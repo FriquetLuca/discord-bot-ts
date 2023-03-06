@@ -1,0 +1,27 @@
+{
+  "type": "commonjs",
+  "ts-node": {
+    "esm": true,
+    "compilerOptions": {
+        "module": "commonjs",
+        "moduleResolution": "node"
+    }
+  },
+  "compilerOptions": {
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "target": "ES2017",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "outDir": "dist",
+    "baseUrl": "src",
+    "strict": true,
+    "removeComments": true
+  },
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules/**/*",
+    "bower_components/**/*",
+    "jspm_packages/**/*"
+  ]
+}

@@ -9,9 +9,6 @@ function LoadCommands(): Command[] {
   for(const command of allCommands) {
     const cmd = require(command);
     for(const cmdKey in cmd) {
-      if(cmdKey === "Command") {
-        continue;
-      }
       result.push(cmd[cmdKey]);
     }
   }

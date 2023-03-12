@@ -1,6 +1,6 @@
 import { Client } from "discord.js";
-import ready from "./listeners/ready";
-import interactionCreate from "./listeners/interactionCreate";
+import ready from "@/listeners/ready";
+import interactionCreate from "@/listeners/interactionCreate";
 import dotenv from "dotenv";
 dotenv.config();
 if(!process.env.DISCORD_TOKEN) {

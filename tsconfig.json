@@ -3,22 +3,34 @@
   "ts-node": {
     "esm": true,
     "compilerOptions": {
-        "module": "commonjs",
-        "moduleResolution": "node"
+      "module": "commonjs",
+      "moduleResolution": "node",
+      "baseUrl": ".",
+      "paths": {
+        "@/*": ["src/*"]
+      }
     }
   },
   "compilerOptions": {
     "module": "commonjs",
     "esModuleInterop": true,
     "target": "ES2017",
+    "lib": ["es6", "es2017"],
     "moduleResolution": "node",
     "allowJs": true,
     "outDir": "dist",
-    "baseUrl": "src",
+    "rootDir": "src/",
     "strict": true,
-    "removeComments": true
+    "removeComments": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*",
+    "**/*.d.ts"
+  ],
   "exclude": [
     "node_modules/**/*",
     "bower_components/**/*",

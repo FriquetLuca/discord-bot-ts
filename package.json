@@ -10,7 +10,7 @@
     "postinstall": "prisma generate"
   },
   "author": "FriquetLuca",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@prisma/client": "^4.11.0",
     "discord.js": "^14.7.1",

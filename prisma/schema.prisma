@@ -8,9 +8,104 @@ datasource db {
   relationMode = "prisma"
 }
 
-model User {
+//model GuildUser {
+//  id          String  @id @default(cuid())
+//  user_id     BigInt
+//  guild_id    BigInt
+//  @@unique([user_id, guild_id])
+//}
+
+enum MHWIMonsterSpecies {
+  Anjanath
+  Barroth
+  Bazelgeuse
+  Behemoth
+  Deviljho
+  Diablos
+  BlackDiablos
+  Dodogama
+  GreatGirros
+  GreatJagras
+  Jyuratidus
+  Kirin
+  KuluYaKu
+  KulveTaroth
+  KushalaDaora
+  Lavasioth
+  Legiana
+  OldLeshen
+  Lunastra
+  Nergigante
+  Odogaron
+  Paolumu
+  PukeiPukei
+  Radobaan
+  Rathalos
+  AzurRathalos
+  Rathian
+  PinkRathian
+  Teostra
+  TobiKadashi
+  TzitziYaKu
+  Uragaan
+  VaalHazak
+  Leshen
+  XenoJiva
+  ZorahMagdaros
+  Banbaro
+  Beotodus
+  TobiKadashiViper
+  PaolumuBelladone
+  Barioth
+  Nargacuga
+  GreenNargacuga
+  Glavenus
+  Tigrex
+  Brachydios
+  ShriekingLegiana
+  FulgurAnjanath
+  AcidicGlavenus
+  EbonyOdogaron
+  Velkhana
+  SeethingBazelgeuse
+  BlackveilVaalHazak
+  Namielle
+  SavageDeviljho
+  RuinerNergigante
+  SharaIshvalda
+  Zinogre
+  YianGaruga
+  ScarredYianGaruga
+  GoldRathian
+  SilverRathalos
+  BruteTigrex
+  CoralPukeiPukei
+  StygianZinogre
+  Rajang
+  FuriousRajang
+  FrostfangBarioth
+  RagingBrachydios
+  SafiJiva
+  Alatreon
+  Fatalis
+  HellbladeGlavenus
+  CrimsonFatalis
+  WhiteFatalis
+  Abiogladius
+}
+
+enum MHWIMonsterStrenght {
+  Normal
+  Tempered
+  AlphaTempered
+}
+
+model MHWIMonsterKill {
   id          String  @id @default(cuid())
-  user_id     BigInt
-  guild_id    BigInt
-  @@unique([user_id, guild_id])
+  user_id     String
+  kill_time   BigInt
+  monster     MHWIMonsterSpecies
+  strenght    MHWIMonsterStrenght
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

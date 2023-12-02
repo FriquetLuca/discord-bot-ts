@@ -8,38 +8,12 @@ After that, install the dependencies with `npm i` if it's not already done.
 ## Development
 To start testing the bot rapidly:
 ```bash
-npm run start
+npm run dev
 ```
 
-To build the project:
-```bash
-npm run build
-```
 To run the build, use:
 ```bash
-npm run bot
-```
-
-## SlashCommand
-The project being just a showcase, only slashcommand is implemented.
-To create a slashcommand, create a new file inside `src/commands/`, name it whatever you want then pase that and change the command content:
-```ts
-import { CommandInteraction, Client, ApplicationCommandType } from "discord.js";
-import { Command } from "../Command";
-
-export const MyCommandKeyVariableWhereNameDoesntMatter: Command = {
-    name: "nameOfMyCommand",
-    description: "Description of my command",
-    type: ApplicationCommandType.ChatInput,
-    run: async (client: Client, interaction: CommandInteraction) => {
-        const content = "Hello there uwu!";
-
-        await interaction.followUp({
-            ephemeral: true,
-            content
-        });
-    }
-};
+npm run start
 ```
 
 Have fun.

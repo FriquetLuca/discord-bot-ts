@@ -4,12 +4,11 @@ import { prisma } from "@/database/prisma"
 import { MHWIMonsterStrenght, MHWIMonsterSpecies } from "@prisma/client"
 import { getFrenchMHWIMonsterStrenght } from "@/mhwi/getFrenchMHWIMonsterStrenght"
 import { getMHWIMonstersAutocomplete } from "@/mhwi/getMHWIMonstersAutocomplete"
-import { getTimestamp } from "@/libraries/time/getTimestamp"
 import { getFrenchMHWIMonsterNames } from "@/mhwi/getFrenchMHWIMonsterNames"
 
-export const MHWIMyHunt: Command = {
-  name: "mhwi-my-hunts",
-  description: "Listez vos chasses à l'encontre d'un monstre en particulier",
+export const MHWICountHunts: Command = {
+  name: "mhwi-count-hunts",
+  description: "Comptez le nombre de fois que vous avez affronter un certain monstre",
   type: ApplicationCommandType.ChatInput,
   options: [
     {
@@ -60,30 +59,18 @@ export const MHWIMyHunt: Command = {
       return
     }
 
-    const monster_list = await prisma.mHWIMonsterKill.findMany({
-      take: 10,
+    const monster_list = await prisma.mHWIMonsterKill.count({
       where: {
         user_id: interaction.user.id,
         monster: current_monster_name,
         strength: current_monster_strenght
-      },
-      orderBy: {
-        kill_time: "asc"
-      },
-      select: {
-        id: true,
-        kill_time: true,
       }
     })
-
-    const record_list_string = monster_list.map(record => {
-      return `1. **${getTimestamp(record.kill_time)}** (Hash: *${record.id}*)\n`
-    }).join('')
     
     await interaction.followUp({
       ephemeral: true,
-      content: `\n**Temps de chasse : ${getFrenchMHWIMonsterNames(current_monster_name)}${current_monster_strenght === undefined ? "" : ` (${getFrenchMHWIMonsterStrenght(current_monster_strenght)})`}**\n${record_list_string}`
-    });
+      content: `Vous avez chassé ***${monster_list}*** **${getFrenchMHWIMonsterNames(current_monster_name)}${current_monster_strenght === undefined ? "" : ` (${getFrenchMHWIMonsterStrenght(current_monster_strenght)})`}**`
+    })
   },
   autocomplete: async (_, interaction: AutocompleteInteraction) => await getMHWIMonstersAutocomplete("monster", interaction)
 }

@@ -6,7 +6,8 @@
   "scripts": {
     "clean": "ts-node -r tsconfig-paths/register src/CleanBot.ts",
     "start": "ts-node -r tsconfig-paths/register src/Bot.ts",
-    "dev": "npm run clean && ts-node -r tsconfig-paths/register src/DevBot.ts",
+    "dev": "ts-node -r tsconfig-paths/register src/DevBot.ts",
+    "dev:clean": "npm run clean && ts-node -r tsconfig-paths/register src/DevBot.ts",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",

@@ -6,10 +6,11 @@ import { getFrenchMHWIMonsterStrenght } from "@/mhwi/getFrenchMHWIMonsterStrengh
 import { getMHWIMonstersAutocomplete } from "@/mhwi/getMHWIMonstersAutocomplete"
 import { getTimestamp } from "@/libraries/time/getTimestamp"
 import { getFrenchMHWIMonsterNames } from "@/mhwi/getFrenchMHWIMonsterNames"
+import { mentionUser } from "@/libraries/discord/mentionUser"
 
-export const MHWIMyHunt: Command = {
-  name: "mhwi-my-hunts",
-  description: "Listez vos chasses à l'encontre d'un monstre en particulier",
+export const MHWITopTeamHunts: Command = {
+  name: "mhwi-top-team-hunts",
+  description: "Listez les meilleurs temps de chasse d'un monstre à plusieurs",
   type: ApplicationCommandType.ChatInput,
   options: [
     {
@@ -60,10 +61,9 @@ export const MHWIMyHunt: Command = {
       return
     }
 
-    const monster_list = await prisma.mHWIMonsterKill.findMany({
+    const monster_list = await prisma.mHWIMonsterKillTeam.findMany({
       take: 10,
       where: {
-        user_id: interaction.user.id,
         monster: current_monster_name,
         strength: current_monster_strenght
       },
@@ -71,18 +71,33 @@ export const MHWIMyHunt: Command = {
         kill_time: "asc"
       },
       select: {
-        id: true,
         kill_time: true,
+        createdAt: true,
+        members: {
+          select: {
+            user_id: true,
+          }
+        },
       }
     })
 
     const record_list_string = monster_list.map(record => {
-      return `1. **${getTimestamp(record.kill_time)}** (Hash: *${record.id}*)\n`
+      return `1. **${getTimestamp(record.kill_time)}** (Par ${record.members
+        .map(item => mentionUser(item.user_id))
+        .map((item, i) => {
+          if(i === record.members.length - 1) {
+            return ` et ${item}`
+          } else if(i === 0) {
+            return item
+          }
+          return `, ${item}`
+        })
+        .join('')} le ${record.createdAt.toLocaleDateString()} à ${record.createdAt.toLocaleTimeString()})\n`
     }).join('')
     
     await interaction.followUp({
       ephemeral: true,
-      content: `\n**Temps de chasse : ${getFrenchMHWIMonsterNames(current_monster_name)}${current_monster_strenght === undefined ? "" : ` (${getFrenchMHWIMonsterStrenght(current_monster_strenght)})`}**\n${record_list_string}`
+      content: `\n**Top des chasses en équipe : ${getFrenchMHWIMonsterNames(current_monster_name)}${current_monster_strenght === undefined ? "" : ` (${getFrenchMHWIMonsterStrenght(current_monster_strenght)})`}**\n${record_list_string}`
     });
   },
   autocomplete: async (_, interaction: AutocompleteInteraction) => await getMHWIMonstersAutocomplete("monster", interaction)

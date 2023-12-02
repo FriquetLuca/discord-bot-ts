@@ -4,12 +4,11 @@ import { prisma } from "@/database/prisma"
 import { MHWIMonsterStrenght, MHWIMonsterSpecies } from "@prisma/client"
 import { getFrenchMHWIMonsterStrenght } from "@/mhwi/getFrenchMHWIMonsterStrenght"
 import { getMHWIMonstersAutocomplete } from "@/mhwi/getMHWIMonstersAutocomplete"
-import { getTimestamp } from "@/libraries/time/getTimestamp"
 import { getFrenchMHWIMonsterNames } from "@/mhwi/getFrenchMHWIMonsterNames"
 
-export const MHWIMyHunt: Command = {
-  name: "mhwi-my-hunts",
-  description: "Listez vos chasses à l'encontre d'un monstre en particulier",
+export const MHWITopKillCount: Command = {
+  name: "mhwi-top-kill-count",
+  description: "Listez les plus grand exterminateurs d'un monstre",
   type: ApplicationCommandType.ChatInput,
   options: [
     {
@@ -59,30 +58,60 @@ export const MHWIMyHunt: Command = {
       })
       return
     }
-
-    const monster_list = await prisma.mHWIMonsterKill.findMany({
-      take: 10,
+    const result = await prisma.mHWIMonsterKill.groupBy({
+      by: [ "user_id" ],
       where: {
-        user_id: interaction.user.id,
         monster: current_monster_name,
         strength: current_monster_strenght
       },
-      orderBy: {
-        kill_time: "asc"
+    })
+    const all_records = await prisma.mHWIMonsterKill.findMany({
+      where: {
+        monster: current_monster_name,
+        strength: current_monster_strenght,
       },
       select: {
-        id: true,
-        kill_time: true,
+        user_id: true,
       }
     })
 
-    const record_list_string = monster_list.map(record => {
-      return `1. **${getTimestamp(record.kill_time)}** (Hash: *${record.id}*)\n`
+    const remapRecords = (all_records: { user_id: string; }[]) => {
+      const record_map = new Map<string, number>();
+      
+      all_records.map(record => {
+        const current_record = record_map.get(record.user_id)
+        if(current_record) {
+          record_map.set(record.user_id, current_record + 1)
+        } else {
+          record_map.set(record.user_id, 1)
+        }
+      })
+      const result: {
+        user_id: string
+        count: number
+      }[] = [];
+      for(const current_record of record_map) {
+        const [user_id, count] = current_record
+        result.push({
+          user_id,
+          count
+        })
+      }
+
+      return result
+    }
+
+    const top_user_kills_result = remapRecords(all_records)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10)
+
+    const record_list_string = top_user_kills_result.map(record => {
+      return `1. **${record.count}** (Par <@${record.user_id}>)\n`
     }).join('')
     
     await interaction.followUp({
       ephemeral: true,
-      content: `\n**Temps de chasse : ${getFrenchMHWIMonsterNames(current_monster_name)}${current_monster_strenght === undefined ? "" : ` (${getFrenchMHWIMonsterStrenght(current_monster_strenght)})`}**\n${record_list_string}`
+      content: `\n**Top des exterminateurs de ${getFrenchMHWIMonsterNames(current_monster_name)}${current_monster_strenght === undefined ? "" : ` (${getFrenchMHWIMonsterStrenght(current_monster_strenght)})`}**\n${record_list_string}`
     });
   },
   autocomplete: async (_, interaction: AutocompleteInteraction) => await getMHWIMonstersAutocomplete("monster", interaction)

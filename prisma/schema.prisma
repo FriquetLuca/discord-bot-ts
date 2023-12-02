@@ -58,7 +58,6 @@ enum MHWIMonsterSpecies {
   PaolumuBelladone
   Barioth
   Nargacuga
-  GreenNargacuga
   Glavenus
   Tigrex
   Brachydios
@@ -89,6 +88,7 @@ enum MHWIMonsterSpecies {
   Alatreon
   Fatalis
   HellbladeGlavenus
+  GreenNargacuga
   CrimsonFatalis
   WhiteFatalis
   Abiogladius
@@ -105,7 +105,24 @@ model MHWIMonsterKill {
   user_id     String
   kill_time   BigInt
   monster     MHWIMonsterSpecies
-  strenght    MHWIMonsterStrenght
+  strength    MHWIMonsterStrenght
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model MHWIMonsterKillTeam {
+  id          String  @id @default(cuid())
+  kill_time   BigInt
+  monster     MHWIMonsterSpecies
+  strength    MHWIMonsterStrenght
+  members MHWITeamMembers[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MHWITeamMembers {
+  user_id     String
+  monsterKillTeamId String
+  monsterKillTeam MHWIMonsterKillTeam @relation(fields: [monsterKillTeamId], references: [id], onDelete: Cascade)
+  @@id([user_id, monsterKillTeamId])
 }

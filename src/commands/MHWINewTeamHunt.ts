@@ -5,9 +5,10 @@ import { MHWIMonsterStrenght, MHWIMonsterSpecies } from "@prisma/client"
 import { getFrenchMHWIMonsterStrenght } from "@/mhwi/getFrenchMHWIMonsterStrenght"
 import { getMHWIMonstersAutocomplete } from "@/mhwi/getMHWIMonstersAutocomplete"
 import { parseTime } from "@/libraries/time/parseTime"
+import { validateUser } from "@/libraries/validators/validateUser"
 
-export const MHWINewHunt: Command = {
-  name: "mhwi-new-hunt",
+export const MHWINewTeamHunt: Command = {
+  name: "mhwi-new-team-hunt",
   description: "Poster un nouveau temps de chasse",
   type: ApplicationCommandType.ChatInput,
   options: [
@@ -23,6 +24,24 @@ export const MHWINewHunt: Command = {
       "description": "La durée du combat",
       "type": ApplicationCommandOptionType.String,
       "required": true
+    },
+    {
+      "name": "player2",
+      "description": "Le joueur n°2",
+      "type": ApplicationCommandOptionType.User,
+      "required": true
+    },
+    {
+      "name": "player3",
+      "description": "Le joueur n°3",
+      "type": ApplicationCommandOptionType.User,
+      "required": false
+    },
+    {
+      "name": "player4",
+      "description": "Le joueur n°4",
+      "type": ApplicationCommandOptionType.User,
+      "required": false
     },
     {
       "name": "strenght",
@@ -53,7 +72,6 @@ export const MHWINewHunt: Command = {
     const current_monster_strenght_string = (interaction.options.get('strenght')?.value || "Normal").toString()
     const current_time_string = (interaction.options.get('time')?.value || "").toString()
 
-
     // Handle the time checking
     const time_in_seconds = parseTime(current_time_string)
 
@@ -62,6 +80,13 @@ export const MHWINewHunt: Command = {
     
     // Handle the strenght checking
     const current_monster_strength = MHWIMonsterStrenght[current_monster_strenght_string as unknown as keyof typeof MHWIMonsterStrenght] as (keyof typeof MHWIMonsterStrenght|undefined);
+
+    const players = [...new Set([
+      interaction.user.id,
+      validateUser(interaction, 'player2'),
+      validateUser(interaction, 'player3'),
+      validateUser(interaction, 'player4')
+    ].filter(item => item !== undefined) as string[])]
 
     // Not a valid time
     if(time_in_seconds === null || Number.isNaN(time_in_seconds)) {
@@ -90,13 +115,31 @@ export const MHWINewHunt: Command = {
       return
     }
 
-    await prisma.mHWIMonsterKill.create({
+    // Not a valid team
+    if(players.length < 2) {
+      await interaction.followUp({
+        ephemeral: true,
+        content: "Vous ne pouvez pas être en équipe avec vous-même."
+      })
+      return
+    }
+
+    const new_hunt = await prisma.mHWIMonsterKillTeam.create({
       data: {
-        user_id: interaction.user.id,
         kill_time: BigInt(time_in_seconds),
         monster: current_monster_name,
         strength: current_monster_strength
       }
+    })
+
+    players.forEach(async (player) => {
+      if(!prisma) return
+      await prisma.mHWITeamMembers.create({
+        data: {
+          user_id: player,
+          monsterKillTeamId: new_hunt.id
+        }
+      })
     })
     
     await interaction.followUp({

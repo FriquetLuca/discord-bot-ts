@@ -6,12 +6,13 @@ Copy/paste the content of `.env.example` and setup your token.
 After that, install the dependencies with `npm i` if it's not already done.
 
 ## Development
-To start testing the bot rapidly:
+
+To test the bot rapidly:
 ```bash
 npm run dev
 ```
 
-To run the build, use:
+To run the bot, use:
 ```bash
 npm run start
 ```

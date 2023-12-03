@@ -17,7 +17,6 @@ if(!Array.isArray(GuildIds)) {
   throw new Error("Something went wrong when parsing the guild ids.")
 }
 
-
 console.log("Cleaning bot commands...")
 const rest = new REST().setToken(token)
 

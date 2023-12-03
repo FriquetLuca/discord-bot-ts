@@ -2,10 +2,9 @@ import { Client, Events, GatewayIntentBits, REST, Routes } from "discord.js"
 import interactionCreate from "@/listeners/interactionCreate"
 import dotenv from "dotenv"
 import { Commands } from "./Commands"
+import { Startups } from "@/Startups"
 
 dotenv.config()
-
-
 
 const ClientID = process.env.BOT_ID ?? ""
 if(!ClientID) {
@@ -47,6 +46,9 @@ client.on(Events.ClientReady, async () => {
         { body: Commands },
       );
     }
+    Startups.forEach(startup => {
+      startup(client)
+    })
     console.log('Successfully reloaded application (/) commands.');
   } catch (error) {
     console.error(error);

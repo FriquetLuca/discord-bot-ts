@@ -2,8 +2,8 @@ import { Client } from "discord.js"
 import path from "path"
 import getFilePaths from "./libraries/io/getFilePaths"
 
-function LoadSchedules() {
-  const commandsPath = path.join(__dirname, "/schedules/")
+function LoadStartups() {
+  const commandsPath = path.join(__dirname, "/startups/")
   const allCommands = getFilePaths(commandsPath)
   const result: ((client: Client) => void)[] = []
   for(const command of allCommands) {
@@ -15,4 +15,4 @@ function LoadSchedules() {
   return result
 }
 
-export const Schedules = LoadSchedules()
+export const Startups = LoadStartups()

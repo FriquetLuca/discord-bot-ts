@@ -1,12 +1,11 @@
-import { Command } from "@/Command"
-import { ApplicationCommandOptionType, CommandInteraction, ApplicationCommandType, AutocompleteInteraction } from "discord.js"
+import { type Command } from "@/Command"
+import { ApplicationCommandOptionType, type CommandInteraction, ApplicationCommandType, type AutocompleteInteraction } from "discord.js"
 import { prisma } from "@/database/prisma"
 import { MHWIMonsterStrenght, MHWIMonsterSpecies } from "@prisma/client"
 import { getFrenchMHWIMonsterStrenght } from "@/mhwi/getFrenchMHWIMonsterStrenght"
 import { getMHWIMonstersAutocomplete } from "@/mhwi/getMHWIMonstersAutocomplete"
-import { getTimestamp } from "@/libraries/time/getTimestamp"
-import { getFrenchMHWIMonsterNames } from "@/mhwi/getFrenchMHWIMonsterNames"
 import { findTop10SoloHunt } from "@/database/findTop10SoloHunt"
+import { generateTopHuntText } from "@/libraries/textGenerator/generateTopHuntText"
 
 export const MHWIMyHunt: Command = {
   name: "mhwi-top-hunts",
@@ -61,22 +60,20 @@ export const MHWIMyHunt: Command = {
       return
     }
 
-    const monster_list = await findTop10SoloHunt({
+    const top_hunt_list = await findTop10SoloHunt({
       prisma,
       select: {
         monster: current_monster_name,
         strength: current_monster_strenght
       }
     })
-
-    const record_list_string = monster_list.map(record => {
-      const subStr = (current_monster_strenght === undefined && ` - ${getFrenchMHWIMonsterStrenght(record.strength)}`) ?? ""
-      return `1. **${getTimestamp(record.kill_time)}${subStr}** (Par <@${record.user_id}> le ${record.createdAt.toLocaleDateString()} à ${record.createdAt.toLocaleTimeString()})\n`
-    }).join('')
     
     await interaction.followUp({
       ephemeral: true,
-      content: `\n**Top des chasses en solo : ${getFrenchMHWIMonsterNames(current_monster_name)}${current_monster_strenght === undefined ? "" : ` (${getFrenchMHWIMonsterStrenght(current_monster_strenght)})`}**\n${record_list_string}`
+      content: generateTopHuntText(top_hunt_list, {
+          monster: current_monster_name,
+          strength: current_monster_strenght
+        })
     });
   },
   autocomplete: async (_, interaction: AutocompleteInteraction) => await getMHWIMonstersAutocomplete("monster", interaction)

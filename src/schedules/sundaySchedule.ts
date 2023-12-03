@@ -1,4 +1,7 @@
+import { findTop10Exterminations } from "@/database/findTop10Exterminations";
 import { Client, TextChannel } from "discord.js"
+import { prisma } from "@/database/prisma"
+import { generateTopHuntersText } from "@/libraries/textGenerator/generateTopHuntersText";
 
 interface RawTime {
   hours: number,
@@ -24,17 +27,25 @@ function getNextSunday(time: RawTime) {
   if (currentDay === 0 && now.getTime() - nextSunday.getTime() >= 0) {
     nextSunday.setDate(nextSunday.getDate() + 7);
   }
-
   return nextSunday;
 }
 
 export function sundaySchedule(client: Client) {
   const now = new Date();
   const nextSunday = getNextSunday({
-    hours: 22
+    hours: 23,
+    minutes: 59,
+    seconds: 59,
   })
   const timer = nextSunday.getTime() - now.getTime();
-  setTimeout(() => {
+  setTimeout(async () => {
+    if(!prisma) {
+      setTimeout(() => {
+        sundaySchedule(client)
+      }, 10000)
+      return
+    }
+    const extermination_list = await findTop10Exterminations({ prisma })
     let channel = client.channels.cache.filter(channel => {
       if(channel.isTextBased()) {
         return (channel as TextChannel).name.toLowerCase() === "mh-kills"
@@ -42,7 +53,7 @@ export function sundaySchedule(client: Client) {
       return false
     })
     channel.forEach(channel => {
-      (channel as TextChannel).send("test schedule")
+      (channel as TextChannel).send(generateTopHuntersText(extermination_list))
     })
     sundaySchedule(client)
   }, timer + 500)

@@ -1,7 +1,8 @@
-import { Command } from "@/Command"
-import { CommandInteraction, ApplicationCommandType } from "discord.js"
+import { type Command } from "@/Command"
+import { type CommandInteraction, ApplicationCommandType } from "discord.js"
 import { prisma } from "@/database/prisma"
 import { findTop10Exterminations } from "@/database/findTop10Exterminations"
+import { generateTopHuntersText } from "@/libraries/textGenerator/generateTopHuntersText"
 
 export const MHWIMyHunt: Command = {
   name: "mhwi-top-hunters",
@@ -17,15 +18,11 @@ export const MHWIMyHunt: Command = {
       })
       return
     }
-    const monster_list = await findTop10Exterminations({ prisma })
-    
-    const record_list_string = monster_list.map(record => {
-      return `1. <@${record.user_id}> *avec un total de* **${record.total_kills}** *chasses*\n`
-    }).join('')
+    const extermination_list = await findTop10Exterminations({ prisma })
     
     await interaction.followUp({
       ephemeral: true,
-      content: `\n**Top des plus grand chasseurs**\n${record_list_string}`
+      content: generateTopHuntersText(extermination_list)
     });
   }
 }

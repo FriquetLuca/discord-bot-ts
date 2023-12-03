@@ -6,6 +6,7 @@ import { getFrenchMHWIMonsterStrenght } from "@/mhwi/getFrenchMHWIMonsterStrengh
 import { getMHWIMonstersAutocomplete } from "@/mhwi/getMHWIMonstersAutocomplete"
 import { getFrenchMHWIMonsterNames } from "@/mhwi/getFrenchMHWIMonsterNames"
 import { findTop10KillCount } from "@/database/findTop10KillCount"
+import { generateTopKillCountText } from "@/libraries/textGenerator/generateTopKillCountText"
 
 export const MHWITopKillCount: Command = {
   name: "mhwi-top-kill-count",
@@ -67,14 +68,13 @@ export const MHWITopKillCount: Command = {
         strength: current_monster_strenght
       }
     })
-
-    const record_list_string = all_records.map(record => {
-      return `1. <@${record.user_id}> *avec un total de* **${record.total_kills}** *chasses*\n`
-    }).join('')
     
     await interaction.followUp({
       ephemeral: true,
-      content: `\n**Top des exterminateurs de ${getFrenchMHWIMonsterNames(current_monster_name)}${current_monster_strenght === undefined ? "" : ` (${getFrenchMHWIMonsterStrenght(current_monster_strenght)})`}**\n${record_list_string}`
+      content: generateTopKillCountText(all_records, {
+          monster: current_monster_name,
+          strength: current_monster_strenght
+        })
     });
   },
   autocomplete: async (_, interaction: AutocompleteInteraction) => await getMHWIMonstersAutocomplete("monster", interaction)

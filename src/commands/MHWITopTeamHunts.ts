@@ -1,13 +1,11 @@
-import { Command } from "@/Command"
-import { ApplicationCommandOptionType, CommandInteraction, ApplicationCommandType, AutocompleteInteraction } from "discord.js"
+import { type Command } from "@/Command"
+import { ApplicationCommandOptionType, type CommandInteraction, ApplicationCommandType, type AutocompleteInteraction } from "discord.js"
 import { prisma } from "@/database/prisma"
 import { MHWIMonsterStrenght, MHWIMonsterSpecies } from "@prisma/client"
 import { getFrenchMHWIMonsterStrenght } from "@/mhwi/getFrenchMHWIMonsterStrenght"
 import { getMHWIMonstersAutocomplete } from "@/mhwi/getMHWIMonstersAutocomplete"
-import { getTimestamp } from "@/libraries/time/getTimestamp"
-import { getFrenchMHWIMonsterNames } from "@/mhwi/getFrenchMHWIMonsterNames"
-import { mentionUser } from "@/libraries/discord/mentionUser"
 import { findTop10TeamHunt } from "@/database/findTop10TeamHunt"
+import { generateTopTeamHunts } from "@/libraries/textGenerator/generateTopTeamHunts"
 
 export const MHWITopTeamHunts: Command = {
   name: "mhwi-top-team-hunts",
@@ -69,25 +67,13 @@ export const MHWITopTeamHunts: Command = {
         strength: current_monster_strenght
       }
     })
-
-    const record_list_string = monster_list.map(record => {
-      const subStr = (!current_monster_strenght && ` - ${getFrenchMHWIMonsterStrenght(record.strength)}`) ?? ""
-      return `1. **${getTimestamp(record.kill_time)}${subStr}** (Par ${record.members
-        .map(item => mentionUser(item.user_id))
-        .map((item, i) => {
-          if(i === record.members.length - 1) {
-            return ` et ${item}`
-          } else if(i === 0) {
-            return item
-          }
-          return `, ${item}`
-        })
-        .join('')} le ${record.createdAt.toLocaleDateString()} à ${record.createdAt.toLocaleTimeString()})\n`
-    }).join('')
     
     await interaction.followUp({
       ephemeral: true,
-      content: `\n**Top des chasses en équipe : ${getFrenchMHWIMonsterNames(current_monster_name)}${current_monster_strenght === undefined ? "" : ` (${getFrenchMHWIMonsterStrenght(current_monster_strenght)})`}**\n${record_list_string}`
+      content: generateTopTeamHunts(monster_list, {
+        monster: current_monster_name,
+        strength: current_monster_strenght
+      })
     });
   },
   autocomplete: async (_, interaction: AutocompleteInteraction) => await getMHWIMonstersAutocomplete("monster", interaction)

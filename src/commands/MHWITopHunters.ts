@@ -1,6 +1,7 @@
 import { Command } from "@/Command"
 import { CommandInteraction, ApplicationCommandType } from "discord.js"
 import { prisma } from "@/database/prisma"
+import { findTop10Exterminations } from "@/database/findTop10Exterminations"
 
 export const MHWIMyHunt: Command = {
   name: "mhwi-top-hunters",
@@ -16,35 +17,7 @@ export const MHWIMyHunt: Command = {
       })
       return
     }
-    const monster_list = await prisma.$queryRaw`
-      WITH combined_kills AS (
-        SELECT
-          user_id,
-          COUNT(*) as solo_kills
-        FROM MHWIMonsterKill
-        GROUP BY
-          user_id
-
-        UNION ALL
-
-        SELECT
-            tm.user_id,
-            COUNT(*) as solo_kills
-          FROM  MHWITeamMembers tm
-          JOIN MHWIMonsterKillTeam kt
-          ON tm.monsterKillTeamId = kt.id
-          GROUP BY tm.user_id
-      )
-
-      SELECT user_id, SUM(solo_kills) as total_kills
-      FROM combined_kills
-      GROUP BY user_id
-      ORDER BY total_kills DESC
-      LIMIT 10
-    ` as {
-      user_id: string,
-      total_kills: number
-    }[]
+    const monster_list = await findTop10Exterminations({ prisma })
     
     const record_list_string = monster_list.map(record => {
       return `1. <@${record.user_id}> *avec un total de* **${record.total_kills}** *chasses*\n`

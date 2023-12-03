@@ -11,12 +11,7 @@ if(!process.env.DISCORD_TOKEN) {
 const token = process.env.DISCORD_TOKEN
 
 const client = new Client({
-  intents: [
-		GatewayIntentBits.Guilds,
-		GatewayIntentBits.GuildMessages,
-		GatewayIntentBits.MessageContent,
-		GatewayIntentBits.GuildMembers,
-  ]
+  intents: [ ]
 })
 
 ready(client)

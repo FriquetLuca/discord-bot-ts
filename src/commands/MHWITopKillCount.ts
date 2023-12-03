@@ -5,6 +5,7 @@ import { MHWIMonsterStrenght, MHWIMonsterSpecies } from "@prisma/client"
 import { getFrenchMHWIMonsterStrenght } from "@/mhwi/getFrenchMHWIMonsterStrenght"
 import { getMHWIMonstersAutocomplete } from "@/mhwi/getMHWIMonstersAutocomplete"
 import { getFrenchMHWIMonsterNames } from "@/mhwi/getFrenchMHWIMonsterNames"
+import { findTop10KillCount } from "@/database/findTop10KillCount"
 
 export const MHWITopKillCount: Command = {
   name: "mhwi-top-kill-count",
@@ -59,35 +60,13 @@ export const MHWITopKillCount: Command = {
       return
     }
     
-    const all_records = await prisma.$queryRawUnsafe(`
-      WITH combined_kills AS (
-        SELECT
-          user_id,
-          COUNT(*) as kill_quantity
-        FROM MHWIMonsterKill
-        WHERE monster="${current_monster_name}"${current_monster_strenght ? ` AND strength="${current_monster_strenght}"` : ""}
-        GROUP BY user_id
-
-        UNION ALL
-
-        SELECT
-            tm.user_id,
-            COUNT(*) as kill_quantity
-          FROM  MHWITeamMembers tm
-            JOIN MHWIMonsterKillTeam kt
-              ON tm.monsterKillTeamId = kt.id AND kt.monster="${current_monster_name}"${current_monster_strenght ? ` AND kt.strength="${current_monster_strenght}"` : ""}
-          GROUP BY tm.user_id
-      )
-
-      SELECT user_id, SUM(kill_quantity) as total_kills
-      FROM combined_kills
-      GROUP BY user_id
-      ORDER BY total_kills DESC
-      LIMIT 10
-    `) as {
-      user_id: string,
-      total_kills: number
-    }[]
+    const all_records = await findTop10KillCount({
+      prisma,
+      select: {
+        monster: current_monster_name,
+        strength: current_monster_strenght
+      }
+    })
 
     const record_list_string = all_records.map(record => {
       return `1. <@${record.user_id}> *avec un total de* **${record.total_kills}** *chasses*\n`

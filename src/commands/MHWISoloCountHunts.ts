@@ -6,9 +6,9 @@ import { getFrenchMHWIMonsterStrenght } from "@/mhwi/getFrenchMHWIMonsterStrengh
 import { getMHWIMonstersAutocomplete } from "@/mhwi/getMHWIMonstersAutocomplete"
 import { getFrenchMHWIMonsterNames } from "@/mhwi/getFrenchMHWIMonsterNames"
 
-export const MHWICountHunts: Command = {
-  name: "mhwi-count-hunts",
-  description: "Comptez le nombre de fois que vous avez affronter un certain monstre",
+export const MHWISoloCountHunts: Command = {
+  name: "mhwi-solo-count-hunts",
+  description: "Comptez le nombre de fois que vous avez affronté un certain monstre en solo",
   type: ApplicationCommandType.ChatInput,
   options: [
     {
@@ -59,7 +59,7 @@ export const MHWICountHunts: Command = {
       return
     }
 
-    const monster_list = await prisma.mHWIMonsterKill.count({
+    const monster_solo_kills = await prisma.mHWIMonsterKill.count({
       where: {
         user_id: interaction.user.id,
         monster: current_monster_name,
@@ -69,7 +69,7 @@ export const MHWICountHunts: Command = {
     
     await interaction.followUp({
       ephemeral: true,
-      content: `Vous avez chassé ***${monster_list}*** **${getFrenchMHWIMonsterNames(current_monster_name)}${current_monster_strenght === undefined ? "" : ` (${getFrenchMHWIMonsterStrenght(current_monster_strenght)})`}**`
+      content: `Vous avez chassé ***${monster_solo_kills}*** **${getFrenchMHWIMonsterNames(current_monster_name)}${current_monster_strenght === undefined ? "" : ` (${getFrenchMHWIMonsterStrenght(current_monster_strenght)})`}**`
     })
   },
   autocomplete: async (_, interaction: AutocompleteInteraction) => await getMHWIMonstersAutocomplete("monster", interaction)

@@ -6,6 +6,7 @@ import { getFrenchMHWIMonsterStrenght } from "@/mhwi/getFrenchMHWIMonsterStrengh
 import { getMHWIMonstersAutocomplete } from "@/mhwi/getMHWIMonstersAutocomplete"
 import { getTimestamp } from "@/libraries/time/getTimestamp"
 import { getFrenchMHWIMonsterNames } from "@/mhwi/getFrenchMHWIMonsterNames"
+import { findTop10SoloHunt } from "@/database/findTop10SoloHunt"
 
 export const MHWIMyHunt: Command = {
   name: "mhwi-top-hunts",
@@ -60,20 +61,11 @@ export const MHWIMyHunt: Command = {
       return
     }
 
-    const monster_list = await prisma.mHWIMonsterKill.findMany({
-      take: 10,
-      where: {
+    const monster_list = await findTop10SoloHunt({
+      prisma,
+      select: {
         monster: current_monster_name,
         strength: current_monster_strenght
-      },
-      orderBy: {
-        kill_time: "asc"
-      },
-      select: {
-        user_id: true,
-        strength: true,
-        kill_time: true,
-        createdAt: true,
       }
     })
 

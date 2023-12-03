@@ -99,8 +99,6 @@ export function scheduler<T extends FrequencyScheduling>(
 ) {
   const now = new Date();
   const nextSchedule = getNextSchedule(schedule)
-  console.log(now)
-  console.log(nextSchedule)
   const timer = nextSchedule.getTime() - now.getTime();
   setTimeout(async () => {
     if(!prisma) {

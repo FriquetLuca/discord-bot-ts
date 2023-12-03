@@ -71,13 +71,15 @@ export const MHWIMyHunt: Command = {
       },
       select: {
         user_id: true,
+        strength: true,
         kill_time: true,
         createdAt: true,
       }
     })
 
     const record_list_string = monster_list.map(record => {
-      return `1. **${getTimestamp(record.kill_time)}** (Par <@${record.user_id}> le ${record.createdAt.toLocaleDateString()} à ${record.createdAt.toLocaleTimeString()})\n`
+      const subStr = (current_monster_strenght === undefined && ` - ${getFrenchMHWIMonsterStrenght(record.strength)}`) ?? ""
+      return `1. **${getTimestamp(record.kill_time)}${subStr}** (Par <@${record.user_id}> le ${record.createdAt.toLocaleDateString()} à ${record.createdAt.toLocaleTimeString()})\n`
     }).join('')
     
     await interaction.followUp({

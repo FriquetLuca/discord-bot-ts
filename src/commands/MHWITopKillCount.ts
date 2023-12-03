@@ -8,7 +8,7 @@ import { getFrenchMHWIMonsterNames } from "@/mhwi/getFrenchMHWIMonsterNames"
 
 export const MHWITopKillCount: Command = {
   name: "mhwi-top-kill-count",
-  description: "Listez les plus grand exterminateurs d'un monstre",
+  description: "Listez les plus grand exterminateurs d'un monstre spécifique",
   type: ApplicationCommandType.ChatInput,
   options: [
     {
@@ -58,55 +58,39 @@ export const MHWITopKillCount: Command = {
       })
       return
     }
-    const result = await prisma.mHWIMonsterKill.groupBy({
-      by: [ "user_id" ],
-      where: {
-        monster: current_monster_name,
-        strength: current_monster_strenght
-      },
-    })
-    const all_records = await prisma.mHWIMonsterKill.findMany({
-      where: {
-        monster: current_monster_name,
-        strength: current_monster_strenght,
-      },
-      select: {
-        user_id: true,
-      }
-    })
-
-    const remapRecords = (all_records: { user_id: string; }[]) => {
-      const record_map = new Map<string, number>();
-      
-      all_records.map(record => {
-        const current_record = record_map.get(record.user_id)
-        if(current_record) {
-          record_map.set(record.user_id, current_record + 1)
-        } else {
-          record_map.set(record.user_id, 1)
-        }
-      })
-      const result: {
-        user_id: string
-        count: number
-      }[] = [];
-      for(const current_record of record_map) {
-        const [user_id, count] = current_record
-        result.push({
+    
+    const all_records = await prisma.$queryRawUnsafe(`
+      WITH combined_kills AS (
+        SELECT
           user_id,
-          count
-        })
-      }
+          COUNT(*) as kill_quantity
+        FROM MHWIMonsterKill
+        WHERE monster="${current_monster_name}"${current_monster_strenght ? ` AND strength="${current_monster_strenght}"` : ""}
+        GROUP BY user_id
 
-      return result
-    }
+        UNION ALL
 
-    const top_user_kills_result = remapRecords(all_records)
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10)
+        SELECT
+            tm.user_id,
+            COUNT(*) as kill_quantity
+          FROM  MHWITeamMembers tm
+            JOIN MHWIMonsterKillTeam kt
+              ON tm.monsterKillTeamId = kt.id AND kt.monster="${current_monster_name}"${current_monster_strenght ? ` AND kt.strength="${current_monster_strenght}"` : ""}
+          GROUP BY tm.user_id
+      )
 
-    const record_list_string = top_user_kills_result.map(record => {
-      return `1. **${record.count}** (Par <@${record.user_id}>)\n`
+      SELECT user_id, SUM(kill_quantity) as total_kills
+      FROM combined_kills
+      GROUP BY user_id
+      ORDER BY total_kills DESC
+      LIMIT 10
+    `) as {
+      user_id: string,
+      total_kills: number
+    }[]
+
+    const record_list_string = all_records.map(record => {
+      return `1. <@${record.user_id}> *avec un total de* **${record.total_kills}** *chasses*\n`
     }).join('')
     
     await interaction.followUp({

@@ -10,7 +10,7 @@ import { mentionUser } from "@/libraries/discord/mentionUser"
 
 export const MHWITopTeamHunts: Command = {
   name: "mhwi-top-team-hunts",
-  description: "Listez les meilleurs temps de chasse d'un monstre à plusieurs",
+  description: "Listez les meilleurs temps de chasse d'un monstre en équipe",
   type: ApplicationCommandType.ChatInput,
   options: [
     {
@@ -72,6 +72,7 @@ export const MHWITopTeamHunts: Command = {
       },
       select: {
         kill_time: true,
+        strength: true,
         createdAt: true,
         members: {
           select: {
@@ -82,7 +83,8 @@ export const MHWITopTeamHunts: Command = {
     })
 
     const record_list_string = monster_list.map(record => {
-      return `1. **${getTimestamp(record.kill_time)}** (Par ${record.members
+      const subStr = (!current_monster_strenght && ` - ${getFrenchMHWIMonsterStrenght(record.strength)}`) ?? ""
+      return `1. **${getTimestamp(record.kill_time)}${subStr}** (Par ${record.members
         .map(item => mentionUser(item.user_id))
         .map((item, i) => {
           if(i === record.members.length - 1) {

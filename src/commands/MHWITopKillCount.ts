@@ -7,6 +7,7 @@ import { getMHWIMonstersAutocomplete } from "@/libraries/mhwi/getMHWIMonstersAut
 import { getFrenchMHWIMonsterNames } from "@/libraries/mhwi/getFrenchMHWIMonsterNames"
 import { findTop10KillCount } from "@/database/findTop10KillCount"
 import { generateTopKillCountText } from "@/libraries/textGenerator/generateTopKillCountText"
+import { validElement } from "@/libraries/discord/validators/validElement"
 
 export const MHWITopKillCount: Command = {
   name: "mhwi-top-kill-count",
@@ -43,14 +44,9 @@ export const MHWITopKillCount: Command = {
       })
       return
     }
-
-    // Get the options values
-    const current_monster_name_string = (interaction.options.get('monster')?.value || "").toString()
-    const current_monster_strenght_string = interaction.options.get('strenght')?.value
-
-    // Handle the monster checking
-    const current_monster_name = MHWIMonsterSpecies[current_monster_name_string as unknown as keyof typeof MHWIMonsterSpecies] as (keyof typeof MHWIMonsterSpecies|undefined);
-    const current_monster_strenght = MHWIMonsterStrenght[current_monster_strenght_string as unknown as keyof typeof MHWIMonsterStrenght] as (keyof typeof MHWIMonsterStrenght|undefined);
+    
+    const current_monster_name = validElement(interaction, "monster", MHWIMonsterSpecies)
+    const current_monster_strenght = validElement(interaction, "strenght", MHWIMonsterStrenght)
 
     // Not a valid monster
     if(current_monster_name === undefined) {

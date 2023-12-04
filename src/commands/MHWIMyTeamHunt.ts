@@ -6,7 +6,7 @@ import { getFrenchMHWIMonsterStrenght } from "@/libraries/mhwi/getFrenchMHWIMons
 import { getMHWIMonstersAutocomplete } from "@/libraries/mhwi/getMHWIMonstersAutocomplete"
 import { getTimestamp } from "@/libraries/time/getTimestamp"
 import { getFrenchMHWIMonsterNames } from "@/libraries/mhwi/getFrenchMHWIMonsterNames"
-import { validateUser } from "@/libraries/validators/validateUser"
+import { validString } from "@/libraries/discord/validators/validString"
 import { mentionUser } from "@/libraries/discord/mentionUser"
 
 export const MHWIMyTeamHunt: Command = {
@@ -82,9 +82,9 @@ export const MHWIMyTeamHunt: Command = {
 
     const players = [...new Set([
       interaction.user.id,
-      validateUser(interaction, 'player2'),
-      validateUser(interaction, 'player3'),
-      validateUser(interaction, 'player4')
+      validString(interaction, 'player2'),
+      validString(interaction, 'player3'),
+      validString(interaction, 'player4')
     ].filter(item => item !== undefined) as string[])]
 
     // Not a valid monster

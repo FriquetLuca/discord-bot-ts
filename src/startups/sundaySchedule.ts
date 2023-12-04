@@ -1,8 +1,8 @@
 import { findTop10Exterminations } from "@/database/findTop10Exterminations"
-import { Client, TextChannel } from "discord.js"
+import type { Client } from "discord.js"
 import { generateTopHuntersText } from "@/libraries/textGenerator/generateTopHuntersText"
 import { scheduler } from "@/libraries/discord/scheduler"
-import { getClientChannels } from "@/libraries/discord/getClientChannels"
+import { sendOnNamedChannels } from "@/libraries/discord/sendOnNamedChannels"
 
 export function sundaySchedule(client: Client) {
   scheduler(
@@ -18,15 +18,9 @@ export function sundaySchedule(client: Client) {
     },
     async ({ prisma }) => {
       const extermination_list = await findTop10Exterminations({ prisma })
-      const channels = getClientChannels(client)
-        .filter(channel => {
-          if(channel.isTextBased()) {
-            return (channel as TextChannel).name.toLowerCase() === "mh-kills"
-          }
-          return false
-        })
-      channels.forEach(channel => {
-        (channel as TextChannel).send(generateTopHuntersText(extermination_list))
+      sendOnNamedChannels(client, {
+        channelName: "mh-kills",
+        message: generateTopHuntersText(extermination_list)
       })
     }
   )

@@ -5,7 +5,7 @@ import { MHWIMonsterStrenght, MHWIMonsterSpecies } from "@prisma/client"
 import { getFrenchMHWIMonsterStrenght } from "@/libraries/mhwi/getFrenchMHWIMonsterStrenght"
 import { getMHWIMonstersAutocomplete } from "@/libraries/mhwi/getMHWIMonstersAutocomplete"
 import { parseTime } from "@/libraries/time/parseTime"
-import { validateUser } from "@/libraries/validators/validateUser"
+import { validString } from "@/libraries/discord/validators/validString"
 
 export const MHWINewTeamHunt: Command = {
   name: "mhwi-new-team-hunt",
@@ -83,9 +83,9 @@ export const MHWINewTeamHunt: Command = {
 
     const players = [...new Set([
       interaction.user.id,
-      validateUser(interaction, 'player2'),
-      validateUser(interaction, 'player3'),
-      validateUser(interaction, 'player4')
+      validString(interaction, 'player2'),
+      validString(interaction, 'player3'),
+      validString(interaction, 'player4')
     ].filter(item => item !== undefined) as string[])]
 
     // Not a valid time

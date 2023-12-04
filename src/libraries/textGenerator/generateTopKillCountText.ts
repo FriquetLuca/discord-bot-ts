@@ -1,5 +1,5 @@
-import { getFrenchMHWIMonsterNames } from "@/mhwi/getFrenchMHWIMonsterNames"
-import { getFrenchMHWIMonsterStrenght } from "@/mhwi/getFrenchMHWIMonsterStrenght"
+import { getFrenchMHWIMonsterNames } from "@/libraries/mhwi/getFrenchMHWIMonsterNames"
+import { getFrenchMHWIMonsterStrenght } from "@/libraries/mhwi/getFrenchMHWIMonsterStrenght"
 import type { MHWIMonsterSpecies, MHWIMonsterStrenght } from "@prisma/client";
 
 export const generateTopKillCountText = (top_kills: {

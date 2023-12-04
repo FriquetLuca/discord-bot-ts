@@ -1,8 +1,8 @@
-import { getFrenchMHWIMonsterStrenght } from "@/mhwi/getFrenchMHWIMonsterStrenght";
+import { getFrenchMHWIMonsterStrenght } from "@/libraries/mhwi/getFrenchMHWIMonsterStrenght";
 import type { MHWIMonsterSpecies, MHWIMonsterStrenght } from "@prisma/client";
 import { getTimestamp } from "../time/getTimestamp";
 import { mentionUser } from "../discord/mentionUser";
-import { getFrenchMHWIMonsterNames } from "@/mhwi/getFrenchMHWIMonsterNames";
+import { getFrenchMHWIMonsterNames } from "@/libraries/mhwi/getFrenchMHWIMonsterNames";
 
 export const generateTopTeamHunts = (monster_list: {
   kill_time: bigint;

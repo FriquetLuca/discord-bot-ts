@@ -62,31 +62,36 @@ type SomeSchedule<
 
 function getNextSchedule<T extends FrequencyScheduling>(schedule: SomeSchedule<T>) {
   const now = new Date()
+  const currentDay = now.getDay()
   switch(schedule.frequency) {
     case "daily":
-      break;
+      const isToday = new Date(now)
+      isToday.setHours(schedule.at.hours)
+      isToday.setMinutes(schedule.at.minutes ?? 0)
+      isToday.setSeconds(schedule.at.seconds ?? 0)
+      isToday.setMilliseconds(schedule.at.milliseconds ?? 0)
+      if(now.getTime() - isToday.getTime() >= 0) {
+        isToday.setDate(isToday.getDate() + 1);
+      }
+      return isToday
     case "weekly":
-      const currentDay = now.getDay()
       const chosenDay = dayName[(schedule as { day: DayName }).day]
       const daysUntilDay = (7 - currentDay + chosenDay) % 7
-
-      const nextChosenDay = new Date(now);
-      nextChosenDay.setDate(now.getDate() + daysUntilDay);
-      nextChosenDay.setHours(schedule.at.hours);
-      nextChosenDay.setMinutes(schedule.at.minutes ?? 0);
-      nextChosenDay.setSeconds(schedule.at.seconds ?? 0);
-      nextChosenDay.setMilliseconds(schedule.at.milliseconds ?? 0);
-
+      const nextChosenDay = new Date(now)
+      nextChosenDay.setDate(now.getDate() + daysUntilDay)
+      nextChosenDay.setHours(schedule.at.hours)
+      nextChosenDay.setMinutes(schedule.at.minutes ?? 0)
+      nextChosenDay.setSeconds(schedule.at.seconds ?? 0)
+      nextChosenDay.setMilliseconds(schedule.at.milliseconds ?? 0)
       if (currentDay === chosenDay && now.getTime() - nextChosenDay.getTime() >= 0) {
-        nextChosenDay.setDate(nextChosenDay.getDate() + 7);
+        nextChosenDay.setDate(nextChosenDay.getDate() + 7)
       }
-      return nextChosenDay;
+      return nextChosenDay
     case "monthly":
-      break;
+      throw new Error("Not implemented yet")
     case "yearly":
-      break;
+      throw new Error("Not implemented yet")
   }
-  return new Date()
 }
 
 export function scheduler<T extends FrequencyScheduling>(
@@ -95,15 +100,17 @@ export function scheduler<T extends FrequencyScheduling>(
   fn: (data: {
     prisma: PrismaClient,
   }) => void,
-  retryDBConnect: number = 10000
+  retryDBConnect: number = 50
 ) {
+  if(retryDBConnect > 10000000000) return
+
   const now = new Date();
   const nextSchedule = getNextSchedule(schedule)
   const timer = nextSchedule.getTime() - now.getTime();
   setTimeout(async () => {
     if(!prisma) {
       setTimeout(() => {
-        scheduler(client, schedule, fn)
+        scheduler(client, schedule, fn, retryDBConnect * 2)
       }, retryDBConnect)
       return
     }

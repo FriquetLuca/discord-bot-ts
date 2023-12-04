@@ -2,9 +2,9 @@ import { Command } from "@/Command"
 import { ApplicationCommandOptionType, CommandInteraction, ApplicationCommandType, AutocompleteInteraction } from "discord.js"
 import { prisma } from "@/database/prisma"
 import { MHWIMonsterStrenght, MHWIMonsterSpecies } from "@prisma/client"
-import { getFrenchMHWIMonsterStrenght } from "@/mhwi/getFrenchMHWIMonsterStrenght"
-import { getMHWIMonstersAutocomplete } from "@/mhwi/getMHWIMonstersAutocomplete"
-import { getFrenchMHWIMonsterNames } from "@/mhwi/getFrenchMHWIMonsterNames"
+import { getFrenchMHWIMonsterStrenght } from "@/libraries/mhwi/getFrenchMHWIMonsterStrenght"
+import { getMHWIMonstersAutocomplete } from "@/libraries/mhwi/getMHWIMonstersAutocomplete"
+import { getFrenchMHWIMonsterNames } from "@/libraries/mhwi/getFrenchMHWIMonsterNames"
 
 export const MHWISoloCountHunts: Command = {
   name: "mhwi-solo-count-hunts",

@@ -1,7 +1,7 @@
 import type { MHWIMonsterSpecies, MHWIMonsterStrenght } from "@prisma/client";
 import { getTimestamp } from "../time/getTimestamp";
-import { getFrenchMHWIMonsterNames } from "@/mhwi/getFrenchMHWIMonsterNames";
-import { getFrenchMHWIMonsterStrenght } from "@/mhwi/getFrenchMHWIMonsterStrenght";
+import { getFrenchMHWIMonsterNames } from "@/libraries/mhwi/getFrenchMHWIMonsterNames";
+import { getFrenchMHWIMonsterStrenght } from "@/libraries/mhwi/getFrenchMHWIMonsterStrenght";
 
 export const generateTopHuntText = (top_hunt_list: {
   user_id: string;

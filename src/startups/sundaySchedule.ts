@@ -1,8 +1,8 @@
 import { findTop10Exterminations } from "@/database/findTop10Exterminations"
 import type { Client } from "discord.js"
 import { generateTopHuntersText } from "@/libraries/textGenerator/generateTopHuntersText"
-import { scheduler } from "@/libraries/discord/scheduler"
-import { sendOnNamedChannels } from "@/libraries/discord/sendOnNamedChannels"
+import { scheduler } from "@/libraries/time/scheduler"
+import { sendOnNamedChannels } from "@/libraries/discord/client/sendOnNamedChannels"
 
 export function sundaySchedule(client: Client) {
   scheduler(

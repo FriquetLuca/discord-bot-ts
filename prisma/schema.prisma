@@ -126,3 +126,10 @@ model MHWITeamMembers {
   monsterKillTeam MHWIMonsterKillTeam @relation(fields: [monsterKillTeamId], references: [id], onDelete: Cascade)
   @@id([user_id, monsterKillTeamId])
 }
+
+model MHWITopRoles {
+  guild_id    String @id
+  first_id      String
+  second_id      String
+  third_id      String
+}

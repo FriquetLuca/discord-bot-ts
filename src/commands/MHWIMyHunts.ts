@@ -1,56 +1,41 @@
-import { Command } from "@/Command"
-import { ApplicationCommandOptionType, CommandInteraction, ApplicationCommandType, AutocompleteInteraction } from "discord.js"
-import { prisma } from "@/database/prisma"
-import { MHWIMonsterStrenght, MHWIMonsterSpecies } from "@prisma/client"
-import { getFrenchMHWIMonsterStrenght } from "@/libraries/mhwi/getFrenchMHWIMonsterStrenght"
-import { getMHWIMonstersAutocomplete } from "@/libraries/mhwi/getMHWIMonstersAutocomplete"
-import { getTimestamp } from "@/libraries/time/getTimestamp"
-import { getFrenchMHWIMonsterNames } from "@/libraries/mhwi/getFrenchMHWIMonsterNames"
+import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js"
+import { MHWIMonsterStrength, MHWIMonsterSpecies } from "@prisma/client"
+import { getMHWIMonstersAutocomplete, getFrenchMHWIMonsterStrength } from "@/libraries/mhwi"
 import { findTop10MySoloMonster } from "@/database/findTop10MySoloMonster"
+import { builder } from "@/libraries/discord/builder"
+import { generateMyHuntsText } from "@/libraries/textGenerator"
 
-export const MHWIMyHunt: Command = {
-  name: "mhwi-my-hunts",
-  description: "Listez vos chasses à l'encontre d'un monstre en particulier",
-  type: ApplicationCommandType.ChatInput,
-  options: [
-    {
-      "name": "monster",
-      "description": "Le nom du monstre chassé",
-      "type": ApplicationCommandOptionType.String,
-      "required": true,
-      "autocomplete": true,
-    },
-    {
-      "name": "strenght",
-      "description": "La force du monstre tué",
-      "type": ApplicationCommandOptionType.String,
-      "required": false,
-      "choices": Object
-        .getOwnPropertyNames(MHWIMonsterStrenght)
-        .map(strenght => ({
-          "name": getFrenchMHWIMonsterStrenght(strenght as MHWIMonsterStrenght),
-          "value": strenght
-        }))
-    }
-  ],
-  run: async (_, interaction: CommandInteraction) => {
-
-    // No db, nothing we can do about it
-    if(!prisma) {
-      await interaction.followUp({
-        ephemeral: true,
-        content: "Erreur : Erreur interne du bot."
-      })
-      return
-    }
-
+export const MHWIMyHunt = builder
+  .commandBuilder()
+  .name("mhwi-my-hunts")
+  .description("Listez vos chasses à l'encontre d'un monstre en particulier")
+  .type(ApplicationCommandType.ChatInput)
+  .addOption(
+    builder.optionCommandBuilder("monster", ApplicationCommandOptionType.String)
+    .description("Le nom du monstre chassé")
+    .required(true)
+    .autocomplete(true)
+  )
+  .addOption(
+    builder.optionCommandBuilder("strength", ApplicationCommandOptionType.String)
+    .description("La force du monstre tué")
+    .addChoices(
+      Object
+      .getOwnPropertyNames(MHWIMonsterStrength)
+      .map(strength => ({
+        "name": getFrenchMHWIMonsterStrength(strength as MHWIMonsterStrength),
+        "value": strength
+      }))
+    )
+  )
+  .handleCommand(async ({ interaction, prisma }) => {
     // Get the options values
     const current_monster_name_string = (interaction.options.get('monster')?.value || "").toString()
-    const current_monster_strenght_string = interaction.options.get('strenght')?.value
+    const current_monster_strength_string = interaction.options.get('strength')?.value
 
     // Handle the monster checking
     const current_monster_name = MHWIMonsterSpecies[current_monster_name_string as unknown as keyof typeof MHWIMonsterSpecies] as (keyof typeof MHWIMonsterSpecies|undefined);
-    const current_monster_strenght = MHWIMonsterStrenght[current_monster_strenght_string as unknown as keyof typeof MHWIMonsterStrenght] as (keyof typeof MHWIMonsterStrenght|undefined);
+    const current_monster_strength = MHWIMonsterStrength[current_monster_strength_string as unknown as keyof typeof MHWIMonsterStrength] as (keyof typeof MHWIMonsterStrength|undefined);
 
     // Not a valid monster
     if(current_monster_name === undefined) {
@@ -66,19 +51,17 @@ export const MHWIMyHunt: Command = {
       select: {
         user_id: interaction.user.id,
         monster: current_monster_name,
-        strength: current_monster_strenght
+        strength: current_monster_strength
       }
     })
-
-    const record_list_string = monster_list.map(record => {
-      const subStr = (current_monster_strenght === undefined && ` - ${getFrenchMHWIMonsterStrenght(record.strength)}`) ?? ""
-      return `1. **${getTimestamp(record.kill_time)}${subStr}** (Hash: *${record.id}*)\n`
-    }).join('')
     
     await interaction.followUp({
       ephemeral: true,
-      content: `\n**Temps de chasse : ${getFrenchMHWIMonsterNames(current_monster_name)}${current_monster_strenght === undefined ? "" : ` (${getFrenchMHWIMonsterStrenght(current_monster_strenght)})`}**\n${record_list_string}`
+      content: generateMyHuntsText(monster_list, {
+        monster: current_monster_name,
+        strength: current_monster_strength
+      })
     });
-  },
-  autocomplete: async (_, interaction: AutocompleteInteraction) => await getMHWIMonstersAutocomplete("monster", interaction)
-}
+  })
+  .autocomplete(async ({ interaction }) => await getMHWIMonstersAutocomplete("monster", interaction))
+  .build()

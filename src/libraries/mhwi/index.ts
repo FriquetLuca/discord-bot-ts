@@ -1,3 +1,3 @@
 export * from "./getFrenchMHWIMonsterNames"
-export * from "./getFrenchMHWIMonsterStrenght"
+export * from "./getFrenchMHWIMonsterStrength"
 export * from "./getMHWIMonstersAutocomplete"

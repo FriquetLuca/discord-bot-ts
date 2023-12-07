@@ -1,75 +1,62 @@
-import { Command } from "@/Command"
-import { ApplicationCommandOptionType, CommandInteraction, ApplicationCommandType, AutocompleteInteraction } from "discord.js"
-import { prisma } from "@/database/prisma"
-import { MHWIMonsterStrenght, MHWIMonsterSpecies } from "@prisma/client"
-import { getFrenchMHWIMonsterStrenght } from "@/libraries/mhwi/getFrenchMHWIMonsterStrenght"
-import { getMHWIMonstersAutocomplete } from "@/libraries/mhwi/getMHWIMonstersAutocomplete"
+import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js"
+import { MHWIMonsterStrength, MHWIMonsterSpecies } from "@prisma/client"
+import { getFrenchMHWIMonsterStrength, getMHWIMonstersAutocomplete } from "@/libraries/mhwi"
 import { parseTime } from "@/libraries/time/parseTime"
 import { validString } from "@/libraries/discord/validators/validString"
+import { builder } from "@/libraries/discord/builder"
 
-export const MHWINewTeamHunt: Command = {
-  name: "mhwi-new-team-hunt",
-  description: "Poster un nouveau temps de chasse",
-  type: ApplicationCommandType.ChatInput,
-  options: [
-    {
-      "name": "monster",
-      "description": "Le nom du monstre abattu",
-      "type": ApplicationCommandOptionType.String,
-      "required": true,
-      "autocomplete": true,
-    },
-    {
-      "name": "time",
-      "description": "La durée du combat",
-      "type": ApplicationCommandOptionType.String,
-      "required": true
-    },
-    {
-      "name": "player2",
-      "description": "Le joueur n°2",
-      "type": ApplicationCommandOptionType.User,
-      "required": true
-    },
-    {
-      "name": "player3",
-      "description": "Le joueur n°3",
-      "type": ApplicationCommandOptionType.User,
-      "required": false
-    },
-    {
-      "name": "player4",
-      "description": "Le joueur n°4",
-      "type": ApplicationCommandOptionType.User,
-      "required": false
-    },
-    {
-      "name": "strenght",
-      "description": "La force du monstre tué",
-      "type": ApplicationCommandOptionType.String,
-      "required": false,
-      "choices": Object
-        .getOwnPropertyNames(MHWIMonsterStrenght)
+export const MHWINewTeamHunt = builder
+  .commandBuilder()
+  .name("mhwi-new-team-hunt")
+  .description("Poster un nouveau temps de chasse")
+  .type(ApplicationCommandType.ChatInput)
+  .addOption(
+    builder
+      .optionCommandBuilder("monster", ApplicationCommandOptionType.String)
+      .description("Le nom du monstre abattu")
+      .required(true)
+      .autocomplete(true)
+  )
+  .addOption(
+    builder
+      .optionCommandBuilder("time", ApplicationCommandOptionType.String)
+      .description("La durée du combat")
+      .required(true)
+  )
+  .addOption(
+    builder
+      .optionCommandBuilder("player2", ApplicationCommandOptionType.User)
+      .description("Le joueur n°2")
+      .required(true)
+  )
+  .addOption(
+    builder
+      .optionCommandBuilder("player3", ApplicationCommandOptionType.User)
+      .description("Le joueur n°3")
+  )
+  .addOption(
+    builder
+      .optionCommandBuilder("player4", ApplicationCommandOptionType.User)
+      .description("Le joueur n°4")
+  )
+  .addOption(
+    builder
+      .optionCommandBuilder("strength", ApplicationCommandOptionType.String)
+      .description("La force du monstre tué")
+      .addChoices(
+        Object
+        .getOwnPropertyNames(MHWIMonsterStrength)
         .map(strenght => ({
-          "name": getFrenchMHWIMonsterStrenght(strenght as MHWIMonsterStrenght),
+          "name": getFrenchMHWIMonsterStrength(strenght as MHWIMonsterStrength),
           "value": strenght
         }))
-    },
-  ],
-  run: async (_, interaction: CommandInteraction) => {
-
-    // No db, nothing we can do about it
-    if(!prisma) {
-      await interaction.followUp({
-        ephemeral: true,
-        content: "Erreur : Erreur interne du bot."
-      })
-      return
-    }
+      )
+  )
+  .handleCommand(async ({ interaction, prisma }) => {
 
     // Get the options values
-    const current_monster_name_string = (interaction.options.get('monster')?.value || "").toString()
-    const current_monster_strenght_string = (interaction.options.get('strenght')?.value || "Normal").toString()
+    const current_monster_name_string = validString(interaction, 'monster')
+    const current_monster_strenght_string = (interaction.options.get('strength')?.value || "Normal").toString()
     const current_time_string = (interaction.options.get('time')?.value || "").toString()
 
     // Handle the time checking
@@ -79,7 +66,7 @@ export const MHWINewTeamHunt: Command = {
     const current_monster_name = MHWIMonsterSpecies[current_monster_name_string as unknown as keyof typeof MHWIMonsterSpecies] as (keyof typeof MHWIMonsterSpecies|undefined);
     
     // Handle the strenght checking
-    const current_monster_strength = MHWIMonsterStrenght[current_monster_strenght_string as unknown as keyof typeof MHWIMonsterStrenght] as (keyof typeof MHWIMonsterStrenght|undefined);
+    const current_monster_strength = MHWIMonsterStrength[current_monster_strenght_string as unknown as keyof typeof MHWIMonsterStrength] as (keyof typeof MHWIMonsterStrength|undefined);
 
     const players = [...new Set([
       interaction.user.id,
@@ -146,6 +133,6 @@ export const MHWINewTeamHunt: Command = {
       ephemeral: true,
       content: "Votre temps a été sauvegardé."
     });
-  },
-  autocomplete: async (_, interaction: AutocompleteInteraction) => await getMHWIMonstersAutocomplete("monster", interaction)
-}
+  })
+  .autocomplete(async ({ interaction }) => await getMHWIMonstersAutocomplete("monster", interaction))
+  .build()

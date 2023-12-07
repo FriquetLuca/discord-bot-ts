@@ -1,29 +1,18 @@
-import { Command } from "@/Command"
-import { ApplicationCommandOptionType, CommandInteraction, ApplicationCommandType } from "discord.js"
-import { prisma } from "@/database/prisma"
+import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js"
+import { builder } from "@/libraries/discord/builder"
 
-export const MHWIRemoveHunt: Command = {
-  name: "mhwi-remove-hunt",
-  description: "Supprimer un temps de chasse depuis un hash",
-  type: ApplicationCommandType.ChatInput,
-  options: [
-    {
-      "name": "hash",
-      "description": "Le hash du temps de chasse à supprimer",
-      "type": ApplicationCommandOptionType.String,
-      "required": true
-    },
-  ],
-  run: async (_, interaction: CommandInteraction) => {
-
-    // No db, nothing we can do about it
-    if(!prisma) {
-      await interaction.followUp({
-        ephemeral: true,
-        content: "Erreur : Erreur interne du bot."
-      })
-      return
-    }
+export const MHWIRemoveHunt = builder
+  .commandBuilder()
+  .name("mhwi-remove-hunt")
+  .description("Supprimer un temps de chasse depuis un hash")
+  .type(ApplicationCommandType.ChatInput)
+  .addOption(
+    builder
+      .optionCommandBuilder("hash", ApplicationCommandOptionType.String)
+      .description("Le hash du temps de chasse à supprimer")
+      .required(true)
+  )
+  .handleCommand(async ({ interaction, prisma }) => {
 
     // Get the options values
     const current_hash_string = (interaction.options.get('hash')?.value || "").toString()
@@ -39,5 +28,5 @@ export const MHWIRemoveHunt: Command = {
       ephemeral: true,
       content: "Votre hash a été correctement supprimé."
     });
-  }
-}
+  })
+  .build()

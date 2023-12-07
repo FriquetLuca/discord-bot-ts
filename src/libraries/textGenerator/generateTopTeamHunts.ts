@@ -1,4 +1,4 @@
-import { getFrenchMHWIMonsterStrenght } from "@/libraries/mhwi/getFrenchMHWIMonsterStrenght";
+import { getFrenchMHWIMonsterStrength } from "@/libraries/mhwi/getFrenchMHWIMonsterStrength";
 import type { MHWIMonsterSpecies, MHWIMonsterStrenght } from "@prisma/client";
 import { getTimestamp } from "../time/getTimestamp";
 import { mentionUser } from "../discord/mentionUser";
@@ -17,7 +17,7 @@ data: {
   strength?: MHWIMonsterStrenght,
 }) => {
   const record_list_string = monster_list.map(record => {
-    const subStr = (data.strength === undefined && ` - ${getFrenchMHWIMonsterStrenght(record.strength)}`) ?? ""
+    const subStr = (data.strength === undefined && ` - ${getFrenchMHWIMonsterStrength(record.strength)}`) ?? ""
     return `1. **${getTimestamp(record.kill_time)}${subStr}** (Par ${record.members
       .map(item => mentionUser(item.user_id))
       .map((item, i) => {
@@ -31,5 +31,5 @@ data: {
       .join('')} le ${record.createdAt.toLocaleDateString()} à ${record.createdAt.toLocaleTimeString()})\n`
   }).join('')
   
-  return `\n**Top des chasses en équipe : ${getFrenchMHWIMonsterNames(data.monster)}${data.strength === undefined ? "" : ` (${getFrenchMHWIMonsterStrenght(data.strength)})`}**\n${record_list_string}`
+  return `\n**Top des chasses en équipe : ${getFrenchMHWIMonsterNames(data.monster)}${data.strength === undefined ? "" : ` (${getFrenchMHWIMonsterStrength(data.strength)})`}**\n${record_list_string}`
 }

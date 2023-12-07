@@ -1,52 +1,40 @@
-import { Command } from "@/Command"
-import { ApplicationCommandOptionType, CommandInteraction, ApplicationCommandType, AutocompleteInteraction } from "discord.js"
-import { prisma } from "@/database/prisma"
-import { MHWIMonsterStrenght, MHWIMonsterSpecies } from "@prisma/client"
-import { getFrenchMHWIMonsterStrenght } from "@/libraries/mhwi/getFrenchMHWIMonsterStrenght"
-import { getMHWIMonstersAutocomplete } from "@/libraries/mhwi/getMHWIMonstersAutocomplete"
-import { getFrenchMHWIMonsterNames } from "@/libraries/mhwi/getFrenchMHWIMonsterNames"
+import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js"
+import { MHWIMonsterStrength, MHWIMonsterSpecies } from "@prisma/client"
+import { getFrenchMHWIMonsterStrength, getMHWIMonstersAutocomplete } from "@/libraries/mhwi"
+import { builder } from "@/libraries/discord/builder"
 import { findTop10KillCount } from "@/database/findTop10KillCount"
-import { generateTopKillCountText } from "@/libraries/textGenerator/generateTopKillCountText"
+import { generateTopKillCountText } from "@/libraries/textGenerator"
 import { validElement } from "@/libraries/discord/validators/validElement"
 
-export const MHWITopKillCount: Command = {
-  name: "mhwi-top-kill-count",
-  description: "Listez les plus grand exterminateurs d'un monstre spécifique",
-  type: ApplicationCommandType.ChatInput,
-  options: [
-    {
-      "name": "monster",
-      "description": "Le nom du monstre chassé",
-      "type": ApplicationCommandOptionType.String,
-      "required": true,
-      "autocomplete": true,
-    },
-    {
-      "name": "strenght",
-      "description": "La force du monstre tué",
-      "type": ApplicationCommandOptionType.String,
-      "required": false,
-      "choices": Object
-        .getOwnPropertyNames(MHWIMonsterStrenght)
+export const MHWITopKillCount = builder
+  .commandBuilder()
+  .name("mhwi-top-kill-count")
+  .description("Listez les plus grand exterminateurs d'un monstre spécifique")
+  .type(ApplicationCommandType.ChatInput)
+  .addOption(
+    builder
+      .optionCommandBuilder("monster", ApplicationCommandOptionType.String)
+      .description("Le nom du monstre chassé")
+      .required(true)
+      .autocomplete(true)
+  )
+  .addOption(
+    builder
+      .optionCommandBuilder("strength", ApplicationCommandOptionType.String)
+      .description("La force du monstre tué")
+      .addChoices(
+        Object
+        .getOwnPropertyNames(MHWIMonsterStrength)
         .map(strenght => ({
-          "name": getFrenchMHWIMonsterStrenght(strenght as MHWIMonsterStrenght),
+          "name": getFrenchMHWIMonsterStrength(strenght as MHWIMonsterStrength),
           "value": strenght
         }))
-    }
-  ],
-  run: async (_, interaction: CommandInteraction) => {
-
-    // No db, nothing we can do about it
-    if(!prisma) {
-      await interaction.followUp({
-        ephemeral: true,
-        content: "Erreur : Erreur interne du bot."
-      })
-      return
-    }
+      )
+  )
+  .handleCommand(async ({ interaction, prisma }) => {
     
     const current_monster_name = validElement(interaction, "monster", MHWIMonsterSpecies)
-    const current_monster_strenght = validElement(interaction, "strenght", MHWIMonsterStrenght)
+    const current_monster_strength = validElement(interaction, "strength", MHWIMonsterStrength)
 
     // Not a valid monster
     if(current_monster_name === undefined) {
@@ -61,7 +49,7 @@ export const MHWITopKillCount: Command = {
       prisma,
       select: {
         monster: current_monster_name,
-        strength: current_monster_strenght
+        strength: current_monster_strength
       }
     })
     
@@ -69,9 +57,9 @@ export const MHWITopKillCount: Command = {
       ephemeral: true,
       content: generateTopKillCountText(all_records, {
           monster: current_monster_name,
-          strength: current_monster_strenght
+          strength: current_monster_strength
         })
     });
-  },
-  autocomplete: async (_, interaction: AutocompleteInteraction) => await getMHWIMonstersAutocomplete("monster", interaction)
-}
+  })
+  .autocomplete(async ({ interaction }) => await getMHWIMonstersAutocomplete("monster", interaction))
+  .build()

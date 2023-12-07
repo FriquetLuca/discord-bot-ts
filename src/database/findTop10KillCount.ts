@@ -1,10 +1,10 @@
-import type { MHWIMonsterSpecies, MHWIMonsterStrenght, PrismaClient } from "@prisma/client"
+import type { MHWIMonsterSpecies, MHWIMonsterStrength, PrismaClient } from "@prisma/client"
 
 export const findTop10KillCount = async (currentData: {
   prisma: PrismaClient,
   select: {
     monster: MHWIMonsterSpecies,
-    strength?: MHWIMonsterStrenght,
+    strength?: MHWIMonsterStrength,
   }
 }) => await currentData.prisma.$queryRawUnsafe(`
 WITH combined_kills AS (
@@ -32,6 +32,6 @@ GROUP BY user_id
 ORDER BY total_kills DESC
 LIMIT 10
 `) as {
-user_id: string,
-total_kills: number
+  user_id: string,
+  total_kills: number
 }[]

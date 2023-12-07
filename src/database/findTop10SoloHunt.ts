@@ -1,10 +1,10 @@
-import type { MHWIMonsterSpecies, MHWIMonsterStrenght, PrismaClient } from "@prisma/client"
+import type { MHWIMonsterSpecies, MHWIMonsterStrength, PrismaClient } from "@prisma/client"
 
 export const findTop10SoloHunt = async (currentData: {
   prisma: PrismaClient,
   select: {
     monster: MHWIMonsterSpecies,
-    strength?: MHWIMonsterStrenght,
+    strength?: MHWIMonsterStrength,
   }
 }) => await currentData.prisma.mHWIMonsterKill.findMany({
   take: 10,

@@ -46,6 +46,13 @@ export class CommandBuilder {
   public build() {
     return {
       ...this.currentCommand,
+      options: this.currentCommand.options.sort((a, b) => {
+        // Required ordered before anything else
+        const lhs = (a as { required: boolean }).required ? -1 : 0;
+        const rhs = (b as { required: boolean }).required ? 1 : 0;
+      
+        return lhs + rhs;
+      }),
       run: async (client: Client<boolean>, interaction: CommandInteraction) => {
         if(!prisma) {
           await interaction.followUp({

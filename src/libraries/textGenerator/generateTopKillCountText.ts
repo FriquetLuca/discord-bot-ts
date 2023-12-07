@@ -1,6 +1,6 @@
 import { getFrenchMHWIMonsterNames } from "@/libraries/mhwi/getFrenchMHWIMonsterNames"
 import { getFrenchMHWIMonsterStrength } from "@/libraries/mhwi/getFrenchMHWIMonsterStrength"
-import type { MHWIMonsterSpecies, MHWIMonsterStrenght } from "@prisma/client";
+import type { MHWIMonsterSpecies, MHWIMonsterStrength } from "@prisma/client";
 
 export const generateTopKillCountText = (top_kills: {
   user_id: string;
@@ -8,7 +8,7 @@ export const generateTopKillCountText = (top_kills: {
 }[],
 data: {
   monster: MHWIMonsterSpecies,
-  strength?: MHWIMonsterStrenght,
+  strength?: MHWIMonsterStrength,
 }) => {
   const record_list_string = top_kills.map(record => {
     return `1. <@${record.user_id}> *avec un total de* **${record.total_kills}** *chasses*\n`

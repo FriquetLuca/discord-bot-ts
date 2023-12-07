@@ -1,13 +1,13 @@
-import { type MHWIMonsterSpecies, type MHWIMonsterStrenght } from "@prisma/client";
+import { type MHWIMonsterSpecies, type MHWIMonsterStrength } from "@prisma/client";
 import { getFrenchMHWIMonsterNames, getFrenchMHWIMonsterStrength } from "../mhwi";
 import { getTimestamp } from "../time/getTimestamp";
 
 export function generateMyHuntsText(monster_list: {
   id: string;
   kill_time: bigint;
-  strength: MHWIMonsterStrenght;
+  strength: MHWIMonsterStrength;
 }[], data: {
-  strength: MHWIMonsterStrenght | undefined,
+  strength: MHWIMonsterStrength | undefined,
   monster: MHWIMonsterSpecies
 }) {
   const { strength, monster } = data

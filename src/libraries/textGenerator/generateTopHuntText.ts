@@ -14,7 +14,7 @@ data: {
   strength?: MHWIMonsterStrength,
 }) => {
   const top_hunt_list_string = top_hunt_list.map(record => {
-    const subStr = (data.strength === undefined && ` - ${getFrenchMHWIMonsterStrength(record.strength)}`) ?? ""
+    const subStr = data.strength === undefined ? ` - ${getFrenchMHWIMonsterStrength(record.strength)}` : ""
     return `1. **${getTimestamp(record.kill_time)}${subStr}** (Par <@${record.user_id}> le ${record.createdAt.toLocaleDateString()} à ${record.createdAt.toLocaleTimeString()})\n`
   })
   .join('')

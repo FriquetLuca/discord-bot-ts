@@ -12,7 +12,7 @@ export function generateMyHuntsText(monster_list: {
 }) {
   const { strength, monster } = data
   const record_list_string = monster_list.map(record => {
-    const subStr = (strength === undefined && ` - ${getFrenchMHWIMonsterStrength(record.strength)}`) ?? ""
+    const subStr = strength === undefined ? ` - ${getFrenchMHWIMonsterStrength(record.strength)}` : ""
     return `1. **${getTimestamp(record.kill_time)}${subStr}** (Hash: *${record.id}*)\n`
   }).join('')
 

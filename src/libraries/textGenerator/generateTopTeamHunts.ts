@@ -17,7 +17,7 @@ data: {
   strength?: MHWIMonsterStrength,
 }) => {
   const record_list_string = monster_list.map(record => {
-    const subStr = (data.strength === undefined && ` - ${getFrenchMHWIMonsterStrength(record.strength)}`) ?? ""
+    const subStr = data.strength === undefined ? ` - ${getFrenchMHWIMonsterStrength(record.strength)}` : ""
     return `1. **${getTimestamp(record.kill_time)}${subStr}** (Par ${record.members
       .map(item => mentionUser(item.user_id))
       .map((item, i) => {

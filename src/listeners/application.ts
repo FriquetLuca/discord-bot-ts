@@ -1,8 +1,7 @@
 import { Args, ClientID, GuildIds, isDevelopment } from "../Bot"
 import { Events, GatewayIntentBits, REST, Routes, Collection } from "discord.js"
-import { DiscordClient } from "@/libraries/discord/DiscordClient"
-import { Commands } from "@/libraries/discord/Commands"
-import { interactionCreate, startups } from "./"
+import { Commands, Startups, DiscordClient } from "@/libraries/discord"
+import { interactionCreate } from "./"
 
 export async function application(token: string) {
   const shouldClean = Args.includes("clean")
@@ -62,7 +61,7 @@ export async function application(token: string) {
       console.log('Successfully loaded application commands.')
 
       console.log('Started application startups.')
-      startups.forEach(startup => {
+      Startups.forEach(startup => {
         startup(client)
       })
       console.log('Successfully loaded application startups.')

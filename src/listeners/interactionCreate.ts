@@ -1,8 +1,12 @@
-import { Events, Client, Interaction, CommandInteraction, CacheType } from "discord.js"
-import { Commands } from "@/Commands"
+import { Events, type Client, type CommandInteraction, Collection } from "discord.js"
+import { Commands } from "@/libraries/discord/Commands"
+import { DiscordClient } from "@/libraries/discord/DiscordClient"
 
-export default (client: Client): void => {
-  client.on(Events.InteractionCreate, async (interaction: Interaction<CacheType>) => {
+export const interactionCreate = (client: Client): void => {
+  client.on(Events.MessageCreate, async (message) => {
+    console.log(message.content)
+  })
+  client.on(Events.InteractionCreate, async (interaction) => {
     if (interaction.isCommand() || interaction.isContextMenuCommand()) {
       await handleSlashCommand(client, interaction)
     } else if (interaction.isAutocomplete()) {
@@ -23,9 +27,38 @@ export default (client: Client): void => {
 const handleSlashCommand = async (client: Client, interaction: CommandInteraction): Promise<void> => {
   const slashCommand = Commands.find(c => c.name === interaction.commandName)
   if (!slashCommand) {
-    interaction.followUp({ content: "An error has occurred" })
+    interaction.followUp({ content: "La commande employée n'existe pas" })
     return
   }
+
   await interaction.deferReply();
-  slashCommand.run(client, interaction);
+
+  if(slashCommand.hasCooldown) {
+
+    const { cooldowns } = interaction.client as DiscordClient;
+  
+    if (!cooldowns.has(slashCommand.name)) {
+      cooldowns.set(slashCommand.name, new Collection());
+    }
+  
+    const now = Date.now();
+    const timestamps = cooldowns.get(slashCommand.name) as Collection<string, number>
+    const defaultCooldownDuration = 10000
+    const cooldownAmount = (slashCommand.cooldown ?? defaultCooldownDuration) * 1000
+  
+    if (timestamps.has(interaction.user.id)) {
+      const expirationTime = (timestamps.get(interaction.user.id) as number) + cooldownAmount
+  
+      if (now < expirationTime) {
+        const expiredTimestamp = Math.round(expirationTime / 1000);
+        interaction.reply({ content: `S'il vous plaît, attendez avant d'utiliser à nouveau la commande : \`${slashCommand.name}\`. Vous pourrez l'utiliser à nouveau d'ici <t:${expiredTimestamp}:R>.`, ephemeral: true })
+        return
+      }
+    }
+    slashCommand.run(client, interaction)
+    timestamps.set(interaction.user.id, now)
+    setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount);
+  } else {
+    slashCommand.run(client, interaction)
+  }
 }

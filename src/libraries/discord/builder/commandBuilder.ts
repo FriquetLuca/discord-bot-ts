@@ -2,7 +2,7 @@ import { type Client, type ApplicationCommandType, type CommandInteraction, type
 import { type OptionCommandBuilder } from "./optionCommandBuilder";
 import { prisma } from "@/database/prisma"
 import { type PrismaClient } from "@prisma/client";
-import { type Command } from "@/Command";
+import { type Command } from "../Command";
 
 export class CommandBuilder {
   private currentCommand: {
@@ -10,6 +10,9 @@ export class CommandBuilder {
     description: string;
     type: ApplicationCommandType;
     options: unknown[];
+    hasCooldown: boolean;
+    cooldown: number;
+    nsfw: boolean;
     run: (ctx: { client: Client<boolean>, interaction: CommandInteraction, prisma: PrismaClient }) => void;
     autocomplete: ((client: Client<boolean>, interaction: AutocompleteInteraction<CacheType>) => Promise<void>) | undefined;
   };
@@ -30,6 +33,23 @@ export class CommandBuilder {
   }
   public addOption(option: OptionCommandBuilder<string, ApplicationCommandOptionType>) {
     this.currentCommand.options.push(option.build())
+    return this
+  }
+  public hasCooldown(hasCooldown: boolean) {
+    this.currentCommand.hasCooldown = hasCooldown
+    return this
+  }
+  public cooldown(cooldown: number) {
+    this.currentCommand.cooldown = cooldown
+    return this
+  }
+  public setCooldown(cooldown: number = 5000) {
+    this.currentCommand.hasCooldown = true
+    this.currentCommand.cooldown = cooldown
+    return this
+  }
+  public isNSFW(nsfw: boolean = true) {
+    this.currentCommand.nsfw = nsfw
     return this
   }
   public handleCommand<A extends (ctx: { client: Client<boolean>, interaction: CommandInteraction, prisma: PrismaClient }) => void>(run: A) {
@@ -74,6 +94,9 @@ export class CommandBuilder {
 
 export function commandBuilder() {
   return new CommandBuilder({
-    options: []
+    hasCooldown: false,
+    cooldown: 0,
+    nsfw: false,
+    options: [],
   })
 }

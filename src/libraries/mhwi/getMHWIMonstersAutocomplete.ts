@@ -1,6 +1,6 @@
 import { AutocompleteInteraction } from "discord.js";
 import { MHWIMonsterSpecies } from "@prisma/client";
-import { getFrenchMHWIMonsterNames } from "@/libraries/mhwi/getFrenchMHWIMonsterNames";
+import { getFrenchMHWIMonsterNames } from "@/libraries/mhwi";
 
 export async function getMHWIMonstersAutocomplete(propertyName: string, interaction: AutocompleteInteraction) {
   const focusedValue = (interaction.options.get(propertyName)?.value ?? "").toString();

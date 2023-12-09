@@ -1,6 +1,6 @@
-import getFileOrDirectoryPaths from "@/libraries/io/getFileOrDirectoryPaths"
+import { getFileOrDirectoryPaths } from "./getFileOrDirectoryPaths"
 import fs from "fs"
 
-export default function getFilePaths(p: string): string[] {
+export function getFilePaths(p: string): string[] {
   return getFileOrDirectoryPaths(p).filter((unknownPath: string) => !fs.lstatSync(unknownPath).isDirectory())
 }

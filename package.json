@@ -4,10 +4,10 @@
   "description": "An example of discord bot",
   "main": "src/Bot.ts",
   "scripts": {
-    "clean": "ts-node -r tsconfig-paths/register src/CleanBot.ts",
     "start": "ts-node -r tsconfig-paths/register src/Bot.ts",
-    "dev": "ts-node -r tsconfig-paths/register src/DevBot.ts",
-    "dev:clean": "npm run clean && ts-node -r tsconfig-paths/register src/DevBot.ts",
+    "start:clean": "ts-node -r tsconfig-paths/register src/Bot.ts clean",
+    "dev": "ts-node -r tsconfig-paths/register src/Bot.ts dev",
+    "dev:clean": "ts-node -r tsconfig-paths/register src/Bot.ts dev clean",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
@@ -17,12 +17,12 @@
   "license": "MIT",
   "dependencies": {
     "@prisma/client": "^5.7.0",
-    "@types/node": "^18.14.6",
-    "discord.js": "^14.7.1",
-    "dotenv": "^16.0.3",
-    "ts-node": "^10.9.1",
-    "tsconfig-paths": "^4.1.2",
-    "typescript": "^4.9.5"
+    "@types/node": "^20.10.4",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.3.1",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.3.3"
   },
   "devDependencies": {
     "prisma": "^5.7.0"

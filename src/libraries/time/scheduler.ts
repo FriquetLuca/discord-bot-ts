@@ -63,6 +63,8 @@ type SomeSchedule<
 function getNextSchedule<T extends FrequencyScheduling>(schedule: SomeSchedule<T>) {
   const now = new Date()
   const currentDay = now.getDay()
+  const currentMonth = now.getMonth()
+  const currentYear = now.getFullYear()
   switch(schedule.frequency) {
     case "daily":
       const isToday = new Date(now)
@@ -88,9 +90,32 @@ function getNextSchedule<T extends FrequencyScheduling>(schedule: SomeSchedule<T
       }
       return nextChosenDay
     case "monthly":
-      throw new Error("Not implemented yet")
+      const chosenDate = (schedule as { day: number }).day
+      const nextChosenMonth = new Date(now)
+      nextChosenMonth.setMonth(currentMonth)
+      nextChosenMonth.setDate(chosenDate)
+      nextChosenMonth.setHours(schedule.at.hours)
+      nextChosenMonth.setMinutes(schedule.at.minutes ?? 0)
+      nextChosenMonth.setSeconds(schedule.at.seconds ?? 0)
+      nextChosenMonth.setMilliseconds(schedule.at.milliseconds ?? 0)
+      if(nextChosenMonth.getTime() - now.getTime() < 0) {
+        nextChosenMonth.setMonth(currentMonth + 1)
+      }
+      return nextChosenMonth
     case "yearly":
-      throw new Error("Not implemented yet")
+      const chosenDayDate = (schedule as { day: number }).day
+      const chosenMonth = monthName[(schedule as { month: MonthName }).month]
+      const nextChosenYear = new Date(now)
+      nextChosenYear.setMonth(chosenMonth)
+      nextChosenYear.setDate(chosenDayDate)
+      nextChosenYear.setHours(schedule.at.hours)
+      nextChosenYear.setMinutes(schedule.at.minutes ?? 0)
+      nextChosenYear.setSeconds(schedule.at.seconds ?? 0)
+      nextChosenYear.setMilliseconds(schedule.at.milliseconds ?? 0)
+      if(nextChosenYear.getTime() - now.getTime() < 0) {
+        nextChosenYear.setFullYear(currentYear + 1)
+      }
+      return nextChosenYear
   }
 }
 

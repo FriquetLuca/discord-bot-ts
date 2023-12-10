@@ -17,8 +17,25 @@ export function sundaySchedule(client: Client) {
       }
     },
     async ({ prisma }) => {
-      const currentSeason = await prisma.$queryRaw`SELECT startedAt FROM MHWISeasons ORDER BY id DESC LIMIT 1` as { startedAt: Date }[]
-      const nextSeason = currentSeason[0].startedAt
+      const currentSeason = await prisma.mHWISeasons.findFirst({
+        select: {
+          startedAt: true,
+        },
+        orderBy: {
+          id: 'desc',
+        },
+        take: 1,
+      })
+
+      const nextSeason = currentSeason === null ? new Date() : currentSeason.startedAt
+
+      if(currentSeason === null) {
+        await prisma.mHWISeasons.create({
+          data: {
+            startedAt: nextSeason
+          }
+        })
+      }
       
       await prisma.mHWISeasons.create({
         data: {

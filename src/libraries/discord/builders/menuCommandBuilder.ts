@@ -8,8 +8,8 @@ import {
   type ContextMenuCommandInteraction
 } from "discord.js";
 import { prisma } from "@/database/prisma"
-import { type PrismaClient } from "@prisma/client";
-import type { Modal, Command, Button, StringSelectMenu } from "../Command";
+import type { Modal, Command, Button, StringSelectMenu } from "../Command"
+import type { BaseHandler, InteractionHandler } from "./commandBuilder"
 
 export class MenuCommandBuilder {
   private currentCommand: {
@@ -22,8 +22,8 @@ export class MenuCommandBuilder {
     hasCooldown: boolean;
     cooldown: number;
     nsfw: boolean;
-    run: (ctx: { client: Client, interaction: ContextMenuCommandInteraction, prisma: PrismaClient }) => void;
-    autocomplete: ((client: Client, interaction: AutocompleteInteraction) => Promise<void>) | undefined;
+    run: InteractionHandler<ContextMenuCommandInteraction>
+    autocomplete: BaseHandler<AutocompleteInteraction> | undefined;
   };
   constructor(element: object) {
     this.currentCommand = element as typeof this.currentCommand
@@ -57,33 +57,79 @@ export class MenuCommandBuilder {
     this.currentCommand.nsfw = nsfw
     return this
   }
-  public handleCommand<A extends (ctx: { client: Client, interaction: ContextMenuCommandInteraction, prisma: PrismaClient }) => void>(run: A) {
+  public handleCommand<A extends InteractionHandler<ContextMenuCommandInteraction>>(run: A) {
     this.currentCommand.run = run
     return this
   }
-  public autocomplete<A extends ((ctx: { client: Client, interaction: AutocompleteInteraction }) => Promise<void>) | undefined>(autocomplete: A) {
-    this.currentCommand.autocomplete = async (client, interaction) => autocomplete && await autocomplete({
-      client,
-      interaction
-    })
+  public autocomplete<A extends InteractionHandler<AutocompleteInteraction> | undefined>(autocomplete: A) {
+    this.currentCommand.autocomplete = async (client, interaction) => {
+      if(!prisma) {
+        await interaction.respond([])
+        return
+      }
+      autocomplete && await autocomplete({
+        client,
+        interaction,
+        prisma
+      })
+    }
     return this
   }
-  public addModal(name: string, handleSubmit: (client: Client, interaction: ModalSubmitInteraction) => Promise<void>) {
+  public addModal(name: string, handleSubmit: InteractionHandler<ModalSubmitInteraction>) {
     this.currentCommand.modals.push({
       customId: name,
-      run: handleSubmit,
+      run: async (client, interaction) => {
+        if(!prisma) {
+          await interaction.reply({
+            ephemeral: true,
+            content: "Erreur : Erreur interne du bot."
+          })
+          return
+        }
+        await handleSubmit({
+          client,
+          interaction,
+          prisma
+        })
+      },
     })
   }
-  public addButton(name: string, handleButton: (client: Client, interaction: ButtonInteraction) => Promise<void>) {
+  public addButton(name: string, handleButton: InteractionHandler<ButtonInteraction>) {
     this.currentCommand.buttons.push({
       customId: name,
-      run: handleButton,
+      run: async (client, interaction) => {
+        if(!prisma) {
+          await interaction.reply({
+            ephemeral: true,
+            content: "Erreur : Erreur interne du bot."
+          })
+          return
+        }
+        await handleButton({
+          client,
+          interaction,
+          prisma
+        })
+      },
     })
   }
-  public addStringSelectMenu(name: string, handleStringSelectMenu: (client: Client, interaction: StringSelectMenuInteraction) => Promise<void>) {
+  public addStringSelectMenu(name: string, handleStringSelectMenu: InteractionHandler<StringSelectMenuInteraction>) {
     this.currentCommand.stringSelectMenus.push({
       customId: name,
-      run: handleStringSelectMenu,
+      run: async (client, interaction) => {
+        if(!prisma) {
+          await interaction.reply({
+            ephemeral: true,
+            content: "Erreur : Erreur interne du bot."
+          })
+          return
+        }
+        await handleStringSelectMenu({
+          client,
+          interaction,
+          prisma
+        })
+      },
     })
   }
   public build() {

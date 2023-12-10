@@ -1,4 +1,4 @@
 export * from "./application"
-export * from "./handleSlashCommand"
+export * from "../handlers/handleSlashCommand"
 export * from "./interactionCreate"
 export * from "./messageCreate"

@@ -1,11 +1,10 @@
 import { type Client, type CommandInteraction, Collection } from "discord.js"
-import { Commands } from "@/libraries/discord/Commands"
-import { DiscordClient } from "@/libraries/discord/DiscordClient"
+import { Commands, type DiscordClient } from "@/libraries/discord"
 
 export const handleSlashCommand = async (client: Client, interaction: CommandInteraction): Promise<void> => {
   const slashCommand = Commands.find(c => c.name === interaction.commandName)
   if (!slashCommand) {
-    interaction.followUp({ content: "La commande employée n'existe pas" })
+    interaction.reply({ content: "La commande employée n'existe pas / plus." })
     return
   }
 

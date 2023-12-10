@@ -1,31 +1,28 @@
 import {
   type Client,
   type ApplicationCommandType,
-  type CommandInteraction,
   type AutocompleteInteraction,
-  type ApplicationCommandOptionType,
   type ModalSubmitInteraction,
   type ButtonInteraction,
-  type StringSelectMenuInteraction
+  type StringSelectMenuInteraction,
+  type ContextMenuCommandInteraction
 } from "discord.js";
-import { type OptionCommandBuilder } from "./optionCommandBuilder";
 import { prisma } from "@/database/prisma"
 import { type PrismaClient } from "@prisma/client";
 import type { Modal, Command, Button, StringSelectMenu } from "../Command";
 
-export class CommandBuilder {
+export class MenuCommandBuilder {
   private currentCommand: {
     name: string;
     description: string;
-    type: ApplicationCommandType;
-    options: unknown[];
+    type: ApplicationCommandType.Message | ApplicationCommandType.User;
     modals: Modal[];
     buttons: Button[];
     stringSelectMenus: StringSelectMenu[];
     hasCooldown: boolean;
     cooldown: number;
     nsfw: boolean;
-    run: (ctx: { client: Client, interaction: CommandInteraction, prisma: PrismaClient }) => void;
+    run: (ctx: { client: Client, interaction: ContextMenuCommandInteraction, prisma: PrismaClient }) => void;
     autocomplete: ((client: Client, interaction: AutocompleteInteraction) => Promise<void>) | undefined;
   };
   constructor(element: object) {
@@ -39,12 +36,8 @@ export class CommandBuilder {
     this.currentCommand.description = description
     return this
   }
-  public type(type: ApplicationCommandType) {
+  public type(type: ApplicationCommandType.Message | ApplicationCommandType.User) {
     this.currentCommand.type = type
-    return this
-  }
-  public addOption(option: OptionCommandBuilder<string, ApplicationCommandOptionType>) {
-    this.currentCommand.options.push(option.build())
     return this
   }
   public hasCooldown(hasCooldown: boolean) {
@@ -64,7 +57,7 @@ export class CommandBuilder {
     this.currentCommand.nsfw = nsfw
     return this
   }
-  public handleCommand<A extends (ctx: { client: Client, interaction: CommandInteraction, prisma: PrismaClient }) => void>(run: A) {
+  public handleCommand<A extends (ctx: { client: Client, interaction: ContextMenuCommandInteraction, prisma: PrismaClient }) => void>(run: A) {
     this.currentCommand.run = run
     return this
   }
@@ -96,14 +89,7 @@ export class CommandBuilder {
   public build() {
     return {
       ...this.currentCommand,
-      options: this.currentCommand.options.sort((a, b) => {
-        // Required ordered before anything else
-        const lhs = (a as { required: boolean }).required ? -1 : 0;
-        const rhs = (b as { required: boolean }).required ? 1 : 0;
-      
-        return lhs + rhs;
-      }),
-      run: async (client: Client, interaction: CommandInteraction) => {
+      run: async (client: Client, interaction: ContextMenuCommandInteraction) => {
         if(!prisma) {
           await interaction.reply({
             ephemeral: true,
@@ -122,12 +108,11 @@ export class CommandBuilder {
   }
 }
 
-export function commandBuilder() {
-  return new CommandBuilder({
+export function menuCommandBuilder() {
+  return new MenuCommandBuilder({
     hasCooldown: false,
     cooldown: 0,
     nsfw: false,
-    options: [],
     modals: [],
     buttons: [],
     stringSelectMenus: [],

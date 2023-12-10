@@ -1,22 +1,20 @@
 import { Events, type Client } from "discord.js"
-import { Commands } from "@/libraries/discord"
-import { handleSlashCommand } from "./handleSlashCommand"
+import { handleAutoComplete, handleSlashCommand, handleSubmitModal, handleButton, handleStringSelectMenu, handleMenuCommand } from "../handlers"
 
 export const interactionCreate = (client: Client): void => {
   client.on(Events.InteractionCreate, async (interaction) => {
-    if (interaction.isCommand() || interaction.isContextMenuCommand()) {
+    if (interaction.isCommand()) {
       await handleSlashCommand(client, interaction)
+    } else if (interaction.isContextMenuCommand()) {
+      await handleMenuCommand(client, interaction)
     } else if (interaction.isAutocomplete()) {
-      const command = Commands.find(c => c.name === interaction.commandName)
-      if (!command) {
-        console.error(`No command matching ${interaction.commandName} was found.`)
-        return;
-      }
-      try {
-        command.autocomplete && await command.autocomplete(client, interaction)
-      } catch (error) {
-        console.error(error)
-      }
+      await handleAutoComplete(client, interaction)
+    } else if (interaction.isModalSubmit()) {
+      await handleSubmitModal(client, interaction)
+    } else if (interaction.isButton()) {
+      await handleButton(client, interaction)
+    } else if (interaction.isStringSelectMenu()) {
+      await handleStringSelectMenu(client, interaction)
     }
   })
 }

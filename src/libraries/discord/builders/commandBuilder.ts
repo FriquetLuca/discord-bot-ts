@@ -68,11 +68,18 @@ export class CommandBuilder {
     this.currentCommand.run = run
     return this
   }
-  public autocomplete<A extends ((ctx: { client: Client, interaction: AutocompleteInteraction }) => Promise<void>) | undefined>(autocomplete: A) {
-    this.currentCommand.autocomplete = async (client, interaction) => autocomplete && await autocomplete({
-      client,
-      interaction
-    })
+  public autocomplete<A extends ((ctx: { client: Client, interaction: AutocompleteInteraction, prisma: PrismaClient }) => Promise<void>) | undefined>(autocomplete: A) {
+    this.currentCommand.autocomplete = async (client, interaction) => {
+      if(!prisma) {
+        await interaction.respond([])
+        return
+      }
+      autocomplete && await autocomplete({
+        client,
+        interaction,
+        prisma
+      })
+    }
     return this
   }
   public addModal(name: string, handleSubmit: (client: Client, interaction: ModalSubmitInteraction) => Promise<void>) {

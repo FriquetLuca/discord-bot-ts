@@ -2,23 +2,21 @@ import { ApplicationCommandOptionType, ApplicationCommandType, userMention } fro
 import { MHWIMonsterStrength, MHWIMonsterSpecies } from "@prisma/client"
 import { getFrenchMHWIMonsterStrength, getMHWIMonstersAutocomplete, getFrenchMHWIMonsterNames } from "@/libraries/mhwi"
 import { getTimestamp } from "@/libraries/time"
-import { builder, validator } from "@/libraries/discord"
+import * as validator from "@/libraries/discord/validators"
+import { commandBuilder, optionCommandBuilder } from "@/libraries/discord/builders"
 
-export const MHWIMyTeamHunt = builder
-  .commandBuilder()
+export const MHWIMyTeamHunt = commandBuilder()
   .name("mhwi-my-team-hunts")
   .description("Listez vos chasses à l'encontre d'un monstre en particulier en équipe")
   .type(ApplicationCommandType.ChatInput)
   .addOption(
-    builder
-      .optionCommandBuilder("monster", ApplicationCommandOptionType.String)
+    optionCommandBuilder("monster", ApplicationCommandOptionType.String)
       .description("Le nom du monstre abattu")
       .required(true)
       .autocomplete(true)
   )
   .addOption(
-    builder
-      .optionCommandBuilder("strength", ApplicationCommandOptionType.String)
+    optionCommandBuilder("strength", ApplicationCommandOptionType.String)
       .description("La force du monstre tué")
       .addChoices(
         Object
@@ -30,24 +28,20 @@ export const MHWIMyTeamHunt = builder
       )
   )
   .addOption(
-    builder
-      .optionCommandBuilder("player2", ApplicationCommandOptionType.User)
+    optionCommandBuilder("player2", ApplicationCommandOptionType.User)
       .description("Le joueur n°2")
       .required(true)
   )
   .addOption(
-    builder
-      .optionCommandBuilder("player3", ApplicationCommandOptionType.User)
+    optionCommandBuilder("player3", ApplicationCommandOptionType.User)
       .description("Le joueur n°3")
   )
   .addOption(
-    builder
-      .optionCommandBuilder("player4", ApplicationCommandOptionType.User)
+    optionCommandBuilder("player4", ApplicationCommandOptionType.User)
       .description("Le joueur n°4")
   )
   .addOption(
-    builder
-      .optionCommandBuilder("exclusive", ApplicationCommandOptionType.Boolean)
+    optionCommandBuilder("exclusive", ApplicationCommandOptionType.Boolean)
       .description("Si activé, uniquement les chasses avec précisément le nombre de joueur donné sera recherché")
   )
   .handleCommand(async ({ interaction, prisma }) => {
@@ -56,7 +50,6 @@ export const MHWIMyTeamHunt = builder
     const current_monster_name_string = validator.validString(interaction, 'monster')
     const current_monster_strenght_string = validator.validString(interaction, 'strength')
     const current_exclusive_string = interaction.options.get('exclusive')?.value as (boolean | undefined)
-
 
     // Handle the monster checking
     const current_monster_name = MHWIMonsterSpecies[current_monster_name_string as unknown as keyof typeof MHWIMonsterSpecies] as (keyof typeof MHWIMonsterSpecies|undefined);
@@ -145,7 +138,7 @@ export const MHWIMyTeamHunt = builder
         .join('')} le ${record.createdAt.toLocaleDateString()} à ${record.createdAt.toLocaleTimeString()})\n`
     }).join('')
     
-    await interaction.reply({
+    await interaction.followUp({
       content: `\n**Temps de chasse en équipe (${current_exclusive ? "Exclusif" : "Inclusif"}) : ${getFrenchMHWIMonsterNames(current_monster_name)}${current_monster_strenght === undefined ? "" : ` (${getFrenchMHWIMonsterStrength(current_monster_strenght)})`}**\n${record_list_string}`
     });
   })

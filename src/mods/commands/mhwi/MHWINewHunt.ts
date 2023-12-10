@@ -1,46 +1,26 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js"
 import { MHWIMonsterStrength, MHWIMonsterSpecies } from "@prisma/client"
-import { getFrenchMHWIMonsterStrength, getMHWIMonstersAutocomplete } from "@/libraries/mhwi"
+import { getMHWIMonstersAutocomplete, getFrenchMHWIMonsterStrength } from "@/libraries/mhwi"
 import { parseTime } from "@/libraries/time"
-import { builder, validator } from "@/libraries/discord"
+import { commandBuilder, optionCommandBuilder } from "@/libraries/discord/builders"
 
-export const MHWINewTeamHunt = builder
-  .commandBuilder()
-  .name("mhwi-new-team-hunt")
+export const MHWINewHunt = commandBuilder()
+  .name("mhwi-new-hunt")
   .description("Poster un nouveau temps de chasse")
   .type(ApplicationCommandType.ChatInput)
   .addOption(
-    builder
-      .optionCommandBuilder("monster", ApplicationCommandOptionType.String)
+    optionCommandBuilder("monster", ApplicationCommandOptionType.String)
       .description("Le nom du monstre abattu")
       .required(true)
       .autocomplete(true)
   )
   .addOption(
-    builder
-      .optionCommandBuilder("time", ApplicationCommandOptionType.String)
+    optionCommandBuilder("time", ApplicationCommandOptionType.String)
       .description("La durée du combat")
       .required(true)
   )
   .addOption(
-    builder
-      .optionCommandBuilder("player2", ApplicationCommandOptionType.User)
-      .description("Le joueur n°2")
-      .required(true)
-  )
-  .addOption(
-    builder
-      .optionCommandBuilder("player3", ApplicationCommandOptionType.User)
-      .description("Le joueur n°3")
-  )
-  .addOption(
-    builder
-      .optionCommandBuilder("player4", ApplicationCommandOptionType.User)
-      .description("Le joueur n°4")
-  )
-  .addOption(
-    builder
-      .optionCommandBuilder("strength", ApplicationCommandOptionType.String)
+    optionCommandBuilder("strength", ApplicationCommandOptionType.String)
       .description("La force du monstre tué")
       .addChoices(
         Object
@@ -54,9 +34,10 @@ export const MHWINewTeamHunt = builder
   .handleCommand(async ({ interaction, prisma }) => {
 
     // Get the options values
-    const current_monster_name_string = validator.validString(interaction, 'monster')
+    const current_monster_name_string = (interaction.options.get('monster')?.value || "").toString()
     const current_monster_strenght_string = (interaction.options.get('strength')?.value || "Normal").toString()
     const current_time_string = (interaction.options.get('time')?.value || "").toString()
+
 
     // Handle the time checking
     const time_in_seconds = parseTime(current_time_string)
@@ -66,13 +47,6 @@ export const MHWINewTeamHunt = builder
     
     // Handle the strenght checking
     const current_monster_strength = MHWIMonsterStrength[current_monster_strenght_string as unknown as keyof typeof MHWIMonsterStrength] as (keyof typeof MHWIMonsterStrength|undefined);
-
-    const players = [...new Set([
-      interaction.user.id,
-      validator.validString(interaction, 'player2'),
-      validator.validString(interaction, 'player3'),
-      validator.validString(interaction, 'player4')
-    ].filter(item => item !== undefined) as string[])]
 
     // Not a valid time
     if(time_in_seconds === null || Number.isNaN(time_in_seconds)) {
@@ -101,38 +75,20 @@ export const MHWINewTeamHunt = builder
       return
     }
 
-    // Not a valid team
-    if(players.length < 2) {
-      await interaction.reply({
-        ephemeral: true,
-        content: "Vous ne pouvez pas être en équipe avec vous-même."
-      })
-      return
-    }
-
     await interaction.deferReply()
 
-    const new_hunt = await prisma.mHWIMonsterKillTeam.create({
+    await prisma.mHWIMonsterKill.create({
       data: {
+        user_id: interaction.user.id,
         kill_time: BigInt(time_in_seconds),
         monster: current_monster_name,
         strength: current_monster_strength
       }
     })
-
-    players.forEach(async (player) => {
-      if(!prisma) return
-      await prisma.mHWITeamMembers.create({
-        data: {
-          user_id: player,
-          monsterKillTeamId: new_hunt.id
-        }
-      })
-    })
     
-    await interaction.reply({
+    await interaction.followUp({
       content: "Votre temps a été sauvegardé."
-    })
+    });
   })
   .autocomplete(async ({ interaction }) => await getMHWIMonstersAutocomplete("monster", interaction))
   .build()

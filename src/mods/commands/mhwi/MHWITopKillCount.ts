@@ -1,25 +1,23 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js"
 import { MHWIMonsterStrength, MHWIMonsterSpecies } from "@prisma/client"
 import { getFrenchMHWIMonsterStrength, getMHWIMonstersAutocomplete } from "@/libraries/mhwi"
-import { findTop10SoloHunt } from "@/database/mhwi/findTop10SoloHunt"
-import { generateTopHuntText } from "@/libraries/mhwiTextGenerator"
-import { builder } from "@/libraries/discord"
+import { findTop10KillCount } from "@/database/mhwi"
+import { generateTopKillCountText } from "@/libraries/mhwiTextGenerator"
+import { commandBuilder, optionCommandBuilder } from "@/libraries/discord/builders"
+import * as validator from "@/libraries/discord/validators"
 
-export const MHWIMyHunt = builder
-  .commandBuilder()
-  .name("mhwi-top-hunts")
-  .description("Listez les meilleurs temps de chasse d'un monstre en solo")
+export const MHWITopKillCount = commandBuilder()
+  .name("mhwi-top-kill-count")
+  .description("Listez les plus grand exterminateurs d'un monstre spécifique")
   .type(ApplicationCommandType.ChatInput)
   .addOption(
-    builder
-      .optionCommandBuilder("monster", ApplicationCommandOptionType.String)
+    optionCommandBuilder("monster", ApplicationCommandOptionType.String)
       .description("Le nom du monstre chassé")
       .required(true)
       .autocomplete(true)
   )
   .addOption(
-    builder
-      .optionCommandBuilder("strength", ApplicationCommandOptionType.String)
+    optionCommandBuilder("strength", ApplicationCommandOptionType.String)
       .description("La force du monstre tué")
       .addChoices(
         Object
@@ -31,14 +29,9 @@ export const MHWIMyHunt = builder
       )
   )
   .handleCommand(async ({ interaction, prisma }) => {
-
-    // Get the options values
-    const current_monster_name_string = (interaction.options.get('monster')?.value || "").toString()
-    const current_monster_strength_string = interaction.options.get('strength')?.value
-
-    // Handle the monster checking
-    const current_monster_name = MHWIMonsterSpecies[current_monster_name_string as unknown as keyof typeof MHWIMonsterSpecies] as (keyof typeof MHWIMonsterSpecies|undefined);
-    const current_monster_strength = MHWIMonsterStrength[current_monster_strength_string as unknown as keyof typeof MHWIMonsterStrength] as (keyof typeof MHWIMonsterStrength|undefined);
+    
+    const current_monster_name = validator.validElement(interaction, "monster", MHWIMonsterSpecies)
+    const current_monster_strength = validator.validElement(interaction, "strength", MHWIMonsterStrength)
 
     // Not a valid monster
     if(current_monster_name === undefined) {
@@ -50,8 +43,8 @@ export const MHWIMyHunt = builder
     }
 
     await interaction.deferReply()
-
-    const top_hunt_list = await findTop10SoloHunt({
+    
+    const all_records = await findTop10KillCount({
       prisma,
       select: {
         monster: current_monster_name,
@@ -59,8 +52,8 @@ export const MHWIMyHunt = builder
       }
     })
     
-    await interaction.reply({
-      content: generateTopHuntText(top_hunt_list, {
+    await interaction.followUp({
+      content: generateTopKillCountText(all_records, {
           monster: current_monster_name,
           strength: current_monster_strength
         })

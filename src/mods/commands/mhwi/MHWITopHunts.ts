@@ -1,34 +1,34 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js"
 import { MHWIMonsterStrength, MHWIMonsterSpecies } from "@prisma/client"
-import { findTop10MySoloMonster } from "@/database/mhwi"
-import { getMHWIMonstersAutocomplete, getFrenchMHWIMonsterStrength } from "@/libraries/mhwi"
-import { builder } from "@/libraries/discord"
-import { generateMyHuntsText } from "@/libraries/mhwiTextGenerator"
+import { getFrenchMHWIMonsterStrength, getMHWIMonstersAutocomplete } from "@/libraries/mhwi"
+import { findTop10SoloHunt } from "@/database/mhwi/findTop10SoloHunt"
+import { generateTopHuntText } from "@/libraries/mhwiTextGenerator"
+import { commandBuilder, optionCommandBuilder } from "@/libraries/discord/builders"
 
-export const MHWIMyHunt = builder
-  .commandBuilder()
-  .name("mhwi-my-hunts")
-  .description("Listez vos chasses à l'encontre d'un monstre en particulier")
+export const MHWIMyHunt = commandBuilder()
+  .name("mhwi-top-hunts")
+  .description("Listez les meilleurs temps de chasse d'un monstre en solo")
   .type(ApplicationCommandType.ChatInput)
   .addOption(
-    builder.optionCommandBuilder("monster", ApplicationCommandOptionType.String)
-    .description("Le nom du monstre chassé")
-    .required(true)
-    .autocomplete(true)
+    optionCommandBuilder("monster", ApplicationCommandOptionType.String)
+      .description("Le nom du monstre chassé")
+      .required(true)
+      .autocomplete(true)
   )
   .addOption(
-    builder.optionCommandBuilder("strength", ApplicationCommandOptionType.String)
-    .description("La force du monstre tué")
-    .addChoices(
-      Object
-      .getOwnPropertyNames(MHWIMonsterStrength)
-      .map(strength => ({
-        "name": getFrenchMHWIMonsterStrength(strength as MHWIMonsterStrength),
-        "value": strength
-      }))
-    )
+    optionCommandBuilder("strength", ApplicationCommandOptionType.String)
+      .description("La force du monstre tué")
+      .addChoices(
+        Object
+        .getOwnPropertyNames(MHWIMonsterStrength)
+        .map(strenght => ({
+          "name": getFrenchMHWIMonsterStrength(strenght as MHWIMonsterStrength),
+          "value": strenght
+        }))
+      )
   )
   .handleCommand(async ({ interaction, prisma }) => {
+
     // Get the options values
     const current_monster_name_string = (interaction.options.get('monster')?.value || "").toString()
     const current_monster_strength_string = interaction.options.get('strength')?.value
@@ -45,25 +45,23 @@ export const MHWIMyHunt = builder
       })
       return
     }
-    
+
     await interaction.deferReply()
 
-    const monster_list = await findTop10MySoloMonster({
+    const top_hunt_list = await findTop10SoloHunt({
       prisma,
       select: {
-        user_id: interaction.user.id,
         monster: current_monster_name,
         strength: current_monster_strength
       }
     })
     
-    await interaction.reply({
-      ephemeral: true,
-      content: generateMyHuntsText(monster_list, {
-        monster: current_monster_name,
-        strength: current_monster_strength
-      })
-    })
+    await interaction.followUp({
+      content: generateTopHuntText(top_hunt_list, {
+          monster: current_monster_name,
+          strength: current_monster_strength
+        })
+    });
   })
   .autocomplete(async ({ interaction }) => await getMHWIMonstersAutocomplete("monster", interaction))
   .build()

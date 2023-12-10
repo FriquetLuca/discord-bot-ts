@@ -1,7 +1,7 @@
 import { type Client } from "discord.js"
 import { findTop10SeasonalExterminations } from "@/database/mhwi"
 import { scheduler } from "@/libraries/time"
-import { client as dClient } from "@/libraries/discord"
+import * as dClient from "@/libraries/discord/client"
 import { generateTopSeasonalHuntersText } from "@/libraries/mhwiTextGenerator"
 
 export function sundaySchedule(client: Client) {

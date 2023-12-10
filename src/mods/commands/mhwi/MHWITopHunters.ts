@@ -1,10 +1,9 @@
 import { ApplicationCommandType } from "discord.js"
 import { findTop10Exterminations } from "@/database/mhwi/findTop10Exterminations"
 import { generateTopHuntersText } from "@/libraries/mhwiTextGenerator"
-import { builder } from "@/libraries/discord"
+import { commandBuilder } from "@/libraries/discord/builders"
 
-export const MHWITopSeasonalHunters = builder
-  .commandBuilder()
+export const MHWITopSeasonalHunters = commandBuilder()
   .name("mhwi-top-hunters")
   .description("Voyez qui sont les chasseurs les plus actifs de tous et leur total de kills")
   .type(ApplicationCommandType.ChatInput)
@@ -14,7 +13,7 @@ export const MHWITopSeasonalHunters = builder
 
     const extermination_list = await findTop10Exterminations({ prisma })
     
-    await interaction.reply({
+    await interaction.followUp({
       content: generateTopHuntersText(extermination_list)
     });
   })

@@ -1,5 +1,6 @@
 import { ApplicationCommandOptionType, ApplicationCommandType, type HexColorString } from "discord.js"
-import { builder, validator as v } from "@/libraries/discord"
+import * as v from "@/libraries/discord/validators"
+import { commandBuilder, optionCommandBuilder } from "@/libraries/discord/builders"
 
 const colorRank = {
   'first': '#aadaf0',
@@ -7,26 +8,22 @@ const colorRank = {
   'third': '#e68b4b'
 }
 
-export const MHWISetTopRoles = builder
-  .commandBuilder()
+export const MHWISetTopRoles = commandBuilder()
   .name("mhwi-set-top-roles")
   .description("Donnez des rôles aux trois meilleurs du classement")
   .type(ApplicationCommandType.ChatInput)
   .addOption(
-    builder
-      .optionCommandBuilder("first", ApplicationCommandOptionType.String)
+    optionCommandBuilder("first", ApplicationCommandOptionType.String)
       .description("Le nom du role du premier au classement")
       .required(true)
   )
   .addOption(
-    builder
-      .optionCommandBuilder("second", ApplicationCommandOptionType.String)
+    optionCommandBuilder("second", ApplicationCommandOptionType.String)
       .description("Le nom du role du second au classement")
       .required(true)
   )
   .addOption(
-    builder
-      .optionCommandBuilder("third", ApplicationCommandOptionType.String)
+    optionCommandBuilder("third", ApplicationCommandOptionType.String)
       .description("Le nom du role du troisième au classement")
       .required(true)
   )
@@ -128,8 +125,7 @@ export const MHWISetTopRoles = builder
         }
       })
 
-      await interaction.reply({
-        ephemeral: true,
+      await interaction.followUp({
         content: "Vous avez créer avec succès vos rôles pour votre leaderboard."
       })
     }

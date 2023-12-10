@@ -1,23 +1,20 @@
 import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js"
 import { MHWIMonsterStrength, MHWIMonsterSpecies } from "@prisma/client"
 import { getFrenchMHWIMonsterStrength, getMHWIMonstersAutocomplete, getFrenchMHWIMonsterNames } from "@/libraries/mhwi"
-import { builder } from "@/libraries/discord"
+import { commandBuilder, optionCommandBuilder } from "@/libraries/discord/builders"
 
-export const MHWISoloCountHunts = builder
-  .commandBuilder()
+export const MHWISoloCountHunts = commandBuilder()
   .name("mhwi-solo-count-hunts")
   .description("Comptez le nombre de fois que vous avez affronté un certain monstre en solo")
   .type(ApplicationCommandType.ChatInput)
   .addOption(
-    builder
-      .optionCommandBuilder("monster", ApplicationCommandOptionType.String)
+    optionCommandBuilder("monster", ApplicationCommandOptionType.String)
       .description("Le nom du monstre chassé")
       .required(true)
       .autocomplete(true)
   )
   .addOption(
-    builder
-      .optionCommandBuilder("strength", ApplicationCommandOptionType.String)
+    optionCommandBuilder("strength", ApplicationCommandOptionType.String)
       .description("La force du monstre tué")
       .addChoices(
         Object
@@ -57,7 +54,7 @@ export const MHWISoloCountHunts = builder
       }
     })
     
-    await interaction.reply({
+    await interaction.followUp({
       content: `Vous avez chassé ***${monster_solo_kills}*** **${getFrenchMHWIMonsterNames(current_monster_name)}${current_monster_strenght === undefined ? "" : ` (${getFrenchMHWIMonsterStrength(current_monster_strenght)})`}**`
     })
   })

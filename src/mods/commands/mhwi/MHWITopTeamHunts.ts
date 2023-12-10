@@ -2,24 +2,22 @@ import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js
 import { MHWIMonsterStrength, MHWIMonsterSpecies } from "@prisma/client"
 import { findTop10TeamHunt } from "@/database/mhwi/findTop10TeamHunt"
 import { generateTopTeamHunts } from "@/libraries/mhwiTextGenerator"
-import { builder, validator as v } from "@/libraries/discord"
+import * as v from "@/libraries/discord/validators"
 import { getFrenchMHWIMonsterStrength, getMHWIMonstersAutocomplete } from "@/libraries/mhwi"
+import { commandBuilder, optionCommandBuilder } from "@/libraries/discord/builders"
 
-export const MHWITopTeamHunts = builder
-  .commandBuilder()
+export const MHWITopTeamHunts = commandBuilder()
   .name("mhwi-top-team-hunts")
   .description("Listez les meilleurs temps de chasse d'un monstre en équipe")
   .type(ApplicationCommandType.ChatInput)
   .addOption(
-    builder
-      .optionCommandBuilder("monster", ApplicationCommandOptionType.String)
+    optionCommandBuilder("monster", ApplicationCommandOptionType.String)
       .description("Le nom du monstre chassé")
       .required(true)
       .autocomplete(true)
   )
   .addOption(
-    builder
-      .optionCommandBuilder("strength", ApplicationCommandOptionType.String)
+    optionCommandBuilder("strength", ApplicationCommandOptionType.String)
       .description("La force du monstre tué")
       .addChoices(
         Object
@@ -57,7 +55,7 @@ export const MHWITopTeamHunts = builder
       }
     })
     
-    await interaction.reply({
+    await interaction.followUp({
       content: generateTopTeamHunts(monster_list, {
         monster: monsterName,
         strength: monsterStrength

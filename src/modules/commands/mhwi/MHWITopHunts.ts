@@ -42,12 +42,14 @@ export const MHWIMyHunt = builder
 
     // Not a valid monster
     if(current_monster_name === undefined) {
-      await interaction.followUp({
+      await interaction.reply({
         ephemeral: true,
         content: "Le monstre spécifié n'existe pas."
       })
       return
     }
+
+    await interaction.deferReply()
 
     const top_hunt_list = await findTop10SoloHunt({
       prisma,
@@ -57,8 +59,7 @@ export const MHWIMyHunt = builder
       }
     })
     
-    await interaction.followUp({
-      ephemeral: true,
+    await interaction.reply({
       content: generateTopHuntText(top_hunt_list, {
           monster: current_monster_name,
           strength: current_monster_strength

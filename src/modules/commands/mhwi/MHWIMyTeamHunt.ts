@@ -1,8 +1,8 @@
-import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js"
+import { ApplicationCommandOptionType, ApplicationCommandType, userMention } from "discord.js"
 import { MHWIMonsterStrength, MHWIMonsterSpecies } from "@prisma/client"
 import { getFrenchMHWIMonsterStrength, getMHWIMonstersAutocomplete, getFrenchMHWIMonsterNames } from "@/libraries/mhwi"
 import { getTimestamp } from "@/libraries/time"
-import { builder, validator, miscellaneous } from "@/libraries/discord"
+import { builder, validator } from "@/libraries/discord"
 
 export const MHWIMyTeamHunt = builder
   .commandBuilder()
@@ -72,7 +72,7 @@ export const MHWIMyTeamHunt = builder
 
     // Not a valid monster
     if(current_monster_name === undefined) {
-      await interaction.followUp({
+      await interaction.reply({
         ephemeral: true,
         content: "Le monstre spécifié n'existe pas."
       })
@@ -81,12 +81,14 @@ export const MHWIMyTeamHunt = builder
 
     // Not a valid team
     if(players.length < 2) {
-      await interaction.followUp({
+      await interaction.reply({
         ephemeral: true,
         content: "Vous ne pouvez pas être en équipe avec vous-même."
       })
       return
     }
+
+    await interaction.deferReply()
 
     const monster_list = await prisma.mHWIMonsterKillTeam.findMany({
       where: {
@@ -131,7 +133,7 @@ export const MHWIMyTeamHunt = builder
     .slice(0, 10)
     .map(record => {
       return `1. **${getTimestamp(record.kill_time)}** (Par ${record.members
-        .map(item => miscellaneous.mentionUser(item.user_id))
+        .map(item => userMention(item.user_id))
         .map((item, i) => {
           if(i === record.members.length - 1) {
             return ` et ${item}`
@@ -143,8 +145,7 @@ export const MHWIMyTeamHunt = builder
         .join('')} le ${record.createdAt.toLocaleDateString()} à ${record.createdAt.toLocaleTimeString()})\n`
     }).join('')
     
-    await interaction.followUp({
-      ephemeral: true,
+    await interaction.reply({
       content: `\n**Temps de chasse en équipe (${current_exclusive ? "Exclusif" : "Inclusif"}) : ${getFrenchMHWIMonsterNames(current_monster_name)}${current_monster_strenght === undefined ? "" : ` (${getFrenchMHWIMonsterStrength(current_monster_strenght)})`}**\n${record_list_string}`
     });
   })

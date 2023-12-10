@@ -38,7 +38,7 @@ export const MHWITopTeamHunts = builder
     const monsterName = MHWIMonsterSpecies[MonsterNameInput] as (keyof typeof MHWIMonsterSpecies|undefined)
     
     if(monsterName === undefined) {
-      await interaction.followUp({
+      await interaction.reply({
         ephemeral: true,
         content: "Le monstre spécifié n'existe pas."
       })
@@ -46,6 +46,8 @@ export const MHWITopTeamHunts = builder
     }
 
     const monsterStrength = MHWIMonsterStrength[MonsterStrengthInput] as (keyof typeof MHWIMonsterStrength|undefined)
+
+    await interaction.deferReply()
 
     const monster_list = await findTop10TeamHunt({
       prisma,
@@ -55,8 +57,7 @@ export const MHWITopTeamHunts = builder
       }
     })
     
-    await interaction.followUp({
-      ephemeral: true,
+    await interaction.reply({
       content: generateTopTeamHunts(monster_list, {
         monster: monsterName,
         strength: monsterStrength

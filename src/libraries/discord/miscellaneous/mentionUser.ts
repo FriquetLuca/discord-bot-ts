@@ -1,1 +1,0 @@
-export const mentionUser = (user_id: string) => `<@${user_id}>`

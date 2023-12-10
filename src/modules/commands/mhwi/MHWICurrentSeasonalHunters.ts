@@ -9,13 +9,14 @@ export const MHWICurrentTopSeasonalHunters = builder
   .description("Voyez qui sont les chasseurs les plus actifs de tous et leur total de kills")
   .type(ApplicationCommandType.ChatInput)
   .handleCommand(async ({ interaction, prisma }) => {
+    await interaction.deferReply()
+    
     const extermination_list = await findTop10SeasonalExterminations({
       prisma,
       isCurrentSeason: true
     })
     
-    await interaction.followUp({
-      ephemeral: true,
+    await interaction.reply({
       content: generateTopSeasonalHuntersText(extermination_list, true)
     })
   })

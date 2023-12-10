@@ -17,6 +17,8 @@ export const MHWIRemoveHunt = builder
     // Get the options values
     const current_hash_string = (interaction.options.get('hash')?.value || "").toString()
 
+    await interaction.deferReply()
+
     await prisma.mHWIMonsterKill.deleteMany({
       where: {
         id: current_hash_string,
@@ -24,7 +26,7 @@ export const MHWIRemoveHunt = builder
       }
     })
     
-    await interaction.followUp({
+    await interaction.reply({
       ephemeral: true,
       content: "Votre hash a été correctement supprimé."
     });

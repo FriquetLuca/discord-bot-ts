@@ -1,9 +1,8 @@
 import { getFrenchMHWIMonsterStrength, getFrenchMHWIMonsterNames } from "@/libraries/mhwi"
 import type { MHWIMonsterSpecies, MHWIMonsterStrength } from "@prisma/client"
 import { getTimestamp } from "@/libraries/time"
-import { miscellaneous } from "@/libraries/discord"
+import { userMention } from "discord.js"
 
-const { mentionUser } = miscellaneous
 export const generateTopTeamHunts = (monster_list: {
   kill_time: bigint;
   strength: MHWIMonsterStrength;
@@ -19,7 +18,7 @@ data: {
   const record_list_string = monster_list.map(record => {
     const subStr = data.strength === undefined ? ` - ${getFrenchMHWIMonsterStrength(record.strength)}` : ""
     return `1. **${getTimestamp(record.kill_time)}${subStr}** (Par ${record.members
-      .map(item => mentionUser(item.user_id))
+      .map(item => userMention(item.user_id))
       .map((item, i) => {
         if(i === record.members.length - 1) {
           return ` et ${item}`

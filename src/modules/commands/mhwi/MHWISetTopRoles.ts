@@ -32,12 +32,14 @@ export const MHWISetTopRoles = builder
   )
   .handleCommand(async ({ interaction, prisma }) => {
     if(!interaction.guild) {
-      await interaction.followUp({
+      await interaction.reply({
         ephemeral: true,
         content: "Je suis navré, mais il m'est impossible de mettre des rôles entre nous..."
       })
       return
     }
+
+    await interaction.deferReply()
 
     const currentRoles = await prisma.mHWITopRoles.findFirst({
       where: {
@@ -99,7 +101,7 @@ export const MHWISetTopRoles = builder
         })
       }
 
-      await interaction.followUp({
+      await interaction.reply({
         ephemeral: true,
         content: "Vous avez édité avec succès les rôles de votre leaderboard."
       })
@@ -126,7 +128,7 @@ export const MHWISetTopRoles = builder
         }
       })
 
-      await interaction.followUp({
+      await interaction.reply({
         ephemeral: true,
         content: "Vous avez créer avec succès vos rôles pour votre leaderboard."
       })

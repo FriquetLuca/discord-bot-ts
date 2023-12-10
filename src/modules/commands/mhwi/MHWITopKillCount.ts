@@ -37,12 +37,14 @@ export const MHWITopKillCount = builder
 
     // Not a valid monster
     if(current_monster_name === undefined) {
-      await interaction.followUp({
+      await interaction.reply({
         ephemeral: true,
         content: "Le monstre spécifié n'existe pas."
       })
       return
     }
+
+    await interaction.deferReply()
     
     const all_records = await findTop10KillCount({
       prisma,
@@ -52,8 +54,7 @@ export const MHWITopKillCount = builder
       }
     })
     
-    await interaction.followUp({
-      ephemeral: true,
+    await interaction.reply({
       content: generateTopKillCountText(all_records, {
           monster: current_monster_name,
           strength: current_monster_strength

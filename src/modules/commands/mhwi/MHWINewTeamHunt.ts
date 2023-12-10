@@ -76,7 +76,7 @@ export const MHWINewTeamHunt = builder
 
     // Not a valid time
     if(time_in_seconds === null || Number.isNaN(time_in_seconds)) {
-      await interaction.followUp({
+      await interaction.reply({
         ephemeral: true,
         content: "Votre temps n'est pas un temps valide."
       })
@@ -85,7 +85,7 @@ export const MHWINewTeamHunt = builder
     
     // Not a valid monster
     if(current_monster_name === undefined) {
-      await interaction.followUp({
+      await interaction.reply({
         ephemeral: true,
         content: "Le monstre spécifié n'existe pas."
       })
@@ -94,7 +94,7 @@ export const MHWINewTeamHunt = builder
 
     // Not a valid strenght
     if(current_monster_strength === undefined) {
-      await interaction.followUp({
+      await interaction.reply({
         ephemeral: true,
         content: "La force du monstre spécifié n'existe pas."
       })
@@ -103,12 +103,14 @@ export const MHWINewTeamHunt = builder
 
     // Not a valid team
     if(players.length < 2) {
-      await interaction.followUp({
+      await interaction.reply({
         ephemeral: true,
         content: "Vous ne pouvez pas être en équipe avec vous-même."
       })
       return
     }
+
+    await interaction.deferReply()
 
     const new_hunt = await prisma.mHWIMonsterKillTeam.create({
       data: {
@@ -128,10 +130,9 @@ export const MHWINewTeamHunt = builder
       })
     })
     
-    await interaction.followUp({
-      ephemeral: true,
+    await interaction.reply({
       content: "Votre temps a été sauvegardé."
-    });
+    })
   })
   .autocomplete(async ({ interaction }) => await getMHWIMonstersAutocomplete("monster", interaction))
   .build()

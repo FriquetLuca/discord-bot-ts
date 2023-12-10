@@ -40,12 +40,14 @@ export const MHWISoloCountHunts = builder
 
     // Not a valid monster
     if(current_monster_name === undefined) {
-      await interaction.followUp({
+      await interaction.reply({
         ephemeral: true,
         content: "Le monstre spécifié n'existe pas."
       })
       return
     }
+
+    await interaction.deferReply()
 
     const monster_solo_kills = await prisma.mHWIMonsterKill.count({
       where: {
@@ -55,8 +57,7 @@ export const MHWISoloCountHunts = builder
       }
     })
     
-    await interaction.followUp({
-      ephemeral: true,
+    await interaction.reply({
       content: `Vous avez chassé ***${monster_solo_kills}*** **${getFrenchMHWIMonsterNames(current_monster_name)}${current_monster_strenght === undefined ? "" : ` (${getFrenchMHWIMonsterStrength(current_monster_strenght)})`}**`
     })
   })

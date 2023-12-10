@@ -31,12 +31,10 @@ export const handleSlashCommand = async (client: Client, interaction: CommandInt
         return
       }
     }
-    await interaction.deferReply();
     slashCommand.run(client, interaction)
     timestamps.set(interaction.user.id, now)
     setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount);
   } else {
-    await interaction.deferReply();
     slashCommand.run(client, interaction)
   }
 }

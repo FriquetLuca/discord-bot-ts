@@ -54,7 +54,7 @@ export const MHWINewHunt = builder
 
     // Not a valid time
     if(time_in_seconds === null || Number.isNaN(time_in_seconds)) {
-      await interaction.followUp({
+      await interaction.reply({
         ephemeral: true,
         content: "Votre temps n'est pas un temps valide."
       })
@@ -63,7 +63,7 @@ export const MHWINewHunt = builder
     
     // Not a valid monster
     if(current_monster_name === undefined) {
-      await interaction.followUp({
+      await interaction.reply({
         ephemeral: true,
         content: "Le monstre spécifié n'existe pas."
       })
@@ -72,12 +72,14 @@ export const MHWINewHunt = builder
 
     // Not a valid strenght
     if(current_monster_strength === undefined) {
-      await interaction.followUp({
+      await interaction.reply({
         ephemeral: true,
         content: "La force du monstre spécifié n'existe pas."
       })
       return
     }
+
+    await interaction.deferReply()
 
     await prisma.mHWIMonsterKill.create({
       data: {
@@ -88,7 +90,7 @@ export const MHWINewHunt = builder
       }
     })
     
-    await interaction.followUp({
+    await interaction.reply({
       ephemeral: true,
       content: "Votre temps a été sauvegardé."
     });

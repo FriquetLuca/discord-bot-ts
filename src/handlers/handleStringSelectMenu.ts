@@ -1,9 +1,9 @@
-import { Commands } from "@/libraries/discord";
+import { AllCommands } from "@/libraries/discord"
 import type { StringSelectMenuInteraction, Client } from "discord.js";
 
 export const handleStringSelectMenu = async (client: Client, interaction: StringSelectMenuInteraction) => {
   let ssmFound = false;
-  for(const command of Commands) {
+  for(const command of AllCommands) {
     const stringSelectMenus = command.stringSelectMenus.find(ssm => ssm.customId === interaction.customId)
     if(stringSelectMenus) {
       ssmFound = true

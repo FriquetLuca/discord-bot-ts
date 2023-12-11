@@ -1,14 +1,10 @@
-import { ApplicationCommandType, bold, italic, userMention } from "discord.js"
-import { menuCommandBuilder } from "@/libraries/discord/builders"
+import { bold, italic, userMention } from "discord.js"
+import { menuUserCommandBuilder } from "@/libraries/discord/builders"
 
-export const NewShopCart = menuCommandBuilder()
-  .name("Add ShopCart Member")
-  .type(ApplicationCommandType.User)
+export const NewShopCart = menuUserCommandBuilder()
+  .setName("Add ShopCart Member")
   .handleCommand(async ({ interaction, prisma }) => {
-    if(!interaction.isUserContextMenuCommand()) {
-      return
-    }
-    
+        
     const user_id = interaction.user.id
     await interaction.deferReply()
 

@@ -1,6 +1,5 @@
-import { ApplicationCommandOptionType, bold, italic } from "discord.js"
+import { bold, italic } from "discord.js"
 import { chatCommandBuilder } from "@/libraries/discord/builders"
-import { optionCommandBuilder } from "@/libraries/discord/builders/optionCommandBuilder"
 
 export const DeleteShopCart = chatCommandBuilder()
   .setName("delete-shop-cart")
@@ -33,15 +32,8 @@ export const DeleteShopCart = chatCommandBuilder()
     })
 
     if(cart !== null) {
-      await prisma.shoppingArticle.deleteMany({
-        where: cart
-      })
   
-      await prisma.shoppingMember.deleteMany({
-        where: cart
-      })
-  
-      await prisma.shoppingCart.deleteMany({
+      await prisma.shoppingCart.delete({
         where: {
           id: cart.cart_id
         }

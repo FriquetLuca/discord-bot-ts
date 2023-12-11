@@ -127,6 +127,7 @@ model MHWITeamMembers {
   monsterKillTeamId String
   monsterKillTeam MHWIMonsterKillTeam @relation(fields: [monsterKillTeamId], references: [id], onDelete: Cascade)
   @@id([user_id, monsterKillTeamId])
+  @@index([monsterKillTeamId])
 }
 
 model MHWITopRoles {
@@ -152,6 +153,7 @@ model ShoppingArticle {
   recipient   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  @@index([cart_id])
 }
 
 enum CartPermission {
@@ -167,6 +169,7 @@ model ShoppingMember {
   permission  CartPermission
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  @@index([cart_id])
 }
 
 model ShoppingCart {

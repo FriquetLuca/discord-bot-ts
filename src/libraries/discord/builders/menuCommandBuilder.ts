@@ -14,7 +14,6 @@ import type { BaseHandler, InteractionHandler } from "./commandBuilder"
 export class MenuCommandBuilder {
   private currentCommand: {
     name: string;
-    description: string;
     type: ApplicationCommandType.Message | ApplicationCommandType.User;
     modals: Modal[];
     buttons: Button[];
@@ -30,10 +29,6 @@ export class MenuCommandBuilder {
   }
   public name(name: string) {
     this.currentCommand.name = name
-    return this
-  }
-  public description(description: string) {
-    this.currentCommand.description = description
     return this
   }
   public type(type: ApplicationCommandType.Message | ApplicationCommandType.User) {

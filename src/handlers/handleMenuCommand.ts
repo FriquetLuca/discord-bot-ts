@@ -1,39 +1,40 @@
 import { type Client, Collection, type ContextMenuCommandInteraction } from "discord.js"
-import { Commands, type DiscordClient } from "@/libraries/discord"
+import { ContextMenuCommands, type DiscordClient } from "@/libraries/discord"
 
 export const handleMenuCommand = async (client: Client, interaction: ContextMenuCommandInteraction): Promise<void> => {
-  const slashCommand = Commands.find(c => c.name === interaction.commandName)
-  if (!slashCommand) {
+  const contextCommand = ContextMenuCommands.find(c => c.name === interaction.commandName)
+
+  if (!contextCommand) {
     interaction.reply({ content: "La commande employée n'existe pas / plus." })
     return
   }
 
-  if(slashCommand.hasCooldown) {
+  if(contextCommand.hasCooldown) {
 
     const { cooldowns } = interaction.client as DiscordClient;
   
-    if (!cooldowns.has(slashCommand.name)) {
-      cooldowns.set(slashCommand.name, new Collection());
+    if (!cooldowns.has(contextCommand.name)) {
+      cooldowns.set(contextCommand.name, new Collection());
     }
   
     const now = Date.now();
-    const timestamps = cooldowns.get(slashCommand.name) as Collection<string, number>
+    const timestamps = cooldowns.get(contextCommand.name) as Collection<string, number>
     const defaultCooldownDuration = 10000
-    const cooldownAmount = (slashCommand.cooldown ?? defaultCooldownDuration) * 1000
+    const cooldownAmount = (contextCommand.cooldown ?? defaultCooldownDuration) * 1000
   
     if (timestamps.has(interaction.user.id)) {
       const expirationTime = (timestamps.get(interaction.user.id) as number) + cooldownAmount
   
       if (now < expirationTime) {
         const expiredTimestamp = Math.round(expirationTime / 1000);
-        interaction.reply({ content: `Please, wait before using the command \`${slashCommand.name}\` again. You'll be able to use it again <t:${expiredTimestamp}:R>.`, ephemeral: true })
+        interaction.reply({ content: `Please, wait before using the command \`${contextCommand.name}\` again. You'll be able to use it again <t:${expiredTimestamp}:R>.`, ephemeral: true })
         return
       }
     }
-    slashCommand.run(client, interaction)
+    contextCommand.run(client, interaction)
     timestamps.set(interaction.user.id, now)
     setTimeout(() => timestamps.delete(interaction.user.id), cooldownAmount);
   } else {
-    slashCommand.run(client, interaction)
+    contextCommand.run(client, interaction)
   }
 }

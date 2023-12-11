@@ -1,6 +1,6 @@
 import { Args, ClientID, GuildIds, isDevelopment } from "../Bot"
 import { Events, GatewayIntentBits, REST, Routes, Collection } from "discord.js"
-import { Commands, Startups, DiscordClient } from "@/libraries/discord"
+import { Commands, ContextMenuCommands, Startups, DiscordClient } from "@/libraries/discord"
 import { interactionCreate } from "./"
 
 export async function application(token: string) {
@@ -50,13 +50,13 @@ export async function application(token: string) {
         for(const guildId of GuildIds) {
           await rest.put(
             Routes.applicationGuildCommands(ClientID, guildId),
-            { body: Commands },
+            { body: [ ...Commands, ...ContextMenuCommands ] },
           )
         }
       }
       await rest.put(
         Routes.applicationCommands(ClientID),
-        { body: Commands },
+        { body: [ ...Commands, ...ContextMenuCommands ] },
       )
       console.log('Successfully loaded application commands.')
 

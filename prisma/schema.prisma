@@ -15,6 +15,8 @@ datasource db {
 //  @@unique([user_id, guild_id])
 //}
 
+// Monster Hunter World Iceborn Example
+
 enum MHWIMonsterSpecies {
   Anjanath
   Barroth
@@ -137,4 +139,47 @@ model MHWITopRoles {
 model MHWISeasons {
   id          Int  @id @default(autoincrement())
   startedAt   DateTime
+}
+
+// Shopping Example
+
+model ShoppingArticle {
+  id          String  @id @default(cuid())
+  cart_id     String
+  cart        ShoppingCart @relation(fields: [cart_id], references: [id], onDelete: Cascade)
+  label     String
+  price       Int
+  recipient   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum CartPermission {
+  OWNER
+  MEMBER
+}
+
+model ShoppingMember {
+  id          String  @id @default(cuid())
+  user_id     String
+  cart_id     String
+  cart        ShoppingCart @relation(fields: [cart_id], references: [id], onDelete: Cascade)
+  permission  CartPermission
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ShoppingCart {
+  id          String  @id @default(cuid())
+  label       String
+  articles     ShoppingArticle[]
+  members      ShoppingMember[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ShoppingContext {
+  user_id     String
+  hash        String?
+  @@id([user_id])
 }

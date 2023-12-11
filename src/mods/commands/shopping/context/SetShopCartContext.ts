@@ -35,7 +35,7 @@ export const SetShopCartContext = chatCommandBuilder()
         return
       }
       await interaction.followUp({
-        content: `Error : Le caddie contextuel n'existe pas.`
+        content: `Erreur : Le caddie contextuel n'existe pas.`
       })
       return
     }

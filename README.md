@@ -27,8 +27,8 @@ Note: It can takes an hour or so before your commands are reloaded using `start`
 
 ## Project
 
-The project is made using `Typescript`, `DiscordJS` and `Prisma`.
-As such, the project directory is as follow :
+The project is made using [`Typescript`](https://www.typescriptlang.org/docs/handbook/typescript-from-scratch.html), [`DiscordJS`](https://discordjs.guide/) and [`Prisma`](https://www.prisma.io/docs/orm/overview/introduction) so don't hesitate to use their documentation for help.
+The project structure is as follow :
 - prisma
 - src
   - database

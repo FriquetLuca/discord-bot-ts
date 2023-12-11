@@ -1,15 +1,13 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, bold, italic } from "discord.js"
-import { commandBuilder } from "@/libraries/discord/builders"
-import { optionCommandBuilder } from "@/libraries/discord/builders/optionCommandBuilder"
+import { bold, italic } from "discord.js"
+import { chatCommandBuilder } from "@/libraries/discord/builders"
 
-export const NewShopCart = commandBuilder()
-  .name("new-shop-cart")
-  .description("Créer un nouveau caddie pour vos courses")
-  .type(ApplicationCommandType.ChatInput)
-  .addOption(
-    optionCommandBuilder("label", ApplicationCommandOptionType.String)
-    .required(true)
-    .description("Le nom associé à votre nouveau caddie")
+export const NewShopCart = chatCommandBuilder()
+  .setName("new-shop-cart")
+  .setDescription("Créer un nouveau caddie pour vos courses")
+  .addStringOption(option =>
+    option.setName("label")
+    .setRequired(true)
+    .setDescription("Le nom associé à votre nouveau caddie")
   )
   .handleCommand(async ({ interaction, prisma }) => {
     

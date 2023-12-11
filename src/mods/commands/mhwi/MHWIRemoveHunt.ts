@@ -1,14 +1,12 @@
-import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js"
-import { commandBuilder, optionCommandBuilder } from "@/libraries/discord/builders"
+import { chatCommandBuilder } from "@/libraries/discord/builders"
 
-export const MHWIRemoveHunt = commandBuilder()
-  .name("mhwi-remove-hunt")
-  .description("Supprimer un temps de chasse depuis un hash")
-  .type(ApplicationCommandType.ChatInput)
-  .addOption(
-    optionCommandBuilder("hash", ApplicationCommandOptionType.String)
-      .description("Le hash du temps de chasse à supprimer")
-      .required(true)
+export const MHWIRemoveHunt = chatCommandBuilder()
+  .setName("mhwi-remove-hunt")
+  .setDescription("Supprimer un temps de chasse depuis un hash")
+  .addStringOption(option =>
+    option.setName("hash")
+      .setDescription("Le hash du temps de chasse à supprimer")
+      .setRequired(true)
   )
   .handleCommand(async ({ interaction, prisma }) => {
 

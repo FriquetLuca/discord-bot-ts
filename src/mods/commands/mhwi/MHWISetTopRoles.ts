@@ -1,6 +1,6 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, type HexColorString } from "discord.js"
+import { type HexColorString } from "discord.js"
 import * as v from "@/libraries/discord/validators"
-import { commandBuilder, optionCommandBuilder } from "@/libraries/discord/builders"
+import { chatCommandBuilder } from "@/libraries/discord/builders"
 
 const colorRank = {
   'first': '#aadaf0',
@@ -8,25 +8,24 @@ const colorRank = {
   'third': '#e68b4b'
 }
 
-export const MHWISetTopRoles = commandBuilder()
-  .name("mhwi-set-top-roles")
-  .description("Donnez des rôles aux trois meilleurs du classement")
-  .type(ApplicationCommandType.ChatInput)
-  .addOption(
-    optionCommandBuilder("first", ApplicationCommandOptionType.String)
-      .description("Le nom du role du premier au classement")
-      .required(true)
-  )
-  .addOption(
-    optionCommandBuilder("second", ApplicationCommandOptionType.String)
-      .description("Le nom du role du second au classement")
-      .required(true)
-  )
-  .addOption(
-    optionCommandBuilder("third", ApplicationCommandOptionType.String)
-      .description("Le nom du role du troisième au classement")
-      .required(true)
-  )
+export const MHWISetTopRoles = chatCommandBuilder()
+  .setName("mhwi-set-top-roles")
+  .setDescription("Donnez des rôles aux trois meilleurs du classement")
+  .addStringOption(option =>
+    option.setName("first")
+      .setDescription("Le nom du role du premier au classement")
+      .setRequired(true)
+    )
+  .addStringOption(option =>
+    option.setName("second")
+      .setDescription("Le nom du role du second au classement")
+      .setRequired(true)
+    )
+  .addStringOption(option =>
+    option.setName("third")
+      .setDescription("Le nom du role du troisième au classement")
+      .setRequired(true)
+    )
   .handleCommand(async ({ interaction, prisma }) => {
     if(!interaction.guild) {
       await interaction.reply({

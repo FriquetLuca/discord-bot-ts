@@ -1,26 +1,24 @@
-import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js"
 import { MHWIMonsterStrength, MHWIMonsterSpecies } from "@prisma/client"
 import { findTop10TeamHunt } from "@/database/mhwi/findTop10TeamHunt"
 import { generateTopTeamHunts } from "@/libraries/mhwiTextGenerator"
 import * as v from "@/libraries/discord/validators"
 import { getFrenchMHWIMonsterStrength, getMHWIMonstersAutocomplete } from "@/libraries/mhwi"
-import { commandBuilder, optionCommandBuilder } from "@/libraries/discord/builders"
+import { chatCommandBuilder } from "@/libraries/discord/builders"
 
-export const MHWITopTeamHunts = commandBuilder()
-  .name("mhwi-top-team-hunts")
-  .description("Listez les meilleurs temps de chasse d'un monstre en équipe")
-  .type(ApplicationCommandType.ChatInput)
-  .addOption(
-    optionCommandBuilder("monster", ApplicationCommandOptionType.String)
-      .description("Le nom du monstre chassé")
-      .required(true)
-      .autocomplete(true)
+export const MHWITopTeamHunts = chatCommandBuilder()
+  .setName("mhwi-top-team-hunts")
+  .setDescription("Listez les meilleurs temps de chasse d'un monstre en équipe")
+  .addStringOption(option =>
+    option.setName("monster")
+      .setDescription("Le nom du monstre chassé")
+      .setRequired(true)
+      .setAutocomplete(true)
   )
-  .addOption(
-    optionCommandBuilder("strength", ApplicationCommandOptionType.String)
-      .description("La force du monstre tué")
+  .addStringOption(option =>
+    option.setName("strength")
+      .setDescription("La force du monstre tué")
       .addChoices(
-        Object
+        ...Object
         .getOwnPropertyNames(MHWIMonsterStrength)
         .map(strenght => ({
           "name": getFrenchMHWIMonsterStrength(strenght as MHWIMonsterStrength),

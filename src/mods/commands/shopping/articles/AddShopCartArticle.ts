@@ -1,25 +1,22 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, bold, italic } from "discord.js"
-import { commandBuilder } from "@/libraries/discord/builders"
-import { optionCommandBuilder } from "@/libraries/discord/builders/optionCommandBuilder"
+import { chatCommandBuilder } from "@/libraries/discord/builders"
 
-export const AddShopCartArticle = commandBuilder()
-  .name("add-shop-cart-article")
-  .description("Ajouter un article à votre caddie.")
-  .type(ApplicationCommandType.ChatInput)
-  .addOption(
-    optionCommandBuilder("label", ApplicationCommandOptionType.String)
-    .required(true)
-    .description("Le nom associé à l'article")
+export const AddShopCartArticle = chatCommandBuilder()
+  .setName("add-shop-cart-article")
+  .setDescription("Ajouter un article à votre caddie.")
+  .addStringOption(option =>
+    option.setName("label")
+    .setRequired(true)
+    .setDescription("Le nom associé à l'article")
   )
-  .addOption(
-    optionCommandBuilder("price", ApplicationCommandOptionType.String)
-    .required(true)
-    .description("Le prix de l'article")
+  .addStringOption(option =>
+    option.setName("price")
+    .setRequired(true)
+    .setDescription("Le prix de l'article")
   )
-  .addOption(
-    optionCommandBuilder("recipient", ApplicationCommandOptionType.User)
-    .required(false)
-    .description("La personne pour qui on achète l'article")
+  .addUserOption(option =>
+    option.setName("recipient")
+    .setRequired(false)
+    .setDescription("La personne pour qui on achète l'article")
   )
   .handleCommand(async ({ interaction, prisma }) => {
     

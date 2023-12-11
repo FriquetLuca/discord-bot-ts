@@ -1,25 +1,24 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, userMention } from "discord.js"
+import { userMention } from "discord.js"
 import { MHWIMonsterStrength, MHWIMonsterSpecies } from "@prisma/client"
 import { getFrenchMHWIMonsterStrength, getMHWIMonstersAutocomplete, getFrenchMHWIMonsterNames } from "@/libraries/mhwi"
 import { getTimestamp } from "@/libraries/time"
 import * as validator from "@/libraries/discord/validators"
-import { commandBuilder, optionCommandBuilder } from "@/libraries/discord/builders"
+import { chatCommandBuilder } from "@/libraries/discord/builders"
 
-export const MHWIMyTeamHunt = commandBuilder()
-  .name("mhwi-my-team-hunts")
-  .description("Listez vos chasses à l'encontre d'un monstre en particulier en équipe")
-  .type(ApplicationCommandType.ChatInput)
-  .addOption(
-    optionCommandBuilder("monster", ApplicationCommandOptionType.String)
-      .description("Le nom du monstre abattu")
-      .required(true)
-      .autocomplete(true)
+export const MHWIMyTeamHunt = chatCommandBuilder()
+  .setName("mhwi-my-team-hunts")
+  .setDescription("Listez vos chasses à l'encontre d'un monstre en particulier en équipe")
+  .addStringOption(option =>
+    option.setName("monster")
+      .setDescription("Le nom du monstre abattu")
+      .setRequired(true)
+      .setAutocomplete(true)
   )
-  .addOption(
-    optionCommandBuilder("strength", ApplicationCommandOptionType.String)
-      .description("La force du monstre tué")
+  .addStringOption(option =>
+    option.setName("strength")
+      .setDescription("La force du monstre tué")
       .addChoices(
-        Object
+        ...Object
         .getOwnPropertyNames(MHWIMonsterStrength)
         .map(strenght => ({
           "name": getFrenchMHWIMonsterStrength(strenght as MHWIMonsterStrength),
@@ -27,22 +26,22 @@ export const MHWIMyTeamHunt = commandBuilder()
         }))
       )
   )
-  .addOption(
-    optionCommandBuilder("player2", ApplicationCommandOptionType.User)
-      .description("Le joueur n°2")
-      .required(true)
+  .addUserOption(option =>
+    option.setName("player2")
+      .setDescription("Le joueur n°2")
+      .setRequired(true)
   )
-  .addOption(
-    optionCommandBuilder("player3", ApplicationCommandOptionType.User)
-      .description("Le joueur n°3")
+  .addUserOption(option =>
+    option.setName("player3")
+      .setDescription("Le joueur n°3")
   )
-  .addOption(
-    optionCommandBuilder("player4", ApplicationCommandOptionType.User)
-      .description("Le joueur n°4")
+  .addUserOption(option =>
+    option.setName("player4")
+      .setDescription("Le joueur n°4")
   )
-  .addOption(
-    optionCommandBuilder("exclusive", ApplicationCommandOptionType.Boolean)
-      .description("Si activé, uniquement les chasses avec précisément le nombre de joueur donné sera recherché")
+  .addBooleanOption(option =>
+    option.setName("exclusive")
+      .setDescription("Si activé, uniquement les chasses avec précisément le nombre de joueur donné sera recherché")
   )
   .handleCommand(async ({ interaction, prisma }) => {
 

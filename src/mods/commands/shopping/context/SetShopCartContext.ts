@@ -1,14 +1,12 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, bold, italic } from "discord.js"
-import { commandBuilder } from "@/libraries/discord/builders"
-import { optionCommandBuilder } from "@/libraries/discord/builders/optionCommandBuilder"
+import { bold, italic } from "discord.js"
+import { chatCommandBuilder } from "@/libraries/discord/builders"
 
-export const SetShopCartContext = commandBuilder()
-  .name("set-shop-cart-context")
-  .description("Assigne le caddie contextuel au hash spécifié")
-  .type(ApplicationCommandType.ChatInput)
-  .addOption(
-    optionCommandBuilder("hash", ApplicationCommandOptionType.String)
-    .description("Le hash associé à votre caddie")
+export const SetShopCartContext = chatCommandBuilder()
+  .setName("set-shop-cart-context")
+  .setDescription("Assigne le caddie contextuel au hash spécifié")
+  .addStringOption(option =>
+    option.setName("hash")
+      .setDescription("Le hash associé à votre caddie")
   )
   .handleCommand(async ({ interaction, prisma }) => {
     

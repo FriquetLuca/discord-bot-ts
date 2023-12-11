@@ -1,15 +1,14 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, bold, italic } from "discord.js"
-import { commandBuilder } from "@/libraries/discord/builders"
+import { ApplicationCommandOptionType, bold, italic } from "discord.js"
+import { chatCommandBuilder } from "@/libraries/discord/builders"
 import { optionCommandBuilder } from "@/libraries/discord/builders/optionCommandBuilder"
 
-export const DeleteShopCart = commandBuilder()
-  .name("delete-shop-cart")
-  .description("Supprimer un caddie de course")
-  .type(ApplicationCommandType.ChatInput)
-  .addOption(
-    optionCommandBuilder("hash", ApplicationCommandOptionType.String)
-    .required(true)
-    .description("Le hash associé au caddie à supprimer")
+export const DeleteShopCart = chatCommandBuilder()
+  .setName("delete-shop-cart")
+  .setDescription("Supprimer un caddie de course")
+  .addStringOption(option =>
+    option.setName("hash")
+    .setDescription("Le hash associé au caddie à supprimer")
+    .setRequired(true)
   )
   .handleCommand(async ({ interaction, prisma }) => {
     

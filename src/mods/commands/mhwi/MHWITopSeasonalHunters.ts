@@ -1,12 +1,10 @@
-import { ApplicationCommandType } from "discord.js"
 import { findTop10SeasonalExterminations } from "@/database/mhwi"
 import { generateTopSeasonalHuntersText } from "@/libraries/mhwiTextGenerator"
-import { commandBuilder } from "@/libraries/discord/builders"
+import { chatCommandBuilder } from "@/libraries/discord/builders"
 
-export const MHWITopSeasonalHunters = commandBuilder()
-  .name("mhwi-top-seasonal-hunters")
-  .description("Voyez qui sont les chasseurs les plus actifs de tous et leur total de kills")
-  .type(ApplicationCommandType.ChatInput)
+export const MHWITopSeasonalHunters = chatCommandBuilder()
+  .setName("mhwi-top-seasonal-hunters")
+  .setDescription("Voyez qui sont les chasseurs les plus actifs de tous et leurs total de kills")
   .handleCommand(async ({ interaction, prisma }) => {
 
     await interaction.deferReply()

@@ -1,23 +1,21 @@
-import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js"
 import { MHWIMonsterStrength, MHWIMonsterSpecies } from "@prisma/client"
 import { getFrenchMHWIMonsterStrength, getMHWIMonstersAutocomplete, getFrenchMHWIMonsterNames } from "@/libraries/mhwi"
-import { commandBuilder, optionCommandBuilder } from "@/libraries/discord/builders"
+import { chatCommandBuilder } from "@/libraries/discord/builders"
 
-export const MHWISoloCountHunts = commandBuilder()
-  .name("mhwi-solo-count-hunts")
-  .description("Comptez le nombre de fois que vous avez affronté un certain monstre en solo")
-  .type(ApplicationCommandType.ChatInput)
-  .addOption(
-    optionCommandBuilder("monster", ApplicationCommandOptionType.String)
-      .description("Le nom du monstre chassé")
-      .required(true)
-      .autocomplete(true)
+export const MHWISoloCountHunts = chatCommandBuilder()
+  .setName("mhwi-solo-count-hunts")
+  .setDescription("Comptez le nombre de fois que vous avez affronté un certain monstre en solo")
+  .addStringOption(option =>
+    option.setName("monster")
+      .setDescription("Le nom du monstre chassé")
+      .setRequired(true)
+      .setAutocomplete(true)
   )
-  .addOption(
-    optionCommandBuilder("strength", ApplicationCommandOptionType.String)
-      .description("La force du monstre tué")
+  .addStringOption(option =>
+    option.setName("strength")
+      .setDescription("La force du monstre tué")
       .addChoices(
-        Object
+        ...Object
         .getOwnPropertyNames(MHWIMonsterStrength)
         .map(strenght => ({
           "name": getFrenchMHWIMonsterStrength(strenght as MHWIMonsterStrength),

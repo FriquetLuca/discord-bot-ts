@@ -1,5 +1,5 @@
+import { menuCommandBuilder } from "@/libraries/discord/builders"
 import { ApplicationCommandType, bold, italic, userMention } from "discord.js"
-import { menuCommandBuilder } from "@/libraries/discord/builders/menuCommandBuilder"
 
 export const NewShopCart = menuCommandBuilder()
   .name("Remove ShopCart Member")

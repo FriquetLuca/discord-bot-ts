@@ -1,43 +1,41 @@
-import { ApplicationCommandOptionType, ApplicationCommandType } from "discord.js"
 import { MHWIMonsterStrength, MHWIMonsterSpecies } from "@prisma/client"
 import { getFrenchMHWIMonsterStrength, getMHWIMonstersAutocomplete } from "@/libraries/mhwi"
 import { parseTime } from "@/libraries/time"
 import * as validator from "@/libraries/discord/validators"
-import { commandBuilder, optionCommandBuilder } from "@/libraries/discord/builders"
+import { chatCommandBuilder } from "@/libraries/discord/builders"
 
-export const MHWINewTeamHunt = commandBuilder()
-  .name("mhwi-new-team-hunt")
-  .description("Poster un nouveau temps de chasse")
-  .type(ApplicationCommandType.ChatInput)
-  .addOption(
-    optionCommandBuilder("monster", ApplicationCommandOptionType.String)
-      .description("Le nom du monstre abattu")
-      .required(true)
-      .autocomplete(true)
+export const MHWINewTeamHunt = chatCommandBuilder()
+  .setName("mhwi-new-team-hunt")
+  .setDescription("Poster un nouveau temps de chasse")
+  .addStringOption(option =>
+    option.setName("monster")
+      .setDescription("Le nom du monstre abattu")
+      .setRequired(true)
+      .setAutocomplete(true)
   )
-  .addOption(
-    optionCommandBuilder("time", ApplicationCommandOptionType.String)
-      .description("La durée du combat")
-      .required(true)
+  .addStringOption(option =>
+    option.setName("time")
+      .setDescription("La durée du combat")
+      .setRequired(true)
   )
-  .addOption(
-    optionCommandBuilder("player2", ApplicationCommandOptionType.User)
-      .description("Le joueur n°2")
-      .required(true)
+  .addUserOption(option =>
+    option.setName("player2")
+      .setDescription("Le joueur n°2")
+      .setRequired(true)
   )
-  .addOption(
-    optionCommandBuilder("player3", ApplicationCommandOptionType.User)
-      .description("Le joueur n°3")
+  .addUserOption(option =>
+    option.setName("player3")
+      .setDescription("Le joueur n°3")
   )
-  .addOption(
-    optionCommandBuilder("player4", ApplicationCommandOptionType.User)
-      .description("Le joueur n°4")
+  .addUserOption(option =>
+    option.setName("player4")
+      .setDescription("Le joueur n°4")
   )
-  .addOption(
-    optionCommandBuilder("strength", ApplicationCommandOptionType.String)
-      .description("La force du monstre tué")
+  .addStringOption(option =>
+    option.setName("strength")
+      .setDescription("La force du monstre tué")
       .addChoices(
-        Object
+        ...Object
         .getOwnPropertyNames(MHWIMonsterStrength)
         .map(strenght => ({
           "name": getFrenchMHWIMonsterStrength(strenght as MHWIMonsterStrength),

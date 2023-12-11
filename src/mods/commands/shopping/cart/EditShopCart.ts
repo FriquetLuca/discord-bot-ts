@@ -1,20 +1,18 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, bold, italic } from "discord.js"
-import { commandBuilder } from "@/libraries/discord/builders"
-import { optionCommandBuilder } from "@/libraries/discord/builders/optionCommandBuilder"
+import { bold, italic } from "discord.js"
+import { chatCommandBuilder } from "@/libraries/discord/builders"
 
-export const EditShopCart = commandBuilder()
-  .name("edit-shop-cart")
-  .description("Modifier le nom d'un caddie")
-  .type(ApplicationCommandType.ChatInput)
-  .addOption(
-    optionCommandBuilder("hash", ApplicationCommandOptionType.String)
-    .required(true)
-    .description("Le hash associé au caddie à renommer")
+export const EditShopCart = chatCommandBuilder()
+  .setName("edit-shop-cart")
+  .setDescription("Modifier le nom d'un caddie")
+  .addStringOption(option =>
+    option.setName("hash")
+    .setRequired(true)
+    .setDescription("Le hash associé au caddie à renommer")
   )
-  .addOption(
-    optionCommandBuilder("name", ApplicationCommandOptionType.String)
-    .required(true)
-    .description("Le nouveau nom du caddie")
+  .addStringOption(option =>
+    option.setName("name")
+    .setRequired(true)
+    .setDescription("Le nouveau nom du caddie")
   )
   .handleCommand(async ({ interaction, prisma }) => {
     

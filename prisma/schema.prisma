@@ -148,7 +148,8 @@ model ShoppingArticle {
   id          String  @id @default(cuid())
   cart_id     String
   cart        ShoppingCart @relation(fields: [cart_id], references: [id], onDelete: Cascade)
-  label     String
+  label       String
+  quantity    Int
   price       Int
   recipient   String?
   createdAt DateTime @default(now())

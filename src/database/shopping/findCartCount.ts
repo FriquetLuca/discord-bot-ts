@@ -17,6 +17,6 @@ export const findCartCount = async (ctx: {
     WHERE
       sm.user_id = ${userId}
     ` as {
-      'count': BigInt
+      count: BigInt
     }[]
 }

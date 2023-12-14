@@ -40,6 +40,11 @@ export function parseMoney(current_time_string: string, currencyDigits: number =
   return (result.lhs * digits + (result.rhs % digits)) * (result.sign ? 1 : -1)
 }
 
+export function moneyFormat(amount: number) {
+  const l = Math.floor(amount % 100).toString()
+  return `${Math.floor(amount / 100)},${l.length === 2 ? l : `0${l}`}`    
+}
+
 // console.log(parseMoney("125"))
 // console.log(parseMoney("125.13"))
 // console.log(parseMoney("125,13"))

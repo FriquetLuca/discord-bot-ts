@@ -1,16 +1,17 @@
 Shopping articles:
-- EditShopCartArticle
 - MyShopCartArticles
-  - Show total price
   - Show unpaid sum
   - Show refunded sum
-  - Show all articles in pagination
-    - Show the article name
-    - Show the article hash
-    - Show the article updated date if updated
-    - Show the article price
-    - Show the article quantity
 
-Also to design/do
+Also to design/do:
 - A way to view the articles paid for us
 - A way to set the articles paid for us as refunded
+
+List of refactors:
+- Subcommands for shop cart (add / edit / remove) shop cart article
+- Subcommands for shop cart (new / edit / delete) cart
+
+Bully / Karma design:
+Example:
+Karma(X) = SUM(MEMBER => 1/(|MEMBERS| - 1) * MIN(-50, MAX(SUM(VOTES => MEMBER NOT X), 50))) * (1 / 100) + (1 / 2)
+So, Karma(X) is in the range [0, 1].

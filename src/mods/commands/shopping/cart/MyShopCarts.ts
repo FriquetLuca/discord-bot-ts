@@ -3,6 +3,7 @@ import { chatCommandBuilder } from "@/libraries/discord/builders"
 import { findCurrentCartPage } from "@/database/shopping/findCurrentCartPage"
 import { findCartCount } from "@/database/shopping/findCartCount"
 import { createPaginationButtons } from "@/libraries/discord/pagination/createPaginationButtons"
+import { moneyFormat } from "@/libraries/money"
 
 export const MyShopCarts = chatCommandBuilder()
   .setName("my-shop-carts")
@@ -36,7 +37,7 @@ export const MyShopCarts = chatCommandBuilder()
         if(currentCart.updatedAt.getTime() !== currentCart.createdAt.getTime()) {
           updated = ` ${italic(`(modifié le ${currentCart.updatedAt.toLocaleDateString()} à ${currentCart.updatedAt.toLocaleTimeString()})`)}`
         }
-        return `${index++}) ${bold(currentCart.label)} (${italic(`Hash: \`${currentCart.cart_id}\``)}) créer le ${currentCart.createdAt.toLocaleDateString()} à ${currentCart.createdAt.toLocaleTimeString()}${updated}`
+        return `${index++}) ${bold(currentCart.label)} (${moneyFormat(currentCart.full_price)}€) [${italic(`Hash: \`${currentCart.cart_id}\``)}] créer le ${currentCart.createdAt.toLocaleDateString()} à ${currentCart.createdAt.toLocaleTimeString()}${updated}`
       }).join("\n")}`,
       components,
     })
@@ -74,13 +75,17 @@ export const MyShopCarts = chatCommandBuilder()
             if(currentCart.updatedAt.getTime() !== currentCart.createdAt.getTime()) {
               updated = ` ${italic(`(modifié le ${currentCart.updatedAt.toLocaleDateString()} à ${currentCart.updatedAt.toLocaleTimeString()})`)}`
             }
-            return `${index++}) ${bold(currentCart.label)} (${italic(`Hash: \`${currentCart.cart_id}\``)}) créer le ${currentCart.createdAt.toLocaleDateString()} à ${currentCart.createdAt.toLocaleTimeString()}${updated}`
+            return `${index++}) ${bold(currentCart.label)} (${moneyFormat(currentCart.full_price)}€) [${italic(`Hash: \`${currentCart.cart_id}\``)}] créer le ${currentCart.createdAt.toLocaleDateString()} à ${currentCart.createdAt.toLocaleTimeString()}${updated}`
           }).join("\n")}`,
           components,
         });
       }
     } catch (e) {
-      await interaction.deleteReply()
+      try {
+        await interaction.deleteReply()
+      } catch(e) {
+        console.error(e)
+      }
     }
   })
   .build()

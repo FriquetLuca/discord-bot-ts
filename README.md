@@ -18,6 +18,8 @@ Example:
 npm run dev:clean
 ```
 
+If anything goes wrong, you can use the `npm run clean` command to clean up all your bot commands.
+
 ## Production
 
 You can build the bot by using the command:
@@ -34,6 +36,8 @@ Or if you happen to have duplicated commands, run the bot with:
 ```bash
 npm run start:clean
 ```
+
+If anything goes wrong, you can use the `npm run clean` command to clean up all your bot commands.
 
 Note: It can takes an hour or so before your commands are reloaded using `start`, so for development purposes, don't use your production bot token (as it may cause trouble to people using the bot while you're developping on it) nor should you even develop from this at all.
 

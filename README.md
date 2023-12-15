@@ -43,14 +43,13 @@ The project is made using [`Typescript`](https://www.typescriptlang.org/docs/han
 The project structure is as follow :
 - prisma
 - src
+  - commands
   - database
   - events
   - libraries
-  - mods
-    - commands
-    - messageCommands
-    - startups
-    - userCommands
+  - messageCommands
+  - startups
+  - userCommands
 
 ### Prisma
 
@@ -74,6 +73,8 @@ This is the file where you want to write down your prisma queries but also where
 Inside this folder, you can define all your custom events for the bot, ...
 
 #### libraries
+
+This folder is your best friend, it's where you can organize your code that will be used by your bot or even where you'll put your assets.
 
 ##### discord
 
@@ -102,11 +103,7 @@ Lazy validators for discord
 
 This library is meant to be used when searching for files or directories in a recursive manner, it also handle modules.
 
-#### mods
-
-Mod is the directory where all your command implementations, startups systems, ... are located. Everything over here is, in itself, a module and treated as such.
-
-##### commands
+#### commands
 
 This is where all your slash commands are located.
 
@@ -129,7 +126,7 @@ export const HelloWorldOrSomething = chatCommandBuilder()
 
 There's some examples inside `mhwi` and `shopping`.
 
-##### messageCommands
+#### messageCommands
 
 This is where all your message commands are located (the commands you're able to use from right clicking on a message).
 
@@ -149,7 +146,7 @@ export const HelloWorldOrSomething = menuMessageCommandBuilder()
   .build()
 ```
 
-##### startups
+#### startups
 
 This folder contains all the functions that are going to be executed once the bot has been started. You can create some CRON executions from it using a `schedule` for example.
 
@@ -164,7 +161,7 @@ export function newStart(client: Client) {
 }
 ```
 
-##### userCommands
+#### userCommands
 
 This is where all your user commands are located (the commands you're able to use from right clicking on a user).
 

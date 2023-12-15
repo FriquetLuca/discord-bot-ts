@@ -1,5 +1,5 @@
 import { type Client, Collection, type ContextMenuCommandInteraction, type UserContextMenuCommandInteraction, type MessageContextMenuCommandInteraction } from "discord.js"
-import { UserMenuCommands, type DiscordClient, type UserCommand, type MessageCommand, MessageMenuCommands } from "@/libraries/discord"
+import { UserMenuCommands, type DiscordClient, type UserCommand, type MessageCommand, MessageMenuCommands } from "../"
 
 const menuCommand = async <T extends UserCommand | MessageCommand, U extends UserContextMenuCommandInteraction|MessageContextMenuCommandInteraction>(ContextMenuCommand: T[], client: Client, interaction: U): Promise<void> => {
   try {

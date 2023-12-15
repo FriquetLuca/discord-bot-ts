@@ -1,4 +1,4 @@
-import { AllCommands } from "@/libraries/discord"
+import { AllCommands } from "../"
 import type { StringSelectMenuInteraction, Client } from "discord.js";
 
 export const handleStringSelectMenu = async (client: Client, interaction: StringSelectMenuInteraction) => {

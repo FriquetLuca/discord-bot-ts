@@ -2,12 +2,13 @@
   "name": "discord-bot-ts",
   "version": "0.0.0",
   "description": "An example of discord bot",
-  "main": "src/Bot.ts",
+  "main": "dist/Bot.js",
   "scripts": {
-    "start": "ts-node -r tsconfig-paths/register src/Bot.ts",
-    "start:clean": "ts-node -r tsconfig-paths/register src/Bot.ts clean",
-    "dev": "ts-node -r tsconfig-paths/register src/Bot.ts dev",
-    "dev:clean": "ts-node -r tsconfig-paths/register src/Bot.ts dev clean",
+    "start": "node -r ./tsconfig-paths.js dist/Bot.js",
+    "start:clean": "node -r ./tsconfig-paths.js dist/Bot.js clean",
+    "dev": "ts-node -r tsconfig-paths/register src/Bot.ts",
+    "dev:clean": "ts-node -r tsconfig-paths/register src/Bot.ts clean",
+    "build": "(rm -rf dist && tsc) || tsc",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
@@ -21,11 +22,11 @@
     "@types/node": "^20.10.4",
     "discord.js": "^14.14.1",
     "dotenv": "^16.3.1",
-    "ts-node": "^10.9.2",
-    "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.3.3"
+    "tsconfig-paths": "^4.2.0"
   },
   "devDependencies": {
-    "prisma": "^5.7.0"
+    "prisma": "^5.7.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   }
 }

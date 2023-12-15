@@ -1,4 +1,4 @@
-import { AllCommands } from "@/libraries/discord"
+import { AllCommands } from "../"
 import type { Client, ModalSubmitInteraction } from "discord.js"
 
 export const handleSubmitModal = async (client: Client, interaction: ModalSubmitInteraction) => {

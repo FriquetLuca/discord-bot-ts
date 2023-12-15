@@ -1,5 +1,5 @@
 import { type Client, type CommandInteraction, Collection } from "discord.js"
-import { Commands, type DiscordClient } from "@/libraries/discord"
+import { Commands, type DiscordClient } from "../"
 
 export const handleSlashCommand = async (client: Client, interaction: CommandInteraction): Promise<void> => {
   const slashCommand = Commands.find(c => c.name === interaction.commandName)

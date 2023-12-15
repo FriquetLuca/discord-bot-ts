@@ -12,18 +12,30 @@ To test the bot rapidly on your own discord server, do:
 npm run dev
 ```
 
-Otherwise run the bot with:
+You'll sometimes find yourself needing to clean all your commands because of some errors or whatever. For this specific case, use the `clean` keyword.
+Example:
+```bash
+npm run dev:clean
+```
+
+## Production
+
+You can build the bot by using the command:
+```bash
+npm run build
+```
+
+Afterwards, run the bot with:
 ```bash
 npm run start
 ```
 
-You'll sometimes find yourself needing to clean all your commands because of some errors or whatever. For this specific case, use the `clean` keyword.
-Example:
+Or if you happen to have duplicated commands, run the bot with:
 ```bash
 npm run start:clean
 ```
 
-Note: It can takes an hour or so before your commands are reloaded using `start`, so for development purposes, use `dev` and not your production bot token (as it may cause trouble to people using the bot while you're developping on it).
+Note: It can takes an hour or so before your commands are reloaded using `start`, so for development purposes, don't use your production bot token (as it may cause trouble to people using the bot while you're developping on it) nor should you even develop from this at all.
 
 ## Project
 
@@ -32,9 +44,8 @@ The project structure is as follow :
 - prisma
 - src
   - database
-  - handlers
+  - events
   - libraries
-  - listeners
   - mods
     - commands
     - messageCommands
@@ -59,9 +70,9 @@ You also have access to your guild ids and client id from what was exposed to th
 
 This is the file where you want to write down your prisma queries but also where `PrismaClient` is exposed to the bot itself (`/src/database/prisma.ts`).
 
-#### handlers
+#### events
 
-Inside this folder, there's a bunch of handlers for commands, autocompletion, ...
+Inside this folder, you can define all your custom events for the bot, ...
 
 #### libraries
 
@@ -96,10 +107,6 @@ This library is meant to be used when searching for files or directories in a re
 
 The library here is to handle time. To be more precise, you'll be able to create schedulers with it. There's also a little function for time written in the following way:
 `3'15"37`.
-
-#### listeners
-
-Everything related to the listeners happen here, so if you want to add a client listener, it's the directory. The `application` inside it is the application itself while there's some others listeners declared.
 
 #### mods
 

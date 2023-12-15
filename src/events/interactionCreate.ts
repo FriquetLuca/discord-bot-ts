@@ -1,5 +1,5 @@
 import { Events, type Client } from "discord.js"
-import { handleAutoComplete, handleSlashCommand, handleSubmitModal, handleButton, handleStringSelectMenu, handleMenuCommand } from "../handlers"
+import { handleAutoComplete, handleSlashCommand, handleSubmitModal, handleButton, handleStringSelectMenu, handleMenuCommand } from "@/libraries/discord/handlers"
 
 export const interactionCreate = (client: Client): void => {
   client.on(Events.InteractionCreate, async (interaction) => {

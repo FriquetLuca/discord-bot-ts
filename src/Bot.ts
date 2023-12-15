@@ -1,7 +1,8 @@
 import dotenv from "dotenv"
 dotenv.config()
 
-import { application } from "./listeners"
+import path from "path"
+export const currentDirectory = path.basename(__dirname)
 
 export const Args = process.argv.slice(2)
 
@@ -15,11 +16,13 @@ if(!Array.isArray(GuildIds)) {
   throw new Error("Something went wrong when parsing the guild ids.")
 }
 
-export const isDevelopment = Args.includes("dev")
+export const isProduction = currentDirectory === "src"
 
 const token = process.env.DISCORD_TOKEN as string
 if(!token) {
   throw new Error("There's no token for the bot to start.")
 }
 
-application(token)
+import { startClient } from "./startClient"
+
+startClient(token)

@@ -1,4 +1,4 @@
-import { Commands } from "@/libraries/discord"
+import { Commands } from "../"
 import type { AutocompleteInteraction, Client } from "discord.js"
 
 export const handleAutoComplete = async (client: Client, interaction: AutocompleteInteraction) => {

@@ -1,4 +1,4 @@
-import { AllCommands } from "@/libraries/discord"
+import { AllCommands } from "../"
 import type { ButtonInteraction, Client } from "discord.js"
 
 export const handleButton = async (client: Client, interaction: ButtonInteraction) => {

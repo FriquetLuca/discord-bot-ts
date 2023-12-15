@@ -51,7 +51,6 @@ The project structure is as follow :
     - messageCommands
     - startups
     - userCommands
-  - Bot.ts
 
 ### Prisma
 
@@ -64,7 +63,7 @@ In `/prisma`, you'll find the prisma schema and also the following commands impl
 
 In `/src`, everything related to the bot is present. You'll find the root of the bot as the `Bot.ts` file (that you won't ever need to change as far as I know) but you'll be able to find all the arguments you want to pass to the bot with the exposed `Args` variable.
 
-You also have access to your guild ids and client id from what was exposed to the `.env` file and finaly, there's a `isDevelopment` variable to use if you want to know if you're in `dev` mode or `prod` mode.
+You also have access to your guild ids and client id from what was exposed to the `.env` file and finaly, there's a `isProduction` variable to use if you want to know if you're in `dev` mode or `prod` mode.
 
 #### database
 
@@ -102,11 +101,6 @@ Lazy validators for discord
 ##### io
 
 This library is meant to be used when searching for files or directories in a recursive manner, it also handle modules.
-
-##### time
-
-The library here is to handle time. To be more precise, you'll be able to create schedulers with it. There's also a little function for time written in the following way:
-`3'15"37`.
 
 #### mods
 

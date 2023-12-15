@@ -6,13 +6,13 @@ import {
 } from "discord.js"
 import { type PrismaClient } from "@prisma/client"
 import { ChatCommandBuilder } from "./ChatCommandBuilder"
-import { GenericMenuCommandBuilder } from "./GenericMenuCommandBuilder"
+import { MenuCommandBuilder } from "./GenericMenuCommandBuilder"
 
 export type BaseHandler<T> = (client: Client, interaction: T) => Promise<void>
 export type InteractionHandler<T> = (ctx: { client: Client, interaction: T, prisma: PrismaClient }) => Promise<void>
 
 export const chatCommandBuilder = () => new ChatCommandBuilder()
 
-export const menuMessageCommandBuilder = () => new GenericMenuCommandBuilder<MessageContextMenuCommandInteraction>().setType(ApplicationCommandType.Message)
+export const menuMessageCommandBuilder = () => new MenuCommandBuilder<MessageContextMenuCommandInteraction>().setType(ApplicationCommandType.Message)
 
-export const menuUserCommandBuilder = () => new GenericMenuCommandBuilder<UserContextMenuCommandInteraction>().setType(ApplicationCommandType.User)
+export const menuUserCommandBuilder = () => new MenuCommandBuilder<UserContextMenuCommandInteraction>().setType(ApplicationCommandType.User)

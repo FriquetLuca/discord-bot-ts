@@ -1,6 +1,0 @@
-export * from "./generateMyHuntsText"
-export * from "./generateTopHuntText"
-export * from "./generateTopHuntersText"
-export * from "./generateTopKillCountText"
-export * from "./generateTopSeasonalHuntersText"
-export * from "./generateTopTeamHunts"

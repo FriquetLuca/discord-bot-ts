@@ -2,7 +2,10 @@
   "name": "discord-bot-ts",
   "version": "0.0.0",
   "description": "An example of discord bot",
+  "author": "FriquetLuca",
+  "license": "MIT",
   "main": "dist/Bot.js",
+  "homepage": "https://github.com/FriquetLuca/discord-bot-ts",
   "scripts": {
     "start": "node -r ./tsconfig-paths.js dist/Bot.js",
     "start:clean": "node -r ./tsconfig-paths.js dist/Bot.js clean",
@@ -12,11 +15,8 @@
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio",
-    "db:test": "ts-node -r tsconfig-paths/register src/db-tests/db.ts"
+    "db:studio": "prisma studio"
   },
-  "author": "FriquetLuca",
-  "license": "MIT",
   "dependencies": {
     "@prisma/client": "^5.7.0",
     "@types/node": "^20.10.4",

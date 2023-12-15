@@ -11,7 +11,7 @@ import { type Button, type Modal, type StringSelectMenu } from "../Command"
 import { prisma } from "@/database/prisma"
 import { type InteractionHandler } from "./"
 
-export class GenericMenuCommandBuilder<T extends (UserContextMenuCommandInteraction | MessageContextMenuCommandInteraction)> extends ContextMenuCommandBuilder {
+export class MenuCommandBuilder<T extends (UserContextMenuCommandInteraction | MessageContextMenuCommandInteraction)> extends ContextMenuCommandBuilder {
   private hasCooldown: boolean = false;
   private cooldown: number = 0;
   private modals: Modal[] = [];

@@ -16,7 +16,7 @@ if(!Array.isArray(GuildIds)) {
   throw new Error("Something went wrong when parsing the guild ids.")
 }
 
-export const isProduction = currentDirectory === "src"
+export const isProduction = currentDirectory !== "src"
 
 const token = process.env.DISCORD_TOKEN as string
 if(!token) {

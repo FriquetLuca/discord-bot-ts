@@ -10,6 +10,11 @@ type RecordObject<T extends Record<string|number|symbol, any>> = {
    */
   get: () => { [K in keyof T]: T[K] }
   /**
+   * Get all the keys from the record
+   * @returns All the keys from the record
+   */
+  getKeys: () => (keyof T)[]
+  /**
    * Find a field from a record, otherwise it return undefined
    * @param item The field to find
    * @returns The value of the field, undefined otherwise
@@ -101,10 +106,14 @@ type RecordObject<T extends Record<string|number|symbol, any>> = {
    * @returns The ObjectRecord with the field that has been changed into another type
    */
   intoOn: <U extends keyof T, V>(key: U, into: (value: T[U]) => V) => RecordObject<{ [K in (keyof T | U)]: K extends U ? V : T[K] }>
+  freeze: () => RecordObject<Readonly<T>>
+  isFrozen: () => boolean
+  seal: () => RecordObject<T>
+  freezeKeys: <U extends keyof T>(...items: U[]) => RecordObject<Omit<T, U> & Readonly<{ [K in U]: T[K]; }>>
 }
-// freeze(...fields)
-// unfreeze(...fields)
-// isFreezed(...fields)
+// inner merge
+// outer merge
+// are keys frozen?
 /**
  * Create a handler for a record
  * @param record The record to handle
@@ -113,7 +122,18 @@ type RecordObject<T extends Record<string|number|symbol, any>> = {
 export function fromRecord<T extends Record<string|number|symbol, any>>(record: T): RecordObject<T> {
   return {
     get: () => record as { [K in keyof T]: T[K] },
+    getKeys: () => Object.entries(record).map(([key, _]) => key) as (keyof T)[],
     find: <U extends LiteralUnion<keyof T, string|number|symbol>>(item: U) => record[item as unknown as keyof T],
+    freeze: () => fromRecord(Object.freeze(record)),
+    freezeKeys: <U extends keyof T>(...items: U[]) => {
+      const result = { ...record } as any
+      for(const item of items) {
+        result[item] = Object.freeze(result[item])
+      }
+      return fromRecord(result as Omit<T, U> & Readonly<{ [K in U]: T[K] }>)
+    },
+    isFrozen: () => Object.isFrozen(record),
+    seal: () => fromRecord(Object.seal(record)),
     omit: <U extends keyof T>(...items: U[]) => {
       const result = {} as any
       for(const item in record) {

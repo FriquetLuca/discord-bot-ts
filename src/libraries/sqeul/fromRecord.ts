@@ -3,7 +3,7 @@ type LiteralUnion<T extends U, U = string> = T | (U & {})
 /**
  * A record handler for a functional programming handling of a record
  */
-type RecordObject<T extends Record<string|number|symbol, any>> = {
+export type RecordObject<T extends Record<string|number|symbol, any>> = {
   /**
    * Get the current record
    * @returns The current record
@@ -33,17 +33,41 @@ type RecordObject<T extends Record<string|number|symbol, any>> = {
    */
   pick: <U extends keyof T>(...items: U[]) => RecordObject<Pick<T, U>>
   /**
-   * Check if the record has some fields with a specific value
-   * @param items The key / value that every field must have
+   * Check if the record has all fields with the specific values
+   * @param items The key / value of every fields
    * @returns True if all fields have the specified value
    */
-  has: <U extends keyof T>(...items: {key: U, value: T[keyof T]}[]) => boolean
+  every: <U extends keyof T>(...items: {key: U, value: T[keyof T]}[]) => boolean
   /**
-   * Check if the record has not some fields with a specific value
-   * @param items The key / value that every field mustn't have
-   * @returns True if there's no field with the specified values
+   * Check if the record has some fields with a specific value
+   * @param items The key / value of every fields
+   * @returns True if at least one field have the specified value
    */
-  hasNot: <U extends keyof T>(...items: {key: U, value: T[keyof T]}[]) => boolean
+  some: <U extends keyof T>(...items: {key: U, value: T[keyof T]}[]) => boolean
+  /**
+   * Check if the record has not all fields without the specified values
+   * @param items The key / value of every fields
+   * @returns True if the record has not all fields without the specified values
+   */
+  none: <U extends keyof T>(...items: {key: U, value: T[keyof T]}[]) => boolean
+  /**
+   * Check if the record has not least one field without the specified values
+   * @param items The key / value of every fields
+   * @returns True if the record has not least one field without the specified values
+   */
+  maybeNot: <U extends keyof T>(...items: {key: U, value: T[keyof T]}[]) => boolean
+  /**
+   * Check if the records has an even number of fields true
+   * @param items The key / value of every fields
+   * @returns True if the records has an even number of fields true
+   */
+  hasEven: <U extends keyof T>(...items: {key: U, value: T[keyof T]}[]) => boolean
+  /**
+   * Check if the records has an odd number of fields true
+   * @param items The key / value of every fields
+   * @returns True if the records has an odd number of fields true
+   */
+  hasOdd: <U extends keyof T>(...items: {key: U, value: T[keyof T]}[]) => boolean
   /**
    * Map a record's fields into an array
    * @param mapper The mapper for every key / value of the current record
@@ -152,8 +176,12 @@ export function fromRecord<T extends Record<string|number|symbol, any>>(record: 
       }
       return fromRecord(result as Pick<T, U>)
     },
-    has: <U extends keyof T>(...items: {key: U, value: T[keyof T]}[]) => items.reduce((prev, curr) => prev && (record[curr.key] === curr.value), true),
-    hasNot: <U extends keyof T>(...items: {key: U, value: T[keyof T]}[]) => items.reduce((prev, curr) => prev && (record[curr.key] !== curr.value), true),
+    every: <U extends keyof T>(...items: {key: U, value: T[keyof T]}[]) => items.reduce((prev, curr) => prev && (record[curr.key] === curr.value), true),
+    some: <U extends keyof T>(...items: {key: U, value: T[keyof T]}[]) => items.reduce((prev, curr) => prev || (record[curr.key] === curr.value), false),
+    hasEven: <U extends keyof T>(...items: {key: U, value: T[keyof T]}[]) => items.reduce((prev, curr) => prev !== (record[curr.key] === curr.value), true),
+    hasOdd: <U extends keyof T>(...items: {key: U, value: T[keyof T]}[]) => items.reduce((prev, curr) => prev !== (record[curr.key] === curr.value), false),
+    none: <U extends keyof T>(...items: {key: U, value: T[keyof T]}[]) => items.reduce((prev, curr) => prev && (record[curr.key] !== curr.value), true),
+    maybeNot: <U extends keyof T>(...items: {key: U, value: T[keyof T]}[]) => items.reduce((prev, curr) => prev || (record[curr.key] !== curr.value), false),
     map: <V>(mapper: (key: keyof T, value: T[keyof T], record: T) => V) => {
       const result: V[] = []
       for(const key in record) {

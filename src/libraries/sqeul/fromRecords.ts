@@ -244,8 +244,19 @@ export type RecordsObject<T extends RecordType> = {
    * @returns — An array containing the elements that were deleted.
    */
   removeAt: (start: number, deleteCount?: number | undefined) => RecordsObject<T>
+  query: <
+      SelectKeys extends keyof T,
+      SelectAliases extends string,
+      Select extends { key: SelectKeys; as?: SelectAliases },
+      Where extends (record: TransformKeys<T, Select>, index: number, array: T[]) => boolean,
+    >(query: {
+      select: Select[],
+      where: Where,
+      orderBy?: ({ key: SelectKeys, desc?: boolean })[],
+      limit?: number,
+      offset?: number,
+    }) => RecordsObject<{ [K in keyof TransformKeys<T, Select>]: TransformKeys<T, Select>[K]; }>
 }
-// query
 // update - where
 // delete - where
 // where - like
@@ -303,7 +314,7 @@ export function fromRecords<T extends RecordType>(records: T[]): RecordsObject<T
     forEach: (callbackfn: (value: T, index: number, array: T[]) => void, thisArg?: any) => records.forEach(callbackfn, thisArg),
     offset: (offset) => fromRecords(records.slice(offset)),
     limit: (limit) => fromRecords(records.slice(0, limit)),
-    slice: (offset, limit) => fromRecords(records.slice(offset, limit)),
+    slice: (offset, limit) => fromRecords(records.slice(offset, offset + limit)),
     map: (callbackfn: (value: T, index: number, array: T[]) => T, thisArg?: any) => fromRecords(records.map(callbackfn, thisArg)),
     union: <U extends RecordType>(unionRecords: U[]) => fromRecords({ ...records, ...unionRecords }),
     pick: <U extends keyof T>(...selection: U[]) => fromRecords(records.map((record) => fromRecord(record).pick(...selection).get())),
@@ -362,5 +373,47 @@ export function fromRecords<T extends RecordType>(records: T[]): RecordsObject<T
     takeFirst: () => records.shift(),
     takeLast: () => records.pop(),
     removeAt: (start: number, deleteCount?: number | undefined) => fromRecords(records.splice(start, deleteCount)),
+    query: <
+      SelectKeys extends keyof T,
+      SelectAliases extends string,
+      Select extends { key: SelectKeys; as?: SelectAliases },
+      Where extends (record: TransformKeys<T, Select>, index: number, array: T[]) => boolean,
+    >(query: {
+      select: Select[],
+      where?: Where,
+      orderBy?: ({ key: SelectKeys, desc?: boolean })[],
+      limit?: number,
+      offset?: number,
+    }) => {
+      let result: any[] = []
+      for(let i = 0; i < records.length; i++) {
+        const currentRecord = fromRecord(records[i])
+          .select(...query.select)
+          .get()
+        if(query.where) {
+          if(query.where(currentRecord as TransformKeys<T, Select>, i, records)) {
+            result.push(currentRecord)
+          }
+        } else {
+          result.push(currentRecord)
+        }
+      }
+      if(query.orderBy) {
+        result = result.sort((a, b) => {
+          for (const key in query.orderBy) {
+            const cKey = query.orderBy[key as any]
+            const aValue = a[cKey.key]
+            const bValue = b[cKey.key]
+            if (aValue < bValue) {
+              return cKey.desc === true ? 1 : -1
+            } else if (aValue > bValue) {
+              return cKey.desc === true ? -1 : 1
+            }
+          }
+          return 0
+        })
+      }
+      return fromRecords(result.slice(query.offset, query.limit ? (query.offset ?? 0) + query.limit : undefined))
+    },
   }
 }

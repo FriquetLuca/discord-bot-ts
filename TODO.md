@@ -15,3 +15,5 @@ Bully / Karma design:
 Example:
 Karma(X) = SUM(MEMBER => 1/(|MEMBERS| - 1) * MIN(-50, MAX(SUM(VOTES => MEMBER NOT X), 50))) * (1 / 100) + (1 / 2)
 So, Karma(X) is in the range [0, 1].
+
+isolate libraries in the long term

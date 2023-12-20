@@ -1,5 +1,9 @@
-type LiteralUnion<T extends U, U = string> = T | (U & {})
+import type { DeepMerge, DeepMutable, DeepReadonly, Mutable } from "@/libraries/types"
+import { deepImmutable, deepMerge, deepMutable } from "../objects"
 
+type NewKeyName<T extends Record<string | number | symbol, any>, U extends { key: keyof T, as?: string }> = U["as"] extends string ? U["as"] : U["key"]
+export type TransformKeys<T extends Record<string | number | symbol, any>, U extends { key: keyof T, as?: string }> = { [K in keyof T as NewKeyName<T, U & { key: K, as?: string }>]: T[K] }
+type LiteralUnion<T extends U, U = string> = T | (U & {})
 /**
  * A record handler for a functional programming handling of a record
  */
@@ -112,6 +116,18 @@ export type RecordObject<T extends Record<string|number|symbol, any>> = {
    */
   rightMerge: <U extends Record<string|number|symbol, any>>(item: U) => RecordObject<{ [K in (keyof T | keyof U)]: K extends keyof U ? U[K] : T[K] }>
   /**
+   * Intersect the current record with another record, picking only shared fields between records but keeping only the current record values.
+   * @param item The record to intersect with
+   * @returns A record object with only shared fields between records and containing the current record values.
+   */
+  intersect: <U extends Record<string | number | symbol, any>>(item: U) => RecordObject<Pick<T, keyof T & keyof U>>
+  /**
+   * Get all different fields between two records inside a new record.
+   * @param item The other records to get fields from
+   * @returns The difference between fields of two records inside a new record
+   */
+  difference: <U extends Record<string | number | symbol, any>>(item: U) => RecordObject<Omit<T, keyof T & keyof U> & Omit<U, keyof T & keyof U>>
+  /**
    * Apply a function on every fields of a record
    * @param apply The function to apply to all fields
    * @returns The ObjectRecord of the record with the apply applied on all the fields
@@ -130,14 +146,55 @@ export type RecordObject<T extends Record<string|number|symbol, any>> = {
    * @returns The ObjectRecord with the field that has been changed into another type
    */
   intoOn: <U extends keyof T, V>(key: U, into: (value: T[U]) => V) => RecordObject<{ [K in (keyof T | U)]: K extends U ? V : T[K] }>
+  /**
+   * Freeze the entire record, making it readonly.
+   * @returns The readonly record in a RecordObject
+   */
   freeze: () => RecordObject<Readonly<T>>
+  /**
+   * Check if the record is readonly and return true if it is.
+   * @returns True if the record is frozen
+   */
   isFrozen: () => boolean
+  /**
+   * Seal an object, making it impossible to add or remove fields from the record.
+   * @returns The sealed record in a RecordObject
+   */
   seal: () => RecordObject<T>
+  /**
+   * Set the selected fields as readonly.
+   * @param items The keys of the fields to freeze
+   * @returns The record with the selected fields marked as readonly
+   */
   freezeKeys: <U extends keyof T>(...items: U[]) => RecordObject<Omit<T, U> & Readonly<{ [K in U]: T[K]; }>>
+  /**
+   * Return true if all the selected fields are readonly.
+   * @param keys The keys of the fields to check if they're marked as readonly
+   * @returns True if all the selected fields are readonly
+   */
+  areKeysFrozen: (...keys: (keyof T)[]) => boolean
+  /**
+   * Unfreeze the object, making it mutable.
+   */
+  unfreeze: () => RecordObject<Mutable<T>>
+  /**
+   * Freeze completely the object and it's nested values.
+   */
+  deepFreeze: () => RecordObject<DeepReadonly<T>>
+  /**
+   * Unfreeze completely the object and it's nested values.
+   */
+  deepUnfreeze: () => RecordObject<DeepMutable<T>>
+  /**
+   * Merge two records into a single one, merging also the childs of the records.
+   * @param item The record to deep merge with
+   */
+  deepMerge: <U extends Record<string|number|symbol, any>>(item: U) => RecordObject<DeepMerge<[T, U]>>
+  select: <U extends keyof T, V extends string, W extends {
+    key: U;
+    as?: V | undefined;
+  }>(...items: W[]) => RecordObject<TransformKeys<T, W>>
 }
-// inner merge
-// outer merge
-// are keys frozen?
 /**
  * Create a handler for a record
  * @param record The record to handle
@@ -146,9 +203,13 @@ export type RecordObject<T extends Record<string|number|symbol, any>> = {
 export function fromRecord<T extends Record<string|number|symbol, any>>(record: T): RecordObject<T> {
   return {
     get: () => record as { [K in keyof T]: T[K] },
+    deepMerge: <U extends Record<string|number|symbol, any>>(item: U) => fromRecord(deepMerge(record, item)),
     getKeys: () => Object.entries(record).map(([key, _]) => key) as (keyof T)[],
     find: <U extends LiteralUnion<keyof T, string|number|symbol>>(item: U) => record[item as unknown as keyof T],
     freeze: () => fromRecord(Object.freeze(record)),
+    deepFreeze: () => fromRecord(deepImmutable(record)),
+    unfreeze: () => fromRecord({ ...record }),
+    deepUnfreeze: () => fromRecord(deepMutable(record)),
     freezeKeys: <U extends keyof T>(...items: U[]) => {
       const result = { ...record } as any
       for(const item of items) {
@@ -175,6 +236,16 @@ export function fromRecord<T extends Record<string|number|symbol, any>>(record: 
         }
       }
       return fromRecord(result as Pick<T, U>)
+    },
+    select: <U extends keyof T, V extends string, W extends { key: U, as?: V }>(...items: W[]) => {
+      const result = {} as any
+      const recordKeys = fromRecord(record).getKeys()
+      for(const item of items) {
+        if(recordKeys.includes(item.key)) {
+          result[item.as ?? item.key] = record[item.key]
+        }
+      }
+      return fromRecord(result) as RecordObject<TransformKeys<T, W>>
     },
     every: <U extends keyof T>(...items: {key: U, value: T[keyof T]}[]) => items.reduce((prev, curr) => prev && (record[curr.key] === curr.value), true),
     some: <U extends keyof T>(...items: {key: U, value: T[keyof T]}[]) => items.reduce((prev, curr) => prev || (record[curr.key] === curr.value), false),
@@ -223,6 +294,32 @@ export function fromRecord<T extends Record<string|number|symbol, any>>(record: 
       return fromRecord(result)
     },
     leftMerge: <U extends Record<string|number|symbol, any>>(item: U) => fromRecord({ ...item, ...record }),
-    rightMerge: <U extends Record<string|number|symbol, any>>(item: U) => fromRecord({ ...record, ...item })
+    rightMerge: <U extends Record<string|number|symbol, any>>(item: U) => fromRecord({ ...record, ...item }),
+    intersect: <U extends Record<string|number|symbol, any>>(item: U) => {
+      const set = new Set<keyof T & keyof U>()
+      const firstRecord = fromRecord(record)
+      const secondRecord = fromRecord(item)
+      firstRecord.getKeys().forEach(key => {
+        if(secondRecord.getKeys().includes(key)) {
+          set.add(key)
+        }
+      })
+      return fromRecord(record).pick(...Array.from(set.keys()))
+    },
+    difference: <U extends Record<string|number|symbol, any>>(item: U) => {
+      const recordKeys = Object.keys(record)
+      const itemKeys = Object.keys(item)
+      const uniqueKeys = new Set([ ...recordKeys, ...itemKeys ])
+      const difference = {} as any
+      for (const key of uniqueKeys) {
+        if(item[key as any] !== undefined && !recordKeys.includes(key as string)) {
+          difference[key] = item[key] as Omit<T, keyof T & keyof U> & Omit<U, keyof T & keyof U>
+        } else if(record[key as any] !== undefined && !itemKeys.includes(key as string)) {
+          difference[key] = record[key] as Omit<T, keyof T & keyof U> & Omit<U, keyof T & keyof U>
+        }
+      }
+      return fromRecord(difference)
+    },
+    areKeysFrozen: (...keys: (keyof T)[]) => keys.reduce((prev, curr) => prev && Object.isFrozen(record[curr]), true),
   }
 }

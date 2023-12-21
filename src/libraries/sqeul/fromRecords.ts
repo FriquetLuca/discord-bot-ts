@@ -246,13 +246,14 @@ export type RecordsObject<T extends RecordType> = {
   removeAt: (start: number, deleteCount?: number | undefined) => RecordsObject<T>
   query: <
       SelectKeys extends keyof T,
+      OrderByKeys extends SelectKeys,
       SelectAliases extends string,
       Select extends { key: SelectKeys; as?: SelectAliases },
       Where extends (record: TransformKeys<T, Select>, index: number, array: T[]) => boolean,
     >(query: {
       select: Select[],
       where: Where,
-      orderBy?: ({ key: SelectKeys, desc?: boolean })[],
+      orderBy?: ({ key: OrderByKeys, desc?: boolean })[],
       limit?: number,
       offset?: number,
     }) => RecordsObject<{ [K in keyof TransformKeys<T, Select>]: TransformKeys<T, Select>[K]; }>
@@ -375,13 +376,14 @@ export function fromRecords<T extends RecordType>(records: T[]): RecordsObject<T
     removeAt: (start: number, deleteCount?: number | undefined) => fromRecords(records.splice(start, deleteCount)),
     query: <
       SelectKeys extends keyof T,
+      OrderByKeys extends SelectKeys,
       SelectAliases extends string,
       Select extends { key: SelectKeys; as?: SelectAliases },
       Where extends (record: TransformKeys<T, Select>, index: number, array: T[]) => boolean,
     >(query: {
       select: Select[],
       where?: Where,
-      orderBy?: ({ key: SelectKeys, desc?: boolean })[],
+      orderBy?: ({ key: OrderByKeys, desc?: boolean })[],
       limit?: number,
       offset?: number,
     }) => {

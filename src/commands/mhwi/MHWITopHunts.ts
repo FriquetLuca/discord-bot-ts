@@ -54,7 +54,7 @@ export const MHWIMyHunt = chatCommandBuilder()
       }
     })
     
-    await interaction.reply({
+    await interaction.followUp({
       content: generateTopHuntText(top_hunt_list, {
           monster: current_monster_name,
           strength: current_monster_strength

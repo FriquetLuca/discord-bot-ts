@@ -81,7 +81,7 @@ export function sundaySchedule(client: Client) {
       })
 
       dClient.sendOnNamedChannels(client, {
-        channelName: "mh-kills",
+        channelName: "mhwi-leaderboard",
         message: generateTopSeasonalHuntersText(extermination_list)
       })
     }

@@ -97,11 +97,16 @@ export class ChatCommandBuilder extends SlashCommandBuilder {
         await interaction.respond([])
         return
       }
-      autocomplete && await autocomplete({
-        client,
-        interaction,
-        prisma
-      })
+      try {
+        autocomplete && await autocomplete({
+          client,
+          interaction,
+          prisma
+        })
+      } catch(e) {
+        console.error(e)
+        await interaction.respond([])
+      }
     }
     return this
   }
@@ -130,7 +135,11 @@ export class ChatCommandBuilder extends SlashCommandBuilder {
           interaction,
           prisma
         }
-        this.run && this.run(context)
+        try {
+          this.run && this.run(context)
+        } catch(e) {
+          console.error(e)
+        }
       },
     }
   }

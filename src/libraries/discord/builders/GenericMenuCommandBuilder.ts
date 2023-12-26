@@ -109,7 +109,11 @@ export class MenuCommandBuilder<T extends (UserContextMenuCommandInteraction | M
           interaction,
           prisma
         }
-        this.run && this.run(context)
+        try {
+          this.run && this.run(context)
+        } catch(e) {
+          console.error(e)
+        }
       },
     }
   }

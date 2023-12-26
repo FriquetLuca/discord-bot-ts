@@ -139,7 +139,11 @@ export function scheduler<T extends FrequencyScheduling>(
       }, retryDBConnect)
       return
     }
-    fn({ prisma })
+    try {
+      fn({ prisma })
+    } catch(e) {
+      console.error(e)
+    }
     scheduler(client, schedule, fn)
   }, timer + 500)
 }

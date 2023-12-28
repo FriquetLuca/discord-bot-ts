@@ -7,16 +7,6 @@ export type AnyFunction = (arg: any) => any
  */
 export type Unpack<T> = T extends (infer A)[] ? A : T
 /**
- * A generic Result type
- */
-export type Result<T, U extends Error = Error> = {
-  success: true,
-  value: T
-} | {
-  success: false,
-  error: U
-}
-/**
  * Represent the constructor type
  */
 export type Constructor<T> = new (...args: any[]) => T
@@ -40,3 +30,11 @@ export type DeepMerge<T extends object[], Rest = {}> = T extends [infer L, ...in
         [p in keyof L]: p extends keyof Rest ? L[p] | Rest[p] : L[p] 
       }>
     : Omit<Rest, never>
+/**
+ * Find the first element in a tuple
+ */
+export type FirstInTuple<T extends any[]> = T extends [any, ...infer R]
+    ? T extends [...infer F, ...R]
+      ? F
+      : never
+    : never

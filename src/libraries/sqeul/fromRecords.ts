@@ -157,14 +157,14 @@ export type RecordsObject<T extends RecordType> = {
    * @param initialValue The initial value to assign on the reduce
    * @returns The value all records has been turned into
    */
-  reduce: <U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => T, initialValue: U) => U
+  reduce: (callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T, initialValue: T) => T
   /**
    * Reduce records into a single value starting at the back of the array.
    * @param callbackfn The callback that's going to be applied on every records to reduce the value into a single value
    * @param initialValue The initial value to assign on the reduce
    * @returns The value all records has been turned into
    */
-  reduceRight: <U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => T, initialValue: U) => U
+  reduceRight: (callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T, initialValue: T) => T
   /**
    * Determines whether the specified callback function returns true for any element of the records.
    * @param predicate A function that accepts up to three arguments. The some method calls the predicate function for each record in the records until the predicate returns a value which is coercible to the Boolean value true, or until the end of the records.
@@ -244,6 +244,13 @@ export type RecordsObject<T extends RecordType> = {
    * @returns — An array containing the elements that were deleted.
    */
   removeAt: (start: number, deleteCount?: number | undefined) => RecordsObject<T>
+  /**
+   * Reduce records into a single value, in contrast to reduce, this actually doesn't force the initial value to be of the same type.
+   * @param callbackfn The callback that's going to be applied on every records to reduce the value into a single value
+   * @param initialValue The initial value to assign on the reduce
+   * @returns The value all records has been turned into
+   */
+  aggregate: <U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => U, initialValue: U) => U,
   query: <
       SelectKeys extends keyof T,
       OrderByKeys extends SelectKeys,
@@ -346,8 +353,8 @@ export function fromRecords<T extends RecordType>(records: T[]): RecordsObject<T
       })
       return result
     },
-    reduce: <U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => T, initialValue?: U) => initialValue ? records.reduce(callbackfn, initialValue) : records.reduce(callbackfn),
-    reduceRight: <U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => T, initialValue?: U) => initialValue ? records.reduceRight(callbackfn, initialValue) : records.reduceRight(callbackfn),
+    reduce: (callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T, initialValue?: T) => initialValue ? records.reduce(callbackfn, initialValue) : records.reduce(callbackfn),
+    reduceRight: (callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T, initialValue?: T) => initialValue ? records.reduceRight(callbackfn, initialValue) : records.reduceRight(callbackfn),
     some: (predicate: (value: T, index: number, array: T[]) => unknown, thisArg?: any) => records.some(predicate, thisArg),
     every: (predicate: (value: T, index: number, array: T[]) => boolean, thisArg?: any) => records.every(predicate, thisArg),
     fill: (value: T, start?: number | undefined, end?: number | undefined) => fromRecords(records.fill(value, start, end)),
@@ -374,6 +381,13 @@ export function fromRecords<T extends RecordType>(records: T[]): RecordsObject<T
     takeFirst: () => records.shift(),
     takeLast: () => records.pop(),
     removeAt: (start: number, deleteCount?: number | undefined) => fromRecords(records.splice(start, deleteCount)),
+    aggregate: <U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => U, initialValue: U) => {
+      let r = initialValue
+      for(let i = 0; i < records.length; i++) {
+        r = callbackfn(r, records[i], i, records)
+      }
+      return r
+    },
     query: <
       SelectKeys extends keyof T,
       OrderByKeys extends SelectKeys,

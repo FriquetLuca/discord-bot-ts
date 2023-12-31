@@ -251,6 +251,10 @@ export type RecordsObject<T extends RecordType> = {
    * @returns The value all records has been turned into
    */
   aggregate: <U>(callbackfn: (previousValue: U, currentValue: T, currentIndex: number, array: T[]) => U, initialValue: U) => U,
+  /**
+   * Execute a query on the records.
+   * @param query The query to execute on the records
+   */
   query: <
       SelectKeys extends keyof T,
       OrderByKeys extends SelectKeys,
@@ -265,16 +269,6 @@ export type RecordsObject<T extends RecordType> = {
       offset?: number,
     }) => RecordsObject<{ [K in keyof TransformKeys<T, Select>]: TransformKeys<T, Select>[K]; }>
 }
-// update - where
-// delete - where
-// where - like
-// where - and
-// where - or
-// where - in
-// where - between
-// where - any
-// where - all
-// where - exist
 /**
  * Create a handler for a list of records
  * @param records An array representing a list of records

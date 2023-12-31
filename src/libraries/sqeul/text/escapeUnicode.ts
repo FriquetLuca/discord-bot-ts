@@ -1,18 +1,14 @@
 /**
  * Display the string as an escaped unicode text content, helping out to checkout for new lines or other weird characters that can't be visible on the console easily.
- * @param text The string to encode in unicode.
- * @returns The escaped string.
+ * @param text The string to escape with unicode.
  */
 export function escapeUnicode(text: string) {
-  let result = '';
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    const code = char.charCodeAt(0);
-    if (code < 32 || code > 126) {
-      result += `\\u${code.toString(16).padStart(4, '0')}`;
-    } else {
-      result += char;
-    }
-  }
-  return result;
+  return text.normalize("NFC")
+}
+/**
+ * Display the string as an encoded unicode text content.
+ * @param text The string to encode in unicode.
+ */
+export function encodeUnicode(text: string) {
+  return text.normalize("NFD")
 }

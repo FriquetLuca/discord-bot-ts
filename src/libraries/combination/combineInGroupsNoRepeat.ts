@@ -17,14 +17,13 @@ export function combineInGroupsNoRepeat<T>(objects: T[], k: number): T[][]
     {
         const content: T[] = [];
         content.push(objects[i]);
-        let generated = combinationArrayDepthNRNO(objects, // Pass our objects
+        Array.prototype.push.apply(result, combinationArrayDepthNRNO(objects, // Pass our objects
             i + 1, // Go to the next index to get the start of the next element
             offset + 1, // Subgroup gain a start offset of 1
             k - 1, // Align k for depth check since array start at 0
             0, // No depth, it's the 1st subgroup
             content // Pass the container of objets itself for referencing
-        );
-        Array.prototype.push.apply(result, generated); // Combine result
+        )); // Combine result
     }
     return result; // Return the result
 }

@@ -157,6 +157,7 @@ export const toPercent = (n: number) => Math.floor(n * 10000) / 100
 export const findAdvancement = async (currentData: {
   prisma: PrismaClient
   user_id: string
+  server_id: string
 }) => {
   const allKills = await searchAllMonsterKills(currentData)
   const progress_SSS = rankProgression(allKills, monsterRank.SSS)
@@ -173,17 +174,17 @@ export const findAdvancement = async (currentData: {
   const sumCurrentRank = progress_SSS.currently * 256 + progress_SS.currently * 128 + progress_S.currently * 64 + progress_A.currently * 32 + progress_B.currently * 16 + progress_C.currently * 8 + progress_D.currently * 4 + progress_E.currently * 2 + progress_F.currently
   return `${bold("Votre progression")}
 
-${bold("Votre rang de chasseur")} : ${bold(getHunterRank(sumCurrentRank))}
+${bold("Votre rang de chasseur")} : ${bold(getHunterRank(sumCurrentRank, currentData.server_id))}
 
-${bold(`Rang ${getRank("F")}`)} : ${toPercent(progress_F.percent)}% (${progress_F.currently} / ${progress_F.total})
-${bold(`Rang ${getRank("E")}`)} : ${toPercent(progress_E.percent)}% (${progress_E.currently} / ${progress_E.total})
-${bold(`Rang ${getRank("D")}`)} : ${toPercent(progress_D.percent)}% (${progress_D.currently} / ${progress_D.total})
-${bold(`Rang ${getRank("C")}`)} : ${toPercent(progress_C.percent)}% (${progress_C.currently} / ${progress_C.total})
-${bold(`Rang ${getRank("B")}`)} : ${toPercent(progress_B.percent)}% (${progress_B.currently} / ${progress_B.total})
-${bold(`Rang ${getRank("A")}`)} : ${toPercent(progress_A.percent)}% (${progress_A.currently} / ${progress_A.total})
-${bold(`Rang ${getRank("S")}`)} : ${toPercent(progress_S.percent)}% (${progress_S.currently} / ${progress_S.total})
-${bold(`Rang ${getRank("SS")}`)} : ${toPercent(progress_SS.percent)}% (${progress_SS.currently} / ${progress_SS.total})
-${bold(`Rang ${getRank("SSS")}`)} : ${toPercent(progress_SSS.percent)}% (${progress_SSS.currently} / ${progress_SSS.total})
+${bold(`Rang ${getRank("F", currentData.server_id)}`)} : ${toPercent(progress_F.percent)}% (${progress_F.currently} / ${progress_F.total})
+${bold(`Rang ${getRank("E", currentData.server_id)}`)} : ${toPercent(progress_E.percent)}% (${progress_E.currently} / ${progress_E.total})
+${bold(`Rang ${getRank("D", currentData.server_id)}`)} : ${toPercent(progress_D.percent)}% (${progress_D.currently} / ${progress_D.total})
+${bold(`Rang ${getRank("C", currentData.server_id)}`)} : ${toPercent(progress_C.percent)}% (${progress_C.currently} / ${progress_C.total})
+${bold(`Rang ${getRank("B", currentData.server_id)}`)} : ${toPercent(progress_B.percent)}% (${progress_B.currently} / ${progress_B.total})
+${bold(`Rang ${getRank("A", currentData.server_id)}`)} : ${toPercent(progress_A.percent)}% (${progress_A.currently} / ${progress_A.total})
+${bold(`Rang ${getRank("S", currentData.server_id)}`)} : ${toPercent(progress_S.percent)}% (${progress_S.currently} / ${progress_S.total})
+${bold(`Rang ${getRank("SS", currentData.server_id)}`)} : ${toPercent(progress_SS.percent)}% (${progress_SS.currently} / ${progress_SS.total})
+${bold(`Rang ${getRank("SSS", currentData.server_id)}`)} : ${toPercent(progress_SSS.percent)}% (${progress_SSS.currently} / ${progress_SSS.total})
 
 ${italic("Total")} : ${toPercent(sumCurrent / sumTotal)}% (${sumCurrent} / ${sumTotal})
 `

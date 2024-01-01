@@ -14,7 +14,7 @@ export const MHWIMyRankProgress = chatCommandBuilder()
     option.setName("rank")
       .setDescription("Le rang pour lequel on désire connaître la progression")
       .addChoices(
-        ...(allRanks.map(v => ({ "name": v, "value": v })))
+        ...(allRanks.map(v => ({ "name": getRank(v as any, ""), "value": v })))
       )
       .setRequired(true)
   )
@@ -33,7 +33,7 @@ export const MHWIMyRankProgress = chatCommandBuilder()
     }, data.rank)
     
     await interaction.followUp({
-      content: `${bold("Votre progression")} - Rang ${bold(getRank(data.rank))} (${obtainedMon.length} / ${obtainedMon.length + missingMon.length}) en ${bold(getTimestamp(obtainedMon.reduce((p, c) => c.kill_time + p, BigInt(0))))}
+      content: `${bold("Votre progression")} - Rang ${bold(getRank(data.rank, interaction.guildId ?? ""))} (${obtainedMon.length} / ${obtainedMon.length + missingMon.length}) en ${bold(getTimestamp(obtainedMon.reduce((p, c) => c.kill_time + p, BigInt(0))))}
 
 ${bold("Restant")} :
 ${missingMon.length === 0 ? `${bold("Aucun")}\n` :  missingMon.map(v => `1. ${getFrenchMHWIMonsterNames(v.monster)} (${getFrenchMHWIMonsterStrength(v.strength)})\n`).join("")}

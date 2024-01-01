@@ -35,17 +35,17 @@ export const MHWIUserProgress = chatCommandBuilder()
 
     const progress = `${bold(`Progression de ${userMention(data.user)}`)}
 
-${bold(`Rang de chasseur de ${userMention(data.user)}`)} : ${bold(getHunterRank(sumCurrentRank))}
+${bold(`Rang de chasseur de ${userMention(data.user)}`)} : ${bold(getHunterRank(sumCurrentRank, interaction.guildId ?? ""))}
 
-${bold(`Rang ${getRank("F")}`)} : ${toPercent(progress_F.percent)}% (${progress_F.currently} / ${progress_F.total})
-${bold(`Rang ${getRank("E")}`)} : ${toPercent(progress_E.percent)}% (${progress_E.currently} / ${progress_E.total})
-${bold(`Rang ${getRank("D")}`)} : ${toPercent(progress_D.percent)}% (${progress_D.currently} / ${progress_D.total})
-${bold(`Rang ${getRank("C")}`)} : ${toPercent(progress_C.percent)}% (${progress_C.currently} / ${progress_C.total})
-${bold(`Rang ${getRank("B")}`)} : ${toPercent(progress_B.percent)}% (${progress_B.currently} / ${progress_B.total})
-${bold(`Rang ${getRank("A")}`)} : ${toPercent(progress_A.percent)}% (${progress_A.currently} / ${progress_A.total})
-${bold(`Rang ${getRank("S")}`)} : ${toPercent(progress_S.percent)}% (${progress_S.currently} / ${progress_S.total})
-${bold(`Rang ${getRank("SS")}`)} : ${toPercent(progress_SS.percent)}% (${progress_SS.currently} / ${progress_SS.total})
-${bold(`Rang ${getRank("SSS")}`)} : ${toPercent(progress_SSS.percent)}% (${progress_SSS.currently} / ${progress_SSS.total})
+${bold(`Rang ${getRank("F", interaction.guildId ?? "")}`)} : ${toPercent(progress_F.percent)}% (${progress_F.currently} / ${progress_F.total})
+${bold(`Rang ${getRank("E", interaction.guildId ?? "")}`)} : ${toPercent(progress_E.percent)}% (${progress_E.currently} / ${progress_E.total})
+${bold(`Rang ${getRank("D", interaction.guildId ?? "")}`)} : ${toPercent(progress_D.percent)}% (${progress_D.currently} / ${progress_D.total})
+${bold(`Rang ${getRank("C", interaction.guildId ?? "")}`)} : ${toPercent(progress_C.percent)}% (${progress_C.currently} / ${progress_C.total})
+${bold(`Rang ${getRank("B", interaction.guildId ?? "")}`)} : ${toPercent(progress_B.percent)}% (${progress_B.currently} / ${progress_B.total})
+${bold(`Rang ${getRank("A", interaction.guildId ?? "")}`)} : ${toPercent(progress_A.percent)}% (${progress_A.currently} / ${progress_A.total})
+${bold(`Rang ${getRank("S", interaction.guildId ?? "")}`)} : ${toPercent(progress_S.percent)}% (${progress_S.currently} / ${progress_S.total})
+${bold(`Rang ${getRank("SS", interaction.guildId ?? "")}`)} : ${toPercent(progress_SS.percent)}% (${progress_SS.currently} / ${progress_SS.total})
+${bold(`Rang ${getRank("SSS", interaction.guildId ?? "")}`)} : ${toPercent(progress_SSS.percent)}% (${progress_SSS.currently} / ${progress_SSS.total})
 
 ${italic("Total")} : ${toPercent(sumCurrent / sumTotal)}% (${sumCurrent} / ${sumTotal})
 `

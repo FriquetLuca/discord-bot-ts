@@ -1,3 +1,4 @@
+import { GuildIds } from "@/Bot";
 import { loadModules } from "@/libraries/io"
 import type { MHWIMonsterSpecies, MHWIMonsterStrength } from "@prisma/client"
 
@@ -16,7 +17,7 @@ const loadedCustomRank = loadModules<{
   F: string;
 }>("custom/rankSettings")
 
-const customRank = loadedCustomRank.length === 0 ? {
+const baseRank = {
   G: "G",
   SSS: "SSS",
   SS: "SS",
@@ -27,9 +28,10 @@ const customRank = loadedCustomRank.length === 0 ? {
   D: "D",
   E: "E",
   F: "F",
-} : loadedCustomRank[0]
+};
+const customRank = loadedCustomRank.length === 0 ? [ baseRank ] : [ baseRank, loadedCustomRank[0] ]
 
-export const getRank = (rank: keyof typeof customRank) => customRank[rank]
+export const getRank = (rank: keyof typeof baseRank, serverId: string) => GuildIds.includes(serverId) ? customRank[1][rank] ?? customRank[0][rank] : customRank[0][rank]
 
 export const monsterRank = {
   G: [],
@@ -543,25 +545,25 @@ const cRank = monsterRank.D.length * 4 + monsterRank.E.length * 2 + monsterRank.
 const dRank = monsterRank.E.length * 2 + monsterRank.F.length
 const eRank = monsterRank.F.length
 
-export const getHunterRank = (x: number) => {
+export const getHunterRank = (x: number, serverId: string) => {
   if(x === gRank) {
-    return customRank.G // G
+    return getRank("G", serverId) // G
   } else if (x > sssRank) {
-    return customRank.SSS // SSS
+    return getRank("SSS", serverId) // SSS
   } else if (x > ssRank) {
-    return customRank.SS // SS
+    return getRank("SS", serverId) // SS
   } else if (x > sRank) {
-    return customRank.S // S
+    return getRank("S", serverId) // S
   } else if (x > aRank) {
-    return customRank.A // A
+    return getRank("A", serverId) // A
   } else if (x > bRank) {
-    return customRank.B // B
+    return getRank("B", serverId) // B
   } else if (x > cRank) {
-    return customRank.C // C
+    return getRank("C", serverId) // C
   } else if (x > dRank) {
-    return customRank.D // D
+    return getRank("D", serverId) // D
   } else if (x > eRank) {
-    return customRank.E // E
+    return getRank("E", serverId) // E
   }
-  return customRank.F // F
+  return getRank("F", serverId) // F
 }

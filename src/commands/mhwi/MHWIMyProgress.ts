@@ -9,7 +9,8 @@ export const MHWIMyProgress = chatCommandBuilder()
 
     const progress = await findAdvancement({
       prisma,
-      user_id: interaction.user.id
+      user_id: interaction.user.id,
+      server_id: interaction.guildId ?? ""
     })
     
     await interaction.followUp({

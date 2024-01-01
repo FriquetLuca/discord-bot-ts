@@ -1,6 +1,7 @@
 import { chatCommandBuilder } from "@/libraries/discord/builders"
 import { validator } from "@/libraries/discord/validators"
 import { parseMoney } from "@/libraries/money"
+import { maybe } from "@/libraries/sqeul"
 import { bold, italic } from "discord.js"
 
 export const AddShopCartArticle = chatCommandBuilder()
@@ -47,37 +48,27 @@ export const AddShopCartArticle = chatCommandBuilder()
         user_id: interaction.user.id,
       }
     })
-
-    if(shopContext === null) {
-      await interaction.followUp({
-        content: `Erreur : Le caddie contextuel n'existe pas.`
-      })
-      return
-    }
-
-    if(shopContext.hash === null) {
-      await interaction.followUp({
-        content: "Le caddie contextuel est indéfini."
-      })
-      return
-    }
+    
+    const shopContextHash = maybe(
+        maybe(shopContext)
+          .getOrThrow("Le caddie contextuel n'existe pas.")
+          .hash
+      )
+      .getOrThrow("Le caddie contextuel est indéfini.")
 
     const cartExist = await prisma.shoppingCart.findUnique({
       where: {
-        id: shopContext.hash,
+        id: shopContextHash,
       }
     })
-    if(cartExist === null) {
-      await interaction.followUp({
-        content: "Erreur : Le caddie contextuel est actuellement associé à un caddie qui n'existe plus."
-      })
-      return
-    }
+
+    maybe(cartExist)
+      .throw("Le caddie contextuel est actuellement associé à un caddie qui n'existe plus.")
 
     const cart = await prisma.shoppingMember.findFirst({
       where: {
         user_id: interaction.user.id,
-        cart_id: shopContext.hash,
+        cart_id: shopContextHash,
       },
       select: {
         cart: {
@@ -89,16 +80,12 @@ export const AddShopCartArticle = chatCommandBuilder()
       }
     })
 
-    if(cart === null) {
-      await interaction.followUp({
-        content: "Erreur : Le caddie contextuel n'existe pas."
-      })
-      return
-    }
+    maybe(cart)
+      .throw("Le caddie contextuel n'existe pas.")
 
     const newArticle = await prisma.shoppingArticle.create({
       data: {
-        cart_id: shopContext.hash,
+        cart_id: shopContextHash,
         ...datas,
       }
     })

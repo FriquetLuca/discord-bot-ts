@@ -6,7 +6,7 @@ type MonsterRecord = { monster: MHWIMonsterSpecies, strength: MHWIMonsterStrengt
 
 const newMonsterRecord = <T extends { monster: MHWIMonsterSpecies, strength: MHWIMonsterStrength }>(records: T[]) => records
 
-const monsterRank = {
+export const monsterRank = {
   SSS: newMonsterRecord([
     {
       monster: "Fatalis",
@@ -507,7 +507,7 @@ const monsterRank = {
   ])
 }
 
-const rankProgression = <T extends MonsterRecord>(records: { id: string, monster: MHWIMonsterSpecies, strength: MHWIMonsterStrength }[], monsterRecords: T[]) => {
+export const rankProgression = <T extends MonsterRecord>(records: { id: string, monster: MHWIMonsterSpecies, strength: MHWIMonsterStrength }[], monsterRecords: T[]) => {
   const a = fromRecord(
     fromRecords(records)
       .filter((record) => {
@@ -563,17 +563,69 @@ export const findCompletedMonstersInRank = async (currentData: {
   prisma: PrismaClient
   user_id: string
 }, rank: keyof typeof monsterRank) => {
-  const allKills = await searchAllMonsterKills(currentData)
+  const allKills = await searchAllMonsterKillsWithTime(currentData)
   const monsters = monsterRank[rank as keyof typeof monsterRank]
-  return completedMonsters(allKills, monsters as MonsterRecord[])
+  const completed = completedMonsters(allKills, monsters as MonsterRecord[])
+
+  return fromRecords(completed)
+    .transform(monster => fromRecords(allKills)
+    .filter(record => record.monster === monster.monster && record.strength === monster.strength)
+    .aggregate<{
+      monster: MHWIMonsterSpecies;
+      strength: MHWIMonsterStrength;
+      kill_time: bigint;
+    }>((previous, current) => previous.kill_time === undefined ? ({
+          ...previous,
+          kill_time: current.kill_time
+        }) : ({
+          ...previous,
+          kill_time: previous.kill_time > current.kill_time ? current.kill_time : previous.kill_time,
+        }), ({ monster: monster.monster, strength: monster.strength, kill_time: undefined as unknown as bigint })))
+    .get()
 }
 
-const searchAllMonsterKills = async (currentData: {
+const searchAllMonsterKillsWithTime = async (currentData: {
   prisma: PrismaClient
   user_id: string
 }) => {
   const { prisma, user_id } = currentData
-  const sss_kills = await prisma.mHWIMonsterKill.findMany({
+  const kills = await prisma.mHWIMonsterKill.findMany({
+    where: {
+      user_id: user_id
+    },
+    select: {
+      id: true,
+      monster: true,
+      strength: true,
+      kill_time: true,
+    }
+  })
+  const team_kills = await prisma.mHWIMonsterKillTeam.findMany({
+    where: {
+      members: {
+        some: {
+          user_id
+        }
+      }
+    },
+    select: {
+      id: true,
+      monster: true,
+      strength: true,
+      kill_time: true,
+    }
+  })
+  return fromRecords(kills)
+    .union(team_kills)
+    .get()
+}
+
+export const searchAllMonsterKills = async (currentData: {
+  prisma: PrismaClient
+  user_id: string
+}) => {
+  const { prisma, user_id } = currentData
+  const kills = await prisma.mHWIMonsterKill.findMany({
     where: {
       user_id: user_id
     },
@@ -583,7 +635,7 @@ const searchAllMonsterKills = async (currentData: {
       strength: true,
     }
   })
-  const sss_team_kills = await prisma.mHWIMonsterKillTeam.findMany({
+  const team_kills = await prisma.mHWIMonsterKillTeam.findMany({
     where: {
       members: {
         some: {
@@ -597,12 +649,12 @@ const searchAllMonsterKills = async (currentData: {
       strength: true,
     }
   })
-  return fromRecords(sss_kills)
-    .union(sss_team_kills)
+  return fromRecords(kills)
+    .union(team_kills)
     .get()
 }
 
-const toPercent = (n: number) => Math.floor(n * 10000) / 100
+export const toPercent = (n: number) => Math.floor(n * 10000) / 100
 
 
 const gRank = monsterRank.SSS.length * 256 + monsterRank.SS.length * 128 + monsterRank.S.length * 64 + monsterRank.A.length * 32 + monsterRank.B.length * 16 + monsterRank.C.length * 8 + monsterRank.D.length * 4 + monsterRank.E.length * 2 + monsterRank.F.length
@@ -650,7 +702,7 @@ ${italic("Total")} : ${toPercent(sumCurrent / sumTotal)}% (${sumCurrent} / ${sum
 `
 }
 
-const getHunterRank = (x: number) => {
+export const getHunterRank = (x: number) => {
   if(x === gRank) {
     return "G"
   } else if (x > sssRank) {

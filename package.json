@@ -11,21 +11,23 @@
     "start:clean": "node -r ./tsconfig-paths.js dist/Bot.js clean",
     "dev": "ts-node -r tsconfig-paths/register src/Bot.ts",
     "dev:clean": "ts-node -r tsconfig-paths/register src/Bot.ts clean",
+    "clean": "ts-node -r tsconfig-paths/register src/Bot.ts fullclean",
     "build": "(rm -rf dist && tsc) || tsc",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "t": "ts-node -r tsconfig-paths/register src/db-tests/db.ts"
   },
   "dependencies": {
-    "@prisma/client": "^5.7.0",
-    "@types/node": "^20.10.4",
+    "@prisma/client": "^5.7.1",
+    "@types/node": "^20.10.5",
     "discord.js": "^14.14.1",
     "dotenv": "^16.3.1",
     "tsconfig-paths": "^4.2.0"
   },
   "devDependencies": {
-    "prisma": "^5.7.0",
+    "prisma": "^5.7.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }

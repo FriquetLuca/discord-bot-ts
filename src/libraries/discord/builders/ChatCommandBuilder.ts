@@ -10,6 +10,7 @@ import {
 import { type Button, type Modal, type StringSelectMenu } from "../Command"
 import { prisma } from "@/database/prisma"
 import type { BaseHandler, InteractionHandler } from "./"
+import { ensureError } from "@/libraries/sqeul";
 
 export class ChatCommandBuilder extends SlashCommandBuilder {
   private hasCooldown: boolean = false;
@@ -97,11 +98,16 @@ export class ChatCommandBuilder extends SlashCommandBuilder {
         await interaction.respond([])
         return
       }
-      autocomplete && await autocomplete({
-        client,
-        interaction,
-        prisma
-      })
+      try {
+        autocomplete && await autocomplete({
+          client,
+          interaction,
+          prisma
+        })
+      } catch(e) {
+        console.error(e)
+        await interaction.respond([])
+      }
     }
     return this
   }
@@ -130,7 +136,23 @@ export class ChatCommandBuilder extends SlashCommandBuilder {
           interaction,
           prisma
         }
-        this.run && this.run(context)
+        try {
+          this.run && this.run(context)
+        } catch(e) {
+          console.error(e)
+          try {
+            await interaction.reply({
+              ephemeral: true,
+              content: `Erreur : ${ensureError(e).message}`
+            })
+          } catch(_) {
+            try {
+              await interaction.followUp({
+                content: `Erreur : ${ensureError(e).message}`
+              })
+            } catch (_) {}
+          }
+        }
       },
     }
   }

@@ -32,7 +32,7 @@ export const MHWIMyRankProgress = chatCommandBuilder()
     }, data.rank)
     
     await interaction.followUp({
-      content: `${bold("Votre progression")} (${obtainedMon.length} / ${obtainedMon.length + missingMon.length})
+      content: `${bold("Votre progression")} - Rang ${bold(data.rank)} (${obtainedMon.length} / ${obtainedMon.length + missingMon.length})
 
 ${bold("Restant")} :
 ${missingMon.length === 0 ? bold("Aucun") :  missingMon.map(v => `1. ${getFrenchMHWIMonsterNames(v.monster)} (${getFrenchMHWIMonsterStrength(v.strength)})\n`).join("")}

@@ -318,7 +318,7 @@ export function fromRecords<T extends RecordType>(records: T[]): RecordsObject<T
     limit: (limit) => fromRecords(records.slice(0, limit)),
     slice: (offset, limit) => fromRecords(records.slice(offset, offset + limit)),
     map: (callbackfn: (value: T, index: number, array: T[]) => T, thisArg?: any) => fromRecords(records.map(callbackfn, thisArg)),
-    union: <U extends RecordType>(unionRecords: U[]) => fromRecords({ ...records, ...unionRecords }),
+    union: <U extends RecordType>(unionRecords: U[]) => fromRecords([ ...records, ...unionRecords ]),
     pick: <U extends keyof T>(...selection: U[]) => fromRecords(records.map((record) => fromRecord(record).pick(...selection).get())),
     select: <U extends keyof T, V extends string, W extends {
       key: U;

@@ -7,6 +7,7 @@ export type Perhaps<T> = {
   isEmpty: () => boolean
   is: (compare: Perhaps<T>) => boolean
   getOrDefault: () => T | undefined | null
+  getOrThrow: (overrideErrorMessage?: string) => T
   getOrElse: (defaultValue: T) => T
   get: () => T | undefined | null
   map: <R>(f: (wrapped: T) => R) => Perhaps<R>
@@ -15,6 +16,7 @@ export type Perhaps<T> = {
   possibly: () => Possibly<T>
   maybe: () => Maybe<T>
   overrideEmpty: (newValue: T) => Perhaps<T>
+  throw: (overrideErrorMessage?:string) => void
 }
 
 /**
@@ -29,6 +31,12 @@ export function perhaps<T>(value: T | undefined | null = undefined, defaultValue
     get: () => value,
     getOrElse: (defaultValue) => value === undefined || value === null ? defaultValue : value,
     getOrDefault: () => (value === undefined || value === null) ? defaultValue : value,
+    getOrThrow: (overrideErrorMessage?:string) => {
+      if(value === null || value === undefined) {
+        throw new Error(overrideErrorMessage ?? `The value is null or undefined.`)
+      }
+      return value
+    },
     overrideEmpty: (newValue: T) => value === null ? perhaps(newValue) : perhaps(value as T),
     map: <R>(f: (wrapped: T) => R) => (value === undefined || value === null)
       ? (defaultValue === undefined || defaultValue === null)
@@ -42,7 +50,12 @@ export function perhaps<T>(value: T | undefined | null = undefined, defaultValue
       : f(value as T),
     default: () => defaultValue,
     possibly: () => value !== null ? possibly<T>(value, defaultValue !== null ? defaultValue : undefined) : possibly<T>(undefined, defaultValue !== null ? defaultValue : undefined),
-    maybe: () => value !== undefined ? maybe<T>(value, defaultValue !== undefined ? defaultValue : null) : maybe<T>(null, defaultValue !== undefined ? defaultValue : null)
+    maybe: () => value !== undefined ? maybe<T>(value, defaultValue !== undefined ? defaultValue : null) : maybe<T>(null, defaultValue !== undefined ? defaultValue : null),
+    throw: (overrideErrorMessage?:string) => {
+      if(value === null || value === undefined) {
+        throw new Error(overrideErrorMessage ?? `The value is null or undefined.`)
+      }
+    },
   }
 }
 

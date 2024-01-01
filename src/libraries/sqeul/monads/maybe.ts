@@ -8,6 +8,7 @@ export type Maybe<T> = {
   is: (compare: Maybe<T>) => boolean
   getOrDefault: () => T | null
   getOrElse: (defaultValue: T) => T
+  getOrThrow: (overrideErrorMessage?: string) => T
   overrideEmpty: (newValue: T) => Maybe<T>
   get: () => T | null
   map: <R>(f: (wrapped: T) => R) => Maybe<R>
@@ -15,6 +16,7 @@ export type Maybe<T> = {
   default: () => T | null
   perhaps: () => Perhaps<T>
   possibly: () => Possibly<T>
+  throw: (overrideErrorMessage?:string) => void
 }
 
 /**
@@ -29,6 +31,12 @@ export function maybe<T>(value: T | null = null, defaultValue: T | null = null):
     get: () => value,
     getOrElse: (defaultValue) => value === null ? defaultValue : value,
     getOrDefault: () => value === null ? defaultValue : value,
+    getOrThrow: (overrideErrorMessage?:string) => {
+      if(value === null) {
+        throw new Error(overrideErrorMessage ?? `The value is null.`)
+      }
+      return value
+    },
     map: <R>(f: (wrapped: T) => R) => value === null
       ? defaultValue === null
         ? maybe<R>(null)
@@ -43,6 +51,11 @@ export function maybe<T>(value: T | null = null, defaultValue: T | null = null):
     perhaps: () => perhaps<T>(value, defaultValue),
     possibly: () => value !== null ? possibly<T>(value, defaultValue !== null ? defaultValue : undefined) : possibly<T>(undefined, defaultValue !== null ? defaultValue : undefined),
     overrideEmpty: (newValue: T) => value === null ? maybe(newValue) : maybe(value as T),
+    throw: (overrideErrorMessage?:string) => {
+      if(value === null) {
+        throw new Error(overrideErrorMessage ?? `The value is null.`)
+      }
+    },
   }
 }
 

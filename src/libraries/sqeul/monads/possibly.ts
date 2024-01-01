@@ -8,6 +8,7 @@ export type Possibly<T> = {
   is: (compare: Possibly<T>) => boolean
   getOrDefault: () => T | undefined
   getOrElse: (defaultValue: T) => T
+  getOrThrow: (overrideErrorMessage?: string) => T
   get: () => T | undefined
   map: <R>(f: (wrapped: T) => R) => Possibly<R>
   flatMap: <R>(f: (wrapped: T) => Possibly<R>) => Possibly<R>
@@ -15,6 +16,7 @@ export type Possibly<T> = {
   perhaps: () => Perhaps<T>
   maybe: () => Maybe<T>
   overrideEmpty: (newValue: T) => Possibly<T>
+  throw: (overrideErrorMessage?:string) => void
 }
 
 /**
@@ -29,6 +31,12 @@ export function possibly<T>(value: T | undefined = undefined, defaultValue: T | 
     get: () => value,
     getOrElse: (defaultValue) => value === undefined ? defaultValue : value,
     getOrDefault: () => value === undefined ? defaultValue : value,
+    getOrThrow: (overrideErrorMessage?:string) => {
+      if(value === undefined) {
+        throw new Error(overrideErrorMessage ?? `The value is undefined.`)
+      }
+      return value
+    },
     overrideEmpty: (newValue: T) => value === null ? possibly(newValue) : possibly(value as T),
     map: <R>(f: (wrapped: T) => R) => value === undefined
       ? defaultValue === undefined
@@ -42,7 +50,12 @@ export function possibly<T>(value: T | undefined = undefined, defaultValue: T | 
       : f(value),
     default: () => defaultValue,
     perhaps: () => perhaps<T>(value, defaultValue),
-    maybe: () => value !== undefined ? maybe<T>(value, defaultValue !== undefined ? defaultValue : null) : maybe<T>(null, defaultValue !== undefined ? defaultValue : null)
+    maybe: () => value !== undefined ? maybe<T>(value, defaultValue !== undefined ? defaultValue : null) : maybe<T>(null, defaultValue !== undefined ? defaultValue : null),
+    throw: (overrideErrorMessage?:string) => {
+      if(value === undefined) {
+        throw new Error(overrideErrorMessage ?? `The value is undefined.`)
+      }
+    },
   }
 }
 

@@ -528,6 +528,46 @@ const rankProgression = <T extends MonsterRecord>(records: { id: string, monster
   }
 }
 
+const missingMonsters = <T extends MonsterRecord>(records: { id: string, monster: MHWIMonsterSpecies, strength: MHWIMonsterStrength }[], monsterRecords: T[]) => fromRecords(monsterRecords)
+.filter((record) => {
+  for(const rec of records) {
+    if(rec.monster === record.monster && rec.strength === record.strength) {
+      return false
+    }
+  }
+  return true
+})
+.get()
+
+const completedMonsters = <T extends MonsterRecord>(records: { id: string, monster: MHWIMonsterSpecies, strength: MHWIMonsterStrength }[], monsterRecords: T[]) => fromRecords(monsterRecords)
+.filter((record) => {
+  for(const rec of records) {
+    if(rec.monster === record.monster && rec.strength === record.strength) {
+      return true
+    }
+  }
+  return false
+})
+.get()
+
+export const findMissingMonstersInRank = async (currentData: {
+  prisma: PrismaClient
+  user_id: string
+}, rank: keyof typeof monsterRank) => {
+  const allKills = await searchAllMonsterKills(currentData)
+  const monsters = monsterRank[rank as keyof typeof monsterRank]
+  return missingMonsters(allKills, monsters as MonsterRecord[])
+}
+
+export const findCompletedMonstersInRank = async (currentData: {
+  prisma: PrismaClient
+  user_id: string
+}, rank: keyof typeof monsterRank) => {
+  const allKills = await searchAllMonsterKills(currentData)
+  const monsters = monsterRank[rank as keyof typeof monsterRank]
+  return completedMonsters(allKills, monsters as MonsterRecord[])
+}
+
 const searchAllMonsterKills = async (currentData: {
   prisma: PrismaClient
   user_id: string
@@ -594,6 +634,8 @@ export const findAdvancement = async (currentData: {
   const sumCurrentRank = progress_SSS.currently * 256 + progress_SS.currently * 128 + progress_S.currently * 64 + progress_A.currently * 32 + progress_B.currently * 16 + progress_C.currently * 8 + progress_D.currently * 4 + progress_E.currently * 2 + progress_F.currently
   return `${bold("Votre progression")}
 
+${bold("Votre rang de chasseur")} : ${bold(getHunterRank(sumCurrentRank))}
+
 ${bold("Rang F")} : ${toPercent(progress_F.percent)}% (${progress_F.currently} / ${progress_F.total})
 ${bold("Rang E")} : ${toPercent(progress_E.percent)}% (${progress_E.currently} / ${progress_E.total})
 ${bold("Rang D")} : ${toPercent(progress_D.percent)}% (${progress_D.currently} / ${progress_D.total})
@@ -605,8 +647,6 @@ ${bold("Rang SS")} : ${toPercent(progress_SS.percent)}% (${progress_SS.currently
 ${bold("Rang SSS")} : ${toPercent(progress_SSS.percent)}% (${progress_SSS.currently} / ${progress_SSS.total})
 
 ${italic("Total")} : ${toPercent(sumCurrent / sumTotal)}% (${sumCurrent} / ${sumTotal})
-
-Votre rang de chasseur : ${bold(getHunterRank(sumCurrentRank))}.
 `
 }
 

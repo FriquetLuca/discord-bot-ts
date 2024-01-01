@@ -12,7 +12,7 @@ data: {
 }) => {
   const record_list_string = top_kills.map(record => {
     return `1. ${userMention(record.user_id)} *avec un total de* **${record.total_kills}** *chasses*\n`
-  }).join('')
+  }).join("")
   
   return `\n**Top des exterminateurs de ${getFrenchMHWIMonsterNames(data.monster)}${data.strength === undefined ? "" : ` (${getFrenchMHWIMonsterStrength(data.strength)})`}**\n${record_list_string}`
 }

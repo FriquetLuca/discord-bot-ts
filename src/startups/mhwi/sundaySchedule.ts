@@ -71,17 +71,20 @@ export function sundaySchedule(client: Client) {
                 member.roles.add(guild.third_id)
               }
             } else {
-              member.roles.remove(guild.first_id);
-              member.roles.remove(guild.second_id);
-              member.roles.remove(guild.third_id);
+              if(member.roles.cache.find(role => role.id === guild.second_id)) {
+                member.roles.remove(guild.first_id)
+              } else if(member.roles.cache.find(role => role.id === guild.second_id)) {
+                member.roles.remove(guild.second_id)
+              } else if(member.roles.cache.find(role => role.id === guild.second_id)) {
+                member.roles.remove(guild.third_id)
+              }
             }
-            
           })
         }
       })
 
       dClient.sendOnNamedChannels(client, {
-        channelName: "mh-kills",
+        channelName: "mhwi-leaderboard",
         message: generateTopSeasonalHuntersText(extermination_list)
       })
     }

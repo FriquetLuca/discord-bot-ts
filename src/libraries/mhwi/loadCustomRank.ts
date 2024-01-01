@@ -14,7 +14,7 @@ const loadedCustomRank = loadModules<{
   D: string;
   E: string;
   F: string;
-}>("src/custom/rankSettings")
+}>("custom/rankSettings")
 
 const customRank = loadedCustomRank.length === 0 ? {
   G: "G",
@@ -32,6 +32,7 @@ const customRank = loadedCustomRank.length === 0 ? {
 export const getRank = (rank: keyof typeof customRank) => customRank[rank]
 
 export const monsterRank = {
+  G: [],
   SSS: newMonsterRecord([
     {
       monster: "Fatalis",

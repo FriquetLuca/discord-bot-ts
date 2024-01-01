@@ -2,7 +2,7 @@ import { chatCommandBuilder } from "@/libraries/discord/builders"
 import { findCompletedMonstersInRank, findMissingMonstersInRank } from "@/database/mhwi/findAdvancement"
 import { validator } from "@/libraries/discord/validators"
 import { bold, italic } from "discord.js"
-import { getFrenchMHWIMonsterNames, getFrenchMHWIMonsterStrength } from "@/libraries/mhwi"
+import { getFrenchMHWIMonsterNames, getFrenchMHWIMonsterStrength, getRank } from "@/libraries/mhwi"
 import { getTimestamp } from "@/libraries/time"
 
 const allRanks = [ "SSS", "SS", "S", "A", "B", "C", "D", "E", "F"]
@@ -33,7 +33,7 @@ export const MHWIMyRankProgress = chatCommandBuilder()
     }, data.rank)
     
     await interaction.followUp({
-      content: `${bold("Votre progression")} - Rang ${bold(data.rank)} (${obtainedMon.length} / ${obtainedMon.length + missingMon.length}) en ${bold(getTimestamp(obtainedMon.reduce((p, c) => c.kill_time + p, BigInt(0))))}
+      content: `${bold("Votre progression")} - Rang ${bold(getRank(data.rank))} (${obtainedMon.length} / ${obtainedMon.length + missingMon.length}) en ${bold(getTimestamp(obtainedMon.reduce((p, c) => c.kill_time + p, BigInt(0))))}
 
 ${bold("Restant")} :
 ${missingMon.length === 0 ? `${bold("Aucun")}\n` :  missingMon.map(v => `1. ${getFrenchMHWIMonsterNames(v.monster)} (${getFrenchMHWIMonsterStrength(v.strength)})\n`).join("")}

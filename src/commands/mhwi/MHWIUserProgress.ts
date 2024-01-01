@@ -1,6 +1,7 @@
+import { rankProgression, searchAllMonsterKills, toPercent } from "@/database/mhwi"
 import { chatCommandBuilder } from "@/libraries/discord/builders"
-import { getHunterRank, monsterRank, rankProgression, searchAllMonsterKills, toPercent } from "@/database/mhwi/findAdvancement"
 import { validator } from "@/libraries/discord/validators"
+import { getHunterRank, getRank, monsterRank } from "@/libraries/mhwi"
 import { bold, italic, userMention } from "discord.js"
 
 export const MHWIUserProgress = chatCommandBuilder()
@@ -36,15 +37,15 @@ export const MHWIUserProgress = chatCommandBuilder()
 
 ${bold(`Rang de chasseur de ${userMention(data.user)}`)} : ${bold(getHunterRank(sumCurrentRank))}
 
-${bold("Rang F")} : ${toPercent(progress_F.percent)}% (${progress_F.currently} / ${progress_F.total})
-${bold("Rang E")} : ${toPercent(progress_E.percent)}% (${progress_E.currently} / ${progress_E.total})
-${bold("Rang D")} : ${toPercent(progress_D.percent)}% (${progress_D.currently} / ${progress_D.total})
-${bold("Rang C")} : ${toPercent(progress_C.percent)}% (${progress_C.currently} / ${progress_C.total})
-${bold("Rang B")} : ${toPercent(progress_B.percent)}% (${progress_B.currently} / ${progress_B.total})
-${bold("Rang A")} : ${toPercent(progress_A.percent)}% (${progress_A.currently} / ${progress_A.total})
-${bold("Rang S")} : ${toPercent(progress_S.percent)}% (${progress_S.currently} / ${progress_S.total})
-${bold("Rang SS")} : ${toPercent(progress_SS.percent)}% (${progress_SS.currently} / ${progress_SS.total})
-${bold("Rang SSS")} : ${toPercent(progress_SSS.percent)}% (${progress_SSS.currently} / ${progress_SSS.total})
+${bold(`Rang ${getRank("F")}`)} : ${toPercent(progress_F.percent)}% (${progress_F.currently} / ${progress_F.total})
+${bold(`Rang ${getRank("E")}`)} : ${toPercent(progress_E.percent)}% (${progress_E.currently} / ${progress_E.total})
+${bold(`Rang ${getRank("D")}`)} : ${toPercent(progress_D.percent)}% (${progress_D.currently} / ${progress_D.total})
+${bold(`Rang ${getRank("C")}`)} : ${toPercent(progress_C.percent)}% (${progress_C.currently} / ${progress_C.total})
+${bold(`Rang ${getRank("B")}`)} : ${toPercent(progress_B.percent)}% (${progress_B.currently} / ${progress_B.total})
+${bold(`Rang ${getRank("A")}`)} : ${toPercent(progress_A.percent)}% (${progress_A.currently} / ${progress_A.total})
+${bold(`Rang ${getRank("S")}`)} : ${toPercent(progress_S.percent)}% (${progress_S.currently} / ${progress_S.total})
+${bold(`Rang ${getRank("SS")}`)} : ${toPercent(progress_SS.percent)}% (${progress_SS.currently} / ${progress_SS.total})
+${bold(`Rang ${getRank("SSS")}`)} : ${toPercent(progress_SSS.percent)}% (${progress_SSS.currently} / ${progress_SSS.total})
 
 ${italic("Total")} : ${toPercent(sumCurrent / sumTotal)}% (${sumCurrent} / ${sumTotal})
 `

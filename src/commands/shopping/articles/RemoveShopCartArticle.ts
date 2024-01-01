@@ -1,4 +1,5 @@
 import { chatCommandBuilder } from "@/libraries/discord/builders"
+import { validator } from "@/libraries/discord/validators"
 import { bold } from "discord.js"
 
 export const RemoveShopCartArticle = chatCommandBuilder()
@@ -10,8 +11,10 @@ export const RemoveShopCartArticle = chatCommandBuilder()
     .setDescription("Le hash associé à l'article")
   )
   .handleCommand(async ({ interaction, prisma }) => {
-    
-    const currentHash = interaction.options.get("label")?.value as string
+
+    const datas = validator(interaction)
+      .string("hash", true)
+      .get()
 
     await interaction.deferReply()
 
@@ -70,7 +73,7 @@ export const RemoveShopCartArticle = chatCommandBuilder()
 
     await prisma.shoppingArticle.delete({
       where: {
-        id: currentHash
+        id: datas.hash
       }
     })
     

@@ -1,5 +1,6 @@
 import { bold, italic } from "discord.js"
 import { chatCommandBuilder } from "@/libraries/discord/builders"
+import { validator } from "@/libraries/discord/validators"
 
 export const NewShopCart = chatCommandBuilder()
   .setName("new-shop-cart")
@@ -11,14 +12,14 @@ export const NewShopCart = chatCommandBuilder()
   )
   .handleCommand(async ({ interaction, prisma }) => {
     
-    const currentLabel = interaction.options.get("label")?.value as string
+    const datas = validator(interaction)
+      .string("label", true)
+      .get()
 
     await interaction.deferReply()
 
     const newCart = await prisma.shoppingCart.create({
-      data: {
-        label: currentLabel
-      }
+      data: datas
     })
 
     await prisma.shoppingMember.create({

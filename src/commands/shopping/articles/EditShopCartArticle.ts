@@ -1,5 +1,7 @@
 import { chatCommandBuilder } from "@/libraries/discord/builders"
+import { validator } from "@/libraries/discord/validators"
 import { parseMoney } from "@/libraries/money"
+import { possibly } from "@/libraries/sqeul"
 import { bold, italic } from "discord.js"
 
 export const EditShopCartArticle = chatCommandBuilder()
@@ -28,19 +30,26 @@ export const EditShopCartArticle = chatCommandBuilder()
     .setDescription("La personne pour qui on achète l'article")
   )
   .handleCommand(async ({ interaction, prisma }) => {
-    
-    const currentHash = interaction.options.get("hash")?.value as string
 
-    const currentLabel = interaction.options.get("label")?.value as string|undefined
-
-    const inputPrice = interaction.options.get("price")?.value as string|undefined
-    const currentPrice = inputPrice !== undefined ? parseMoney(inputPrice) : inputPrice
-
-    const inputRecipient = interaction.options.get("recipient")?.value as string|undefined
-    const currentRecipient = inputRecipient === "" ? null : inputRecipient
-
-    const inputQuantity = interaction.options.get("quantity")?.value as number|undefined
-    const currentQuantity = inputQuantity !== undefined ? Math.max(1, Math.floor(inputQuantity)) : inputQuantity
+    const datas = validator(interaction)
+    .string("hash", true)
+    .string("label")
+    .string("price")
+    .string("recipient")
+    .number("quantity")
+    .refine(record => ({
+      ...record,
+      price: possibly(record.price)
+        .map(parseMoney)
+        .get(),
+      recipient: possibly(record.recipient)
+        .map((value) => value === "" ? null : value)
+        .get(),
+      quantity: possibly(record.quantity)
+        .map(value => Math.max(1, Math.floor(value)))
+        .get(),
+    }))
+    .get()
 
     await interaction.deferReply()
 
@@ -99,27 +108,27 @@ export const EditShopCartArticle = chatCommandBuilder()
     }
     const article = await prisma.shoppingArticle.findFirst({
       where: {
-        id: currentHash,
+        id: datas.hash,
         cart_id: cart.cart.id,
       }
     })
     if(article === null) {
       await interaction.followUp({
-        content: `Erreur : L'article dont le hash est ${currentHash} n'existe pas.`
+        content: `Erreur : L'article dont le hash est ${datas.hash} n'existe pas.`
       })
       return
     }
 
     const newArticle = await prisma.shoppingArticle.update({
       where: {
-        id: currentHash,
+        id: datas.hash,
       },
       data: {
         cart_id: shopContext.hash,
-        label: currentLabel,
-        price: currentPrice,
-        quantity: currentQuantity,
-        recipient: currentRecipient,
+        label: datas.label,
+        price: datas.price,
+        quantity: datas.quantity,
+        recipient: datas.recipient,
       }
     })
     

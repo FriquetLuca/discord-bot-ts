@@ -1,4 +1,5 @@
 import { chatCommandBuilder } from "@/libraries/discord/builders"
+import { validator } from "@/libraries/discord/validators"
 import { parseMoney } from "@/libraries/money"
 import { bold, italic } from "discord.js"
 
@@ -26,11 +27,18 @@ export const AddShopCartArticle = chatCommandBuilder()
     .setDescription("La personne pour qui on achète l'article")
   )
   .handleCommand(async ({ interaction, prisma }) => {
-    
-    const currentLabel = interaction.options.get("label")?.value as string
-    const currentPrice = parseMoney(interaction.options.get("price")?.value as string)
-    const currentRecipient = interaction.options.get("recipient")?.value as string|undefined
-    const currentQuantity = Math.max(1, Math.floor(interaction.options.get("quantity")?.value as number))
+
+    const datas = validator(interaction)
+      .string("label", true)
+      .string("price", true)
+      .number("quantity", true)
+      .string("recipient")
+      .refine(record => ({
+        ...record,
+        quantity: Math.max(1, Math.floor(record.quantity)),
+        price: parseMoney(record.price)
+      }))
+      .get()
 
     await interaction.deferReply()
 
@@ -49,7 +57,7 @@ export const AddShopCartArticle = chatCommandBuilder()
 
     if(shopContext.hash === null) {
       await interaction.followUp({
-        content: `Le caddie contextuel est indéfini.`
+        content: "Le caddie contextuel est indéfini."
       })
       return
     }
@@ -61,7 +69,7 @@ export const AddShopCartArticle = chatCommandBuilder()
     })
     if(cartExist === null) {
       await interaction.followUp({
-        content: `Erreur : Le caddie contextuel est actuellement associé à un caddie qui n'existe plus.`
+        content: "Erreur : Le caddie contextuel est actuellement associé à un caddie qui n'existe plus."
       })
       return
     }
@@ -83,7 +91,7 @@ export const AddShopCartArticle = chatCommandBuilder()
 
     if(cart === null) {
       await interaction.followUp({
-        content: `Erreur : Le caddie contextuel n'existe pas.`
+        content: "Erreur : Le caddie contextuel n'existe pas."
       })
       return
     }
@@ -91,10 +99,7 @@ export const AddShopCartArticle = chatCommandBuilder()
     const newArticle = await prisma.shoppingArticle.create({
       data: {
         cart_id: shopContext.hash,
-        label: currentLabel,
-        price: currentPrice,
-        quantity: currentQuantity,
-        recipient: currentRecipient,
+        ...datas,
       }
     })
     

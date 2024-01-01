@@ -1,5 +1,6 @@
 import { bold, italic } from "discord.js"
 import { chatCommandBuilder } from "@/libraries/discord/builders"
+import { validator } from "@/libraries/discord/validators"
 
 export const DeleteShopCart = chatCommandBuilder()
   .setName("delete-shop-cart")
@@ -11,14 +12,17 @@ export const DeleteShopCart = chatCommandBuilder()
   )
   .handleCommand(async ({ interaction, prisma }) => {
     
-    const currentHash = interaction.options.get("hash")?.value as string
+    const datas = validator(interaction)
+      .string("hash", true)
+      .get()
+
 
     await interaction.deferReply()
 
     const cart = await prisma.shoppingMember.findFirst({
       where: {
         user_id: interaction.user.id,
-        cart_id: currentHash,
+        cart_id: datas.hash,
         permission: "OWNER"
       },
       select: {
@@ -44,7 +48,7 @@ export const DeleteShopCart = chatCommandBuilder()
       })
     } else {
       await interaction.followUp({
-        content: `Erreur : Le caddie ${bold(currentHash)} n'existe pas.`
+        content: `Erreur : Le caddie ${bold(datas.hash)} n'existe pas.`
       })
     }
   })

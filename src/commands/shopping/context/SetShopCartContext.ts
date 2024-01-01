@@ -1,5 +1,6 @@
 import { bold, italic } from "discord.js"
 import { chatCommandBuilder } from "@/libraries/discord/builders"
+import { validator } from "@/libraries/discord/validators"
 
 export const SetShopCartContext = chatCommandBuilder()
   .setName("set-shop-cart-context")
@@ -10,11 +11,13 @@ export const SetShopCartContext = chatCommandBuilder()
   )
   .handleCommand(async ({ interaction, prisma }) => {
     
-    const currentHash = interaction.options.get("hash")?.value as string|undefined
+    const datas = validator(interaction)
+      .string("hash")
+      .get()
 
     await interaction.deferReply()
 
-    if(currentHash === undefined) {
+    if(datas.hash === undefined) {
       const shopContext = await prisma.shoppingContext.findUnique({
         where: {
           user_id: interaction.user.id,
@@ -26,7 +29,7 @@ export const SetShopCartContext = chatCommandBuilder()
             user_id: interaction.user.id,
           },
           data: {
-            hash: currentHash,
+            hash: undefined,
           }
         })
         await interaction.followUp({
@@ -67,14 +70,14 @@ export const SetShopCartContext = chatCommandBuilder()
             user_id: interaction.user.id,
           },
           data: {
-            hash: currentHash,
+            hash: datas.hash,
           }
         })
       } else {
         await prisma.shoppingContext.create({
           data: {
             user_id: interaction.user.id,
-            hash: currentHash,
+            hash: datas.hash,
           }
         })
       }
@@ -83,7 +86,7 @@ export const SetShopCartContext = chatCommandBuilder()
       })
     } else {
       await interaction.followUp({
-        content: `Erreur : Le caddie ${bold(currentHash)} n'existe pas.`
+        content: `Erreur : Le caddie ${bold(datas.hash)} n'existe pas.`
       })
     }
   })

@@ -46,12 +46,20 @@ export const MHWIRandomizedRankMonster = chatCommandBuilder()
 
     const data = validator(interaction)
       .bool("onlymissing")
+      .in("rank", { SSS: "SSS", SS: "SS", S: "S", A: "A", B: "B", C: "C", D: "D", E: "E", F: "F" }, true)
       .get()
+    
+    const getMissingChoice = async () => {
+      if(data.onlymissing !== true) {
+        return allMonsters
+      }
+      const allKills = await searchAllMonsterKills({
+        prisma,
+        user_id: interaction.user.id
+      })
+      return missingMonsters(allKills, monsterRank[data.rank] as typeof allMonsters)
+    }
 
-    const getMissingChoice = async () => data.onlymissing !== true ? allMonsters : await findMissingMonsters({
-      prisma,
-      user_id: interaction.user.id
-    })
     const missing = await getMissingChoice()
     if(missing.length === 0) {
       await interaction.reply({

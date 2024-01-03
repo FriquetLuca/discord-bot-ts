@@ -69,6 +69,10 @@ export const monsterRank = {
     {
       monster: "Namielle",
       strength: "AlphaTempered"
+    },
+    {
+      monster: "Alatreon",
+      strength: "Normal"
     }
   ]),
   S: newMonsterRecord([
@@ -535,15 +539,66 @@ export const monsterRank = {
   ])
 }
 
-const gRank = monsterRank.SSS.length * 256 + monsterRank.SS.length * 128 + monsterRank.S.length * 64 + monsterRank.A.length * 32 + monsterRank.B.length * 16 + monsterRank.C.length * 8 + monsterRank.D.length * 4 + monsterRank.E.length * 2 + monsterRank.F.length
-const sssRank = monsterRank.SS.length * 128 + monsterRank.S.length * 64 + monsterRank.A.length * 32 + monsterRank.B.length * 16 + monsterRank.C.length * 8 + monsterRank.D.length * 4 + monsterRank.E.length * 2 + monsterRank.F.length
-const ssRank = monsterRank.S.length * 64 + monsterRank.A.length * 32 + monsterRank.B.length * 16 + monsterRank.C.length * 8 + monsterRank.D.length * 4 + monsterRank.E.length * 2 + monsterRank.F.length
-const sRank = monsterRank.A.length * 32 + monsterRank.B.length * 16 + monsterRank.C.length * 8 + monsterRank.D.length * 4 + monsterRank.E.length * 2 + monsterRank.F.length
-const aRank = monsterRank.B.length * 16 + monsterRank.C.length * 8 + monsterRank.D.length * 4 + monsterRank.E.length * 2 + monsterRank.F.length
-const bRank = monsterRank.C.length * 8 + monsterRank.D.length * 4 + monsterRank.E.length * 2 + monsterRank.F.length
-const cRank = monsterRank.D.length * 4 + monsterRank.E.length * 2 + monsterRank.F.length
-const dRank = monsterRank.E.length * 2 + monsterRank.F.length
 const eRank = monsterRank.F.length
+const dRank = monsterRank.E.length * 2 + eRank
+const cRank = monsterRank.D.length * 4 + dRank
+const bRank = monsterRank.C.length * 8 + cRank
+const aRank = monsterRank.B.length * 16 + bRank
+const sRank = monsterRank.A.length * 32 + aRank
+const ssRank = monsterRank.S.length * 64 + sRank
+const sssRank = monsterRank.SS.length * 128 + ssRank
+const gRank = monsterRank.SSS.length * 256 + sssRank
+
+export const rankExp = {
+  G: gRank,
+  SSS: sssRank,
+  SS: ssRank,
+  S: sRank,
+  A: aRank,
+  B: bRank,
+  C: cRank,
+  D: dRank,
+  E: eRank,
+  F: 0,
+}
+
+export const getNextRank = (rank: keyof typeof baseRank) => ({
+  G: "G",
+  SSS: "G",
+  SS: "SSS",
+  S: "SS",
+  A: "S",
+  B: "A",
+  C: "B",
+  D: "C",
+  E: "D",
+  F: "E",
+})[rank] as keyof typeof baseRank
+
+export const getNextRankExp = (rank: keyof typeof baseRank) => rankExp[getNextRank(rank)]
+
+export const getRawHunterRank = (x: number) => {
+  if(x === gRank) {
+    return "G"
+  } else if (x > sssRank) {
+    return "SSS"
+  } else if (x > ssRank) {
+    return "SS"
+  } else if (x > sRank) {
+    return "S"
+  } else if (x > aRank) {
+    return "A"
+  } else if (x > bRank) {
+    return "B"
+  } else if (x > cRank) {
+    return "C"
+  } else if (x > dRank) {
+    return "D"
+  } else if (x > eRank) {
+    return "E"
+  }
+  return "F"
+}
 
 export const getHunterRank = (x: number, serverId: string) => {
   if(x === gRank) {

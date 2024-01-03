@@ -1,6 +1,6 @@
 import { fromRecord, fromRecords } from "@/libraries/sqeul"
 import type { MHWIMonsterSpecies, MHWIMonsterStrength, PrismaClient } from "@prisma/client"
-import { bold, italic } from "discord.js"
+import { bold } from "discord.js"
 import { getNextRank, getNextRankExp, getRank, getRankExp, getRawHunterRank, monsterRank } from "@/libraries/mhwi/loadCustomRank"
 import { getTimestamp } from "@/libraries/time"
 

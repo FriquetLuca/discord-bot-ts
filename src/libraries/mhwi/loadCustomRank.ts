@@ -258,8 +258,16 @@ export const monsterRank = {
       monster: "GreatJagras",
       strength: "AlphaTempered"
     },
+    {
+      monster: "Velkhana",
+      strength: "Normal"
+    }
   ]),
   B: newMonsterRecord([
+    {
+      monster: "FrostfangBarioth",
+      strength: "Normal"
+    },
     {
       monster: "Barioth",
       strength: "Tempered"

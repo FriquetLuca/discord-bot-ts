@@ -1,10 +1,12 @@
 import { missingMonsters, searchAllMonsterKills } from "@/database/mhwi"
 import { chatCommandBuilder } from "@/libraries/discord/builders"
-import { getFrenchMHWIMonsterNames, getFrenchMHWIMonsterStrength, monsterRank } from "@/libraries/mhwi"
+import { getFrenchMHWIMonsterNames, getFrenchMHWIMonsterStrength, getRank, monsterRank } from "@/libraries/mhwi"
 import { fromRecords } from "@/libraries/sqeul"
 import { bold } from "discord.js"
 import { type PrismaClient } from "@prisma/client"
 import { validator } from "@/libraries/discord/validators"
+
+const allRanks = [ "SSS", "SS", "S", "A", "B", "C", "D", "E", "F" ]
 
 const allMonsters = fromRecords(monsterRank.A)
   .union(monsterRank.B)
@@ -25,12 +27,20 @@ const findMissingMonsters = async (currentData: {
   return missingMonsters(allKills, allMonsters)
 }
 
-export const MHWIRandomizedMonster = chatCommandBuilder()
-  .setName("mhwi-randomized-monster")
+export const MHWIRandomizedRankMonster = chatCommandBuilder()
+  .setName("mhwi-randomized-rank-monster")
   .setDescription("Obtenez votre objectif de chasse aléatoirement")
+  .addStringOption(option =>
+    option.setName("rank")
+      .setDescription("Le rang pour lequel on désire obtenir un monstre aléatoirement")
+      .addChoices(
+        ...(allRanks.map(v => ({ "name": getRank(v as any, ""), "value": v })))
+      )
+      .setRequired(true)
+  )
   .addBooleanOption(option =>
     option.setName("onlymissing")
-      .setDescription("Ne reprenez que des monstres de votre liste de progrès restant")
+      .setDescription("Ne reprenez que des monstres de votre liste de progrès manquant")
   )
   .handleCommand(async ({ interaction, prisma }) => {
 
@@ -43,6 +53,11 @@ export const MHWIRandomizedMonster = chatCommandBuilder()
       user_id: interaction.user.id
     })
     const missing = await getMissingChoice()
+    if(missing.length === 0) {
+      await interaction.reply({
+        content: "Vous n'avez plus de monstre restant dans votre liste de monstre..."
+      })
+    }
     const rnd_monster = missing[Math.floor(Math.random() * allMonsters.length)]
 
     await interaction.reply({

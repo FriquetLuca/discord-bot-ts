@@ -273,6 +273,11 @@ export const findAdvancement = async (currentData: {
   const nextRank = getNextRank(currentHunterRank)
   const currentRankExp = getRankExp(currentHunterRank)
   const missingRankPoints = getNextRankExp(currentHunterRank) - sumCurrentRank
+
+  const soloTime = kills.reduce((p, c) => p + c.kill_time, BigInt(0))
+  const teamTime = team_kills.reduce((p, c) => p + c.kill_time, BigInt(0))
+  const totalTime = allKills.reduce((p, c) => p + c.kill_time, BigInt(0))
+
   return `${bold(currentData.title)}
 
 ${bold("Rang de chasseur")} : ${bold(getRank(currentHunterRank, currentData.server_id))}${nextRank === currentHunterRank ? "" : `\n${bold("Prochain rang")} : ${bold(getRank(getNextRank(currentHunterRank), currentData.server_id))} (${bold(missingRankPoints.toString())} point${missingRankPoints === 1 || missingRankPoints === 0 ? "" : "s"} restant)`}
@@ -280,8 +285,14 @@ ${bold("Expérience")} : ${bold((sumCurrentRank - currentRankExp).toString())} /
 ${bold("Expérience totale")} : ${bold(sumCurrentRank.toString())} / ${bold(getNextRankExp("G").toString())}
 ${bold("Monstres tués")} :
 - ${bold("Solo")} : ${bold(kills.length.toString())}
-- ${bold("Équipe")} : ${bold(team_kills.length.toString())}
-- ${bold("Total")} : ${bold(allKills.length.toString())}
+  - ${bold("Temps par monstre")} : ${bold(getTimestamp(soloTime / BigInt(kills.length)))}
+  - ${bold("Temps total")} : ${bold(getTimestamp(soloTime))}
+- ${bold("Équipe")} : ${bold(team_kills.length.toString())} (${getTimestamp(teamTime)})
+  - ${bold("Temps par monstre")} : ${bold(getTimestamp(teamTime / BigInt(team_kills.length)))}
+  - ${bold("Temps total")} : ${bold(getTimestamp(soloTime))}
+- ${bold("Total")} : ${bold(allKills.length.toString())} (${getTimestamp(totalTime)})
+  - ${bold("Temps par monstre")} : ${bold(getTimestamp(totalTime / BigInt(allKills.length)))}
+  - ${bold("Temps total")} : ${bold(getTimestamp(soloTime))}
 
 ${generateHunterRankFullText(currentData.server_id, progress_F, time_f, "F")}
 ${generateHunterRankFullText(currentData.server_id, progress_E, time_e, "E")}

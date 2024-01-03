@@ -213,7 +213,35 @@ export const findAdvancement = async (currentData: {
   server_id: string
   title: string
 }) => {
-  const allKills = await searchAllMonsterKillsWithTime(currentData)
+  const kills = await currentData.prisma.mHWIMonsterKill.findMany({
+    where: {
+      user_id: currentData.user_id
+    },
+    select: {
+      id: true,
+      monster: true,
+      strength: true,
+      kill_time: true,
+    }
+  })
+  const team_kills = await currentData.prisma.mHWIMonsterKillTeam.findMany({
+    where: {
+      members: {
+        some: {
+          user_id: currentData.user_id
+        }
+      }
+    },
+    select: {
+      id: true,
+      monster: true,
+      strength: true,
+      kill_time: true,
+    }
+  })
+  const allKills = fromRecords(kills)
+    .union(team_kills)
+    .get()
 
   const progress_SSS = rankProgression(allKills, monsterRank.SSS)
   const progress_SS = rankProgression(allKills, monsterRank.SS)
@@ -249,6 +277,9 @@ export const findAdvancement = async (currentData: {
 ${bold("Rang de chasseur")} : ${bold(getRank(currentHunterRank, currentData.server_id))}${nextRank === currentHunterRank ? "" : `\n${bold("Prochain rang")} : ${bold(getRank(getNextRank(currentHunterRank), currentData.server_id))} (${bold((getNextRankExp(currentHunterRank) - sumCurrentRank).toString())} points restant)`}
 ${bold("Expérience")} : ${bold((sumCurrentRank - currentRankExp).toString())} / ${bold((getNextRankExp(currentHunterRank) - currentRankExp).toString())}
 ${bold("Expérience totale")} : ${bold(sumCurrentRank.toString())} / ${bold(getNextRankExp("G").toString())}
+${bold("Monstres tués")} : ${bold(allKills.length.toString())} (${bold(team_kills.length.toString())} en équipe)
+${bold("Monstres tués (Solo)")} : ${bold(kills.length.toString())}
+${bold("Monstres tués (Équipe)")} : ${bold(team_kills.length.toString())}
 
 ${generateHunterRankFullText(currentData.server_id, progress_F, time_f, "F")}
 ${generateHunterRankFullText(currentData.server_id, progress_E, time_e, "E")}

@@ -21,7 +21,6 @@ export const MHWINewTeamHunt = chatCommandBuilder()
   .addUserOption(option =>
     option.setName("player2")
       .setDescription("Le joueur n°2")
-      .setRequired(true)
   )
   .addUserOption(option =>
     option.setName("player3")
@@ -89,15 +88,6 @@ export const MHWINewTeamHunt = chatCommandBuilder()
       await interaction.reply({
         ephemeral: true,
         content: "La force du monstre spécifié n'existe pas."
-      })
-      return
-    }
-
-    // Not a valid team
-    if(players.length < 2) {
-      await interaction.reply({
-        ephemeral: true,
-        content: "Vous ne pouvez pas être en équipe avec vous-même."
       })
       return
     }

@@ -135,6 +135,10 @@ export const monsterRank = {
     {
       monster: "RagingBrachydios",
       strength: "Normal"
+    },
+    {
+      monster: "SharaIshvalda",
+      strength: "Normal"
     }
   ]),
   A: newMonsterRecord([

@@ -286,15 +286,15 @@ ${bold("Expérience totale")} : ${bold(sumCurrentRank.toString())} / ${bold(getN
 ${bold("Monstres")} :
 - ${bold("Solo")} :
   - ${bold("Tués")} : ${bold(kills.length.toString())}
-  - ${bold("Temps par monstre")} : ${bold(getTimestamp(soloTime / BigInt(kills.length)))}
+  - ${bold("Temps par monstre")} : ${kills.length === 0 ? bold(getTimestamp(BigInt(kills.length))) : bold(getTimestamp(soloTime / BigInt(kills.length)))}
   - ${bold("Temps total")} : ${bold(getTimestamp(soloTime))}
 - ${bold("Équipe")} :
   - ${bold("Tués")} : ${bold(team_kills.length.toString())}
-  - ${bold("Temps par monstre")} : ${bold(getTimestamp(teamTime / BigInt(team_kills.length)))}
+  - ${bold("Temps par monstre")} : ${team_kills.length === 0 ? bold(getTimestamp(BigInt(team_kills.length))) : bold(getTimestamp(teamTime / BigInt(team_kills.length)))}
   - ${bold("Temps total")} : ${bold(getTimestamp(soloTime))}
 - ${bold("Total")} :
   - ${bold("Tués")} : ${bold(allKills.length.toString())}
-  - ${bold("Temps par monstre")} : ${bold(getTimestamp(totalTime / BigInt(allKills.length)))}
+  - ${bold("Temps par monstre")} : ${allKills.length === 0 ? bold(getTimestamp(BigInt(allKills.length))) : bold(getTimestamp(totalTime / BigInt(allKills.length)))}
   - ${bold("Temps total")} : ${bold(getTimestamp(soloTime))}
 
 ${generateHunterRankFullText(currentData.server_id, progress_F, time_f, "F")}

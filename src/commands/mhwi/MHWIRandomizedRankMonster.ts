@@ -65,6 +65,7 @@ export const MHWIRandomizedRankMonster = chatCommandBuilder()
       await interaction.reply({
         content: "Vous n'avez plus de monstre restant dans votre liste de monstre..."
       })
+      return
     }
     const rnd_monster = missing[Math.floor(Math.random() * allMonsters.length)]
 

@@ -283,14 +283,17 @@ export const findAdvancement = async (currentData: {
 ${bold("Rang de chasseur")} : ${bold(getRank(currentHunterRank, currentData.server_id))}${nextRank === currentHunterRank ? "" : `\n${bold("Prochain rang")} : ${bold(getRank(getNextRank(currentHunterRank), currentData.server_id))} (${bold(missingRankPoints.toString())} point${missingRankPoints === 1 || missingRankPoints === 0 ? "" : "s"} restant)`}
 ${bold("Expérience")} : ${bold((sumCurrentRank - currentRankExp).toString())} / ${bold((getNextRankExp(currentHunterRank) - currentRankExp).toString())}
 ${bold("Expérience totale")} : ${bold(sumCurrentRank.toString())} / ${bold(getNextRankExp("G").toString())}
-${bold("Monstres tués")} :
-- ${bold("Solo")} : ${bold(kills.length.toString())}
+${bold("Monstres")} :
+- ${bold("Solo")} :
+  - ${bold("Tués")} : ${bold(kills.length.toString())}
   - ${bold("Temps par monstre")} : ${bold(getTimestamp(soloTime / BigInt(kills.length)))}
   - ${bold("Temps total")} : ${bold(getTimestamp(soloTime))}
-- ${bold("Équipe")} : ${bold(team_kills.length.toString())}
+- ${bold("Équipe")} :
+  - ${bold("Tués")} : ${bold(team_kills.length.toString())}
   - ${bold("Temps par monstre")} : ${bold(getTimestamp(teamTime / BigInt(team_kills.length)))}
   - ${bold("Temps total")} : ${bold(getTimestamp(soloTime))}
-- ${bold("Total")} : ${bold(allKills.length.toString())}
+- ${bold("Total")} :
+  - ${bold("Tués")} : ${bold(allKills.length.toString())}
   - ${bold("Temps par monstre")} : ${bold(getTimestamp(totalTime / BigInt(allKills.length)))}
   - ${bold("Temps total")} : ${bold(getTimestamp(soloTime))}
 

@@ -67,7 +67,7 @@ export const MHWIRandomizedRankMonster = chatCommandBuilder()
       })
       return
     }
-    const rnd_monster = missing[Math.floor(Math.random() * allMonsters.length)]
+    const rnd_monster = missing[Math.floor(Math.random() * missing.length)]
 
     await interaction.reply({
       content: `Affrontez un ${bold(getFrenchMHWIMonsterNames(rnd_monster.monster))} en ${bold(getFrenchMHWIMonsterStrength(rnd_monster.strength))}.`

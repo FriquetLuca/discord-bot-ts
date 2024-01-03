@@ -11,8 +11,7 @@ export const MHWIMyProgress = chatCommandBuilder()
       prisma,
       user_id: interaction.user.id,
       server_id: interaction.guildId ?? "",
-      title: "Votre rang de chasseur",
-      subtitle: "Votre rang de chasseur",
+      title: "Votre progression de chasseur",
     })
     
     await interaction.followUp({

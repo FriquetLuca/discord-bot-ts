@@ -576,6 +576,7 @@ export const getNextRank = (rank: keyof typeof baseRank) => ({
 })[rank] as keyof typeof baseRank
 
 export const getNextRankExp = (rank: keyof typeof baseRank) => rankExp[getNextRank(rank)]
+export const getRankExp = (rank: keyof typeof baseRank) => rankExp[rank]
 
 export const getRawHunterRank = (x: number) => {
   if(x === gRank) {

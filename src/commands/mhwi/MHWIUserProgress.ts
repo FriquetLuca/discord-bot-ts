@@ -23,7 +23,6 @@ export const MHWIUserProgress = chatCommandBuilder()
       user_id: data.user,
       server_id: interaction.guildId ?? "",
       title: `Progression de ${userMention(data.user)}`,
-      subtitle: `Rang de chasseur`,
     })
     
     await interaction.followUp({

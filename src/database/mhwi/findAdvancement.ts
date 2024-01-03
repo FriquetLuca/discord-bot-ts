@@ -1,7 +1,7 @@
 import { fromRecord, fromRecords } from "@/libraries/sqeul"
 import type { MHWIMonsterSpecies, MHWIMonsterStrength, PrismaClient } from "@prisma/client"
 import { bold, italic } from "discord.js"
-import { getNextRank, getNextRankExp, getRank, getRawHunterRank, monsterRank } from "@/libraries/mhwi/loadCustomRank"
+import { getNextRank, getNextRankExp, getRank, getRankExp, getRawHunterRank, monsterRank } from "@/libraries/mhwi/loadCustomRank"
 import { getTimestamp } from "@/libraries/time"
 
 type MonsterRecord = { monster: MHWIMonsterSpecies, strength: MHWIMonsterStrength }
@@ -174,7 +174,7 @@ const monsterToCompletedList = <T extends Record<string|number|symbol, any>, U e
 
 export const toPercent = (n: number, decimals: number = 2) => Math.floor(n * 100 * Math.pow(10, decimals)) / 100
 
-export const generateHunterRankText = (
+export const generateHunterRankFullText = (
   server_id: string,
   advancement: {
     percent: number;
@@ -183,14 +183,35 @@ export const generateHunterRankText = (
   },
   time: bigint,
   rank: keyof typeof monsterRank
-) => `${bold(`Rang ${getRank(rank, server_id)}`)} : ${toPercent(advancement.percent)}% (${advancement.currently} / ${advancement.total}) en ${bold(getTimestamp(time))} ${italic(`(${bold(getTimestamp(advancement.currently === 0 ? BigInt(0) : time / BigInt(advancement.currently)))} / monstre)`)}`
+) => `${bold(`Rang ${getRank(rank, server_id)}`)} :
+${generateHunterRankText(advancement, time)}`
+
+export const generateHunterRankText = (
+  advancement: {
+    percent: number;
+    currently: number;
+    total: number;
+  },
+  time: bigint
+) => {
+  const result: string[] = []
+  if(advancement.currently !== advancement.total) {
+    result.push(`- Progression : ${advancement.currently} / ${advancement.total} (${toPercent(advancement.percent)}%)`)
+  }
+  if(advancement.currently !== advancement.total) {
+    result.push(`- Monstres restant : ${advancement.total - advancement.currently}`)
+  }
+  if(advancement.currently > 0) {
+    result.push(`- Temps total pour tous les monstres tués : ${bold(getTimestamp(time))} (${bold(getTimestamp(advancement.currently === 0 ? BigInt(0) : time / BigInt(advancement.currently)))} / monstre)`)
+  }
+  return result.join("\n")
+}
 
 export const findAdvancement = async (currentData: {
   prisma: PrismaClient
   user_id: string
   server_id: string
   title: string
-  subtitle: string
 }) => {
   const allKills = await searchAllMonsterKillsWithTime(currentData)
 
@@ -217,24 +238,32 @@ export const findAdvancement = async (currentData: {
   const time_s = monsterToCompletedList(completedMonsters(allKills, monsterRank["S"] as MonsterRecord[]), allKills).reduce((p, c) => c.kill_time + p, BigInt(0))
   const time_ss = monsterToCompletedList(completedMonsters(allKills, monsterRank["SS"] as MonsterRecord[]), allKills).reduce((p, c) => c.kill_time + p, BigInt(0))
   const time_sss = monsterToCompletedList(completedMonsters(allKills, monsterRank["SSS"] as MonsterRecord[]), allKills).reduce((p, c) => c.kill_time + p, BigInt(0))
+
+  const totalKillTime = time_sss + time_ss + time_s + time_a + time_b + time_c + time_d + time_e + time_f
   
   const currentHunterRank = getRawHunterRank(sumCurrentRank)
   const nextRank = getNextRank(currentHunterRank)
-
+  const currentRankExp = getRankExp(currentHunterRank)
   return `${bold(currentData.title)}
 
-${bold(currentData.subtitle)} : ${bold(getRank(currentHunterRank, currentData.server_id))}${nextRank === currentHunterRank ? "" : ` (${bold(sumCurrentRank.toString())} / ${bold(getNextRankExp(currentHunterRank).toString())} points restant pour atteindre le rang ${bold(getRank(getNextRank(currentHunterRank), currentData.server_id))})`}
+${bold("Rang de chasseur")} : ${bold(getRank(currentHunterRank, currentData.server_id))}${nextRank === currentHunterRank ? "" : `\n${bold("Prochain rang")} : ${bold(getRank(getNextRank(currentHunterRank), currentData.server_id))} (${bold((getNextRankExp(currentHunterRank) - sumCurrentRank).toString())} points restant)`}
+${bold("Expérience")} : ${bold((sumCurrentRank - currentRankExp).toString())} / ${bold((getNextRankExp(currentHunterRank) - currentRankExp).toString())}
+${bold("Expérience totale")} : ${bold(sumCurrentRank.toString())} / ${bold(getNextRankExp("G").toString())}
 
-${generateHunterRankText(currentData.server_id, progress_F, time_f, "F")}
-${generateHunterRankText(currentData.server_id, progress_E, time_e, "E")}
-${generateHunterRankText(currentData.server_id, progress_D, time_d, "D")}
-${generateHunterRankText(currentData.server_id, progress_C, time_c, "C")}
-${generateHunterRankText(currentData.server_id, progress_B, time_b, "B")}
-${generateHunterRankText(currentData.server_id, progress_A, time_a, "A")}
-${generateHunterRankText(currentData.server_id, progress_S, time_s, "S")}
-${generateHunterRankText(currentData.server_id, progress_SS, time_ss, "SS")}
-${generateHunterRankText(currentData.server_id, progress_SSS, time_sss, "SSS")}
+${generateHunterRankFullText(currentData.server_id, progress_F, time_f, "F")}
+${generateHunterRankFullText(currentData.server_id, progress_E, time_e, "E")}
+${generateHunterRankFullText(currentData.server_id, progress_D, time_d, "D")}
+${generateHunterRankFullText(currentData.server_id, progress_C, time_c, "C")}
+${generateHunterRankFullText(currentData.server_id, progress_B, time_b, "B")}
+${generateHunterRankFullText(currentData.server_id, progress_A, time_a, "A")}
+${generateHunterRankFullText(currentData.server_id, progress_S, time_s, "S")}
+${generateHunterRankFullText(currentData.server_id, progress_SS, time_ss, "SS")}
+${generateHunterRankFullText(currentData.server_id, progress_SSS, time_sss, "SSS")}
 
-${italic("Total")} : ${toPercent(sumCurrent / sumTotal)}% (${sumCurrent} / ${sumTotal}) en ${bold(getTimestamp(time_sss + time_ss + time_s + time_a + time_b + time_c + time_d + time_e + time_f))} ${italic(`(${bold(getTimestamp(sumCurrent === 0 ? BigInt(0) : (time_sss + time_ss + time_s + time_a + time_b + time_c + time_d + time_e + time_f) / BigInt(sumCurrent)))} / monstre)`)}
-`
+${bold("Total")} :
+${generateHunterRankText({
+  percent: sumCurrent / sumTotal,
+  currently: sumCurrent,
+  total: sumTotal,
+}, totalKillTime)}`
 }

@@ -287,10 +287,10 @@ ${bold("Monstres tués")} :
 - ${bold("Solo")} : ${bold(kills.length.toString())}
   - ${bold("Temps par monstre")} : ${bold(getTimestamp(soloTime / BigInt(kills.length)))}
   - ${bold("Temps total")} : ${bold(getTimestamp(soloTime))}
-- ${bold("Équipe")} : ${bold(team_kills.length.toString())} (${getTimestamp(teamTime)})
+- ${bold("Équipe")} : ${bold(team_kills.length.toString())}
   - ${bold("Temps par monstre")} : ${bold(getTimestamp(teamTime / BigInt(team_kills.length)))}
   - ${bold("Temps total")} : ${bold(getTimestamp(soloTime))}
-- ${bold("Total")} : ${bold(allKills.length.toString())} (${getTimestamp(totalTime)})
+- ${bold("Total")} : ${bold(allKills.length.toString())}
   - ${bold("Temps par monstre")} : ${bold(getTimestamp(totalTime / BigInt(allKills.length)))}
   - ${bold("Temps total")} : ${bold(getTimestamp(soloTime))}
 

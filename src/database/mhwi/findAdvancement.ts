@@ -274,7 +274,7 @@ export const findAdvancement = async (currentData: {
   const currentRankExp = getRankExp(currentHunterRank)
   return `${bold(currentData.title)}
 
-${bold("Rang de chasseur")} : ${bold(getRank(currentHunterRank, currentData.server_id))}${nextRank === currentHunterRank ? "" : `\n${bold("Prochain rang")} : ${bold(getRank(getNextRank(currentHunterRank), currentData.server_id))} (${bold((getNextRankExp(currentHunterRank) - sumCurrentRank).toString())} points restant)`}
+${bold("Rang de chasseur")} : ${bold(getRank(currentHunterRank, currentData.server_id))}${nextRank === currentHunterRank ? "" : `\n${bold("Prochain rang")} : ${bold(getRank(getNextRank(currentHunterRank), currentData.server_id))} (${bold((getNextRankExp(currentHunterRank) - sumCurrentRank).toString())} point${getNextRankExp(currentHunterRank) - sumCurrentRank === 1 ? "" : "s"} restant)`}
 ${bold("Expérience")} : ${bold((sumCurrentRank - currentRankExp).toString())} / ${bold((getNextRankExp(currentHunterRank) - currentRankExp).toString())}
 ${bold("Expérience totale")} : ${bold(sumCurrentRank.toString())} / ${bold(getNextRankExp("G").toString())}
 ${bold("Monstres tués")} : ${bold(allKills.length.toString())} (${bold(team_kills.length.toString())} en équipe)

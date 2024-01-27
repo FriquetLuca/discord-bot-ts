@@ -1,5 +1,5 @@
 export * from "./arrayValidator"
-export * from "./objectValidator"
+export * from "./objectValidatorus"
 
 export type Parser = {
   parse: (arg: unknown) => any

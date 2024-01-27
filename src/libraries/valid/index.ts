@@ -10,16 +10,20 @@ import type {
   ErrorValidatorChain,
   NumberParserSchema,
   NumberValidatorChain,
+  ObjectParserSchema,
+  ObjectValidatorChain,
   StringParserSchema,
   StringValidatorChain,
 } from "./scalars"
+import { type Parser } from "./composites"
 
-type ScalarParserSchema = BigintParserSchema | BooleanParserSchema | DateParserSchema | ErrorParserSchema | NumberParserSchema | StringParserSchema
+type ScalarParserSchema<S extends Record<string, Parser> = any> = BigintParserSchema | BooleanParserSchema | DateParserSchema | ErrorParserSchema | ObjectParserSchema<S> | NumberParserSchema | StringParserSchema
 
 type ScalarValidatorChain<
+  S extends Record<string, Parser>,
   Prs extends <U>(value: unknown, arg: U) => any,
   T extends Record<string, (arg: U, ...args: any) => any>,
-  U extends ScalarParserSchema
+  U extends ScalarParserSchema<S>
 > = U extends BigintParserSchema
   ? BigintValidatorChain<Prs, T, U>
   : U extends BooleanParserSchema
@@ -32,7 +36,9 @@ type ScalarValidatorChain<
             ? NumberValidatorChain<Prs, T, U>
             : U extends StringParserSchema
               ? StringValidatorChain<Prs, T, U>
-              : unknown
+              : U extends ObjectParserSchema<any>
+                ? ObjectValidatorChain<S, Prs, T, U>
+                : unknown
 
 export type {
   BigintParserSchema,
@@ -45,6 +51,8 @@ export type {
   ErrorValidatorChain,
   NumberParserSchema,
   NumberValidatorChain,
+  ObjectParserSchema,
+  ObjectValidatorChain,
   StringParserSchema,
   StringValidatorChain,
   ScalarParserSchema,

@@ -20,7 +20,7 @@ type MakeOptionalKeys<T, U extends keyof T> = Pick<T, U> & Partial<Omit<T, U>>
 
 type ParsedSchema<S extends Record<string, Parser>> = Collapse<MakeOptionalKeys<{ [K in keyof S]: ReturnType<S[K]["parse"]> }, PickRequiredSchemaKeys<{ [K in keyof S]: ReturnType<S[K]["schema"]> }>>>
 
-export function objectValidator<S extends Record<string, Parser>>(objectSchema: S) {
+export function objectValidatorus<S extends Record<string, Parser>>(objectSchema: S) {
   function validate(arg: unknown): asserts arg is ParsedSchema<S> {
     assert(arg, "object")
     let objectKeys = Object.keys(arg)

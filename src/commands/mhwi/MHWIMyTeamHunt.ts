@@ -141,5 +141,10 @@ export const MHWIMyTeamHunt = chatCommandBuilder()
       content: `\n**Temps de chasse en équipe (${current_exclusive ? "Exclusif" : "Inclusif"}) : ${getFrenchMHWIMonsterNames(current_monster_name)}${current_monster_strenght === undefined ? "" : ` (${getFrenchMHWIMonsterStrength(current_monster_strenght)})`}**\n${record_list_string}`
     });
   })
-  .autocomplete(async ({ interaction }) => await getMHWIMonstersAutocomplete("monster", interaction))
+  .autocomplete(async ({ interaction }) => {
+    const focusedValue = interaction.options.getFocused(true)
+    if(focusedValue.name === "monster") {
+      await getMHWIMonstersAutocomplete(interaction)
+    }
+  })
   .build()

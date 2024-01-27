@@ -1,3 +1,6 @@
 export * from "./getTypeof"
 export * from "./isInstanceOf"
 export * from "./matchTypeof"
+export * from "./newInstance"
+export * from "./assert"
+export * from "./typeError"

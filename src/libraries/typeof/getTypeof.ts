@@ -1,5 +1,35 @@
 import type { AnyFunction } from "@/libraries/types"
 
+export type VanillaTypes = "object" | "date" | "error" | "null" | "array" | "class" | "boolean" | "symbol" | "bigint" | "number" | "string" | "function" | "undefined"
+
+export type FromVanilla<T extends VanillaTypes> = T extends "error"
+? Error
+: T extends "date"
+  ? Date
+  : T extends "null"
+    ? null
+    : T extends "undefined"
+      ? undefined
+      : T extends "array"
+        ? unknown[]
+        : T extends "function"
+          ? (...args: any[]) => any
+          : T extends "string"
+            ? string
+              : T extends "number"
+              ? number
+                : T extends "bigint"
+                ? bigint
+                  : T extends "symbol"
+                  ? symbol
+                    : T extends "boolean"
+                    ? boolean
+                        : T extends "class"
+                          ? new (...args: any[]) => any
+                          : T extends "object"
+                            ? object
+                            : unknown
+;
 export type GetTypeof<T> = T extends Error
 ? "error"
 : T extends Date
@@ -26,7 +56,7 @@ export type GetTypeof<T> = T extends Error
                     ? "boolean"
                     : T extends object
                       ? "object"
-                      : "date" | "error" | "null" | "array" | "class" | "boolean" | "symbol" | "bigint" | "number" | "string" | "function" | "undefined"
+                      : VanillaTypes
 
 /**
  * Get the type of the parameter, extending `typeof` to support `class`, `array`, `date`, `error` and `null` as native options.

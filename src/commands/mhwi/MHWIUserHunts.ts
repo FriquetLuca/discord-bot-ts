@@ -69,5 +69,10 @@ export const MHWIUserHunts = chatCommandBuilder()
       })}`
     })
   })
-  .autocomplete(async ({ interaction }) => await getMHWIMonstersAutocomplete("monster", interaction))
+  .autocomplete(async ({ interaction }) => {
+    const focusedValue = interaction.options.getFocused(true)
+    if(focusedValue.name === "monster") {
+      await getMHWIMonstersAutocomplete(interaction)
+    }
+  })
   .build()

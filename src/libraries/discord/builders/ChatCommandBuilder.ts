@@ -3,9 +3,10 @@ import {
   type AutocompleteInteraction,
   type ButtonInteraction,
   type Client,
-  type CommandInteraction,
   type ModalSubmitInteraction,
   type StringSelectMenuInteraction,
+  type ChatInputCommandInteraction,
+  type CacheType,
 } from "discord.js"
 import { type Button, type Modal, type StringSelectMenu } from "../Command"
 import { prisma } from "@/database/prisma"
@@ -19,7 +20,7 @@ export class ChatCommandBuilder extends SlashCommandBuilder {
   private buttons: Button[] = [];
   private stringSelectMenus: StringSelectMenu[] = [];
   private _autocomplete: BaseHandler<AutocompleteInteraction> | undefined;
-  private run: InteractionHandler<CommandInteraction> = async () => {};
+  private run: InteractionHandler<ChatInputCommandInteraction<CacheType>> = async () => {};
   public addModal(name: string, handleSubmit: InteractionHandler<ModalSubmitInteraction>) {
     this.modals.push({
       customId: name,
@@ -88,7 +89,7 @@ export class ChatCommandBuilder extends SlashCommandBuilder {
     this.cooldown = cooldown
     return this
   }
-  public handleCommand(run: InteractionHandler<CommandInteraction>) {
+  public handleCommand(run: InteractionHandler<ChatInputCommandInteraction<CacheType>>) {
     this.run = run
     return this
   }
@@ -123,7 +124,7 @@ export class ChatCommandBuilder extends SlashCommandBuilder {
       hasCooldown: this.hasCooldown,
       cooldown: this.cooldown,
       autocomplete: this._autocomplete,
-      run: async (client: Client, interaction: CommandInteraction) => {
+      run: async (client: Client, interaction: ChatInputCommandInteraction<CacheType>) => {
         if(!prisma) {
           await interaction.reply({
             ephemeral: true,
@@ -131,13 +132,12 @@ export class ChatCommandBuilder extends SlashCommandBuilder {
           })
           return
         }
-        const context = {
-          client,
-          interaction,
-          prisma
-        }
         try {
-          this.run && this.run(context)
+          this.run && this.run({
+            client,
+            interaction,
+            prisma
+          })
         } catch(e) {
           console.error(e)
           try {

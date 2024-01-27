@@ -4,7 +4,12 @@ import { bold } from "discord.js"
 import { getNextRank, getNextRankExp, getRank, getRankExp, getRawHunterRank, monsterRank } from "@/libraries/mhwi/loadCustomRank"
 import { getTimestamp } from "@/libraries/time"
 
-type MonsterRecord = { monster: MHWIMonsterSpecies, strength: MHWIMonsterStrength }
+export type MonsterRecord = {
+  monster: MHWIMonsterSpecies,
+  strength: MHWIMonsterStrength,
+  uncapturable?: boolean,
+  siege?: boolean,
+}
 
 export const rankProgression = <T extends MonsterRecord>(records: { id: string, monster: MHWIMonsterSpecies, strength: MHWIMonsterStrength }[], monsterRecords: T[]) => {
   const a = fromRecord(
@@ -153,7 +158,7 @@ export const searchAllMonsterKills = async (currentData: {
     .get()
 }
 
-const monsterToCompletedList = <T extends Record<string|number|symbol, any>, U extends ({ id: string; monster: MHWIMonsterSpecies; strength: MHWIMonsterStrength; kill_time: bigint; })>(
+export const monsterToCompletedList = <T extends Record<string|number|symbol, any>, U extends ({ id: string; monster: MHWIMonsterSpecies; strength: MHWIMonsterStrength; kill_time: bigint; })>(
   elements: T[],
   allRecords: U[]
 ) => fromRecords(elements)

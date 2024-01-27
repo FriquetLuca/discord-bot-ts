@@ -95,10 +95,17 @@ enum MHWIMonsterStrength {
   AlphaTempered
 }
 
+enum MHWIHuntCategory {
+  Freestyle
+  Capture
+  Gladiator
+}
+
 model MHWIMonsterKill {
   id          String  @id @default(cuid())
   user_id     String
   kill_time   BigInt
+  category    MHWIHuntCategory
   monster     MHWIMonsterSpecies
   strength    MHWIMonsterStrength
   createdAt DateTime @default(now())
@@ -108,6 +115,7 @@ model MHWIMonsterKill {
 model MHWIMonsterKillTeam {
   id          String  @id @default(cuid())
   kill_time   BigInt
+  category    MHWIHuntCategory
   monster     MHWIMonsterSpecies
   strength    MHWIMonsterStrength
   members MHWITeamMembers[]

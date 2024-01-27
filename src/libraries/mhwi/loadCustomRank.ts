@@ -1,6 +1,7 @@
 import { GuildIds } from "@/Bot";
 import { loadModules } from "@/libraries/io"
 import type { MHWIMonsterSpecies, MHWIMonsterStrength } from "@prisma/client"
+import { fromRecord } from "../sqeul";
 
 const newMonsterRecord = <T extends { monster: MHWIMonsterSpecies, strength: MHWIMonsterStrength }>(records: T[]) => records
 
@@ -31,6 +32,12 @@ const baseRank = {
 };
 const customRank = loadedCustomRank.length === 0 ? [ baseRank ] : [ baseRank, loadedCustomRank[0] ]
 
+export const getRanks = (serverId: string) => fromRecord(GuildIds.includes(serverId) ? customRank[1] ?? customRank[0] : customRank[0])
+  .map((k, v) => ({
+    name: v,
+    value: k
+  }))
+
 export const getRank = (rank: keyof typeof baseRank, serverId: string) => GuildIds.includes(serverId) ? customRank[1][rank] ?? customRank[0][rank] : customRank[0][rank]
 
 export const monsterRank = {
@@ -38,7 +45,8 @@ export const monsterRank = {
   SSS: newMonsterRecord([
     {
       monster: "Fatalis",
-      strength: "AlphaTempered"
+      strength: "AlphaTempered",
+      uncapturable: true,
     },
     {
       monster: "Rajang",
@@ -52,41 +60,50 @@ export const monsterRank = {
   SS: newMonsterRecord([
     {
       monster: "Fatalis",
-      strength: "Normal"
+      strength: "Normal",
+      uncapturable: true,
     },
     {
       monster: "CrimsonFatalis",
-      strength: "Normal"
+      strength: "Normal",
+      uncapturable: true,
     },
     {
       monster: "WhiteFatalis",
-      strength: "Normal"
+      strength: "Normal",
+      uncapturable: true,
     },
     {
       monster: "Velkhana",
-      strength: "AlphaTempered"
+      strength: "AlphaTempered",
+      uncapturable: true,
     },
     {
       monster: "Namielle",
-      strength: "AlphaTempered"
+      strength: "AlphaTempered",
+      uncapturable: true,
     },
     {
       monster: "Alatreon",
-      strength: "Normal"
+      strength: "Normal",
+      uncapturable: true,
     }
   ]),
   S: newMonsterRecord([
     {
       monster: "Behemoth",
-      strength: "Tempered"
+      strength: "Tempered",
+      uncapturable: true,
     },
     {
       monster: "SafiJiva",
-      strength: "Normal"
+      strength: "Normal",
+      uncapturable: true,
     },
     {
       monster: "KulveTaroth",
-      strength: "AlphaTempered"
+      strength: "Normal",
+      uncapturable: true,
     },
     {
       monster: "FuriousRajang",
@@ -94,23 +111,28 @@ export const monsterRank = {
     },
     {
       monster: "Lunastra",
-      strength: "Tempered"
+      strength: "Tempered",
+      uncapturable: true,
     },
     {
       monster: "Kirin",
-      strength: "Tempered"
+      strength: "Tempered",
+      uncapturable: true,
     },
     {
       monster: "Namielle",
-      strength: "Tempered"
+      strength: "Tempered",
+      uncapturable: true,
     },
     {
       monster: "Velkhana",
-      strength: "Tempered"
+      strength: "Tempered",
+      uncapturable: true,
     },
     {
       monster: "RuinerNergigante",
-      strength: "Tempered"
+      strength: "Tempered",
+      uncapturable: true,
     },
     {
       monster: "GoldRathian",
@@ -122,7 +144,8 @@ export const monsterRank = {
     },
     {
       monster: "BlackveilVaalHazak",
-      strength: "Tempered"
+      strength: "Tempered",
+      uncapturable: true,
     },
     {
       monster: "SavageDeviljho",
@@ -134,17 +157,24 @@ export const monsterRank = {
     },
     {
       monster: "RagingBrachydios",
-      strength: "Normal"
+      strength: "Normal",
+      uncapturable: true,
     },
     {
       monster: "SharaIshvalda",
-      strength: "Normal"
+      strength: "Normal",
+      uncapturable: true,
     }
   ]),
   A: newMonsterRecord([
     {
       monster: "BlackDiablos",
       strength: "Tempered"
+    },
+    {
+      monster: "KulveTaroth",
+      strength: "AlphaTempered",
+      uncapturable: true,
     },
     {
       monster: "Deviljho",
@@ -156,11 +186,13 @@ export const monsterRank = {
     },
     {
       monster: "VaalHazak",
-      strength: "Tempered"
+      strength: "Tempered",
+      uncapturable: true,
     },
     {
       monster: "VaalHazak",
-      strength: "AlphaTempered"
+      strength: "AlphaTempered",
+      uncapturable: true,
     },
     {
       monster: "GoldRathian",
@@ -184,23 +216,28 @@ export const monsterRank = {
     },
     {
       monster: "Kirin",
-      strength: "AlphaTempered"
+      strength: "AlphaTempered",
+      uncapturable: true,
     },
     {
       monster: "Teostra",
-      strength: "Tempered"
+      strength: "Tempered",
+      uncapturable: true,
     },
     {
       monster: "Teostra",
-      strength: "AlphaTempered"
+      strength: "AlphaTempered",
+      uncapturable: true,
     },
     {
       monster: "KushalaDaora",
-      strength: "Tempered"
+      strength: "Tempered",
+      uncapturable: true,
     },
     {
       monster: "KushalaDaora",
-      strength: "AlphaTempered"
+      strength: "AlphaTempered",
+      uncapturable: true,
     },
     {
       monster: "Abiogladius",
@@ -208,31 +245,39 @@ export const monsterRank = {
     },
     {
       monster: "ZorahMagdaros",
-      strength: "AlphaTempered"
+      strength: "AlphaTempered",
+      uncapturable: true,
+      siege: true,
     },
     {
       monster: "Nergigante",
-      strength: "Tempered"
+      strength: "Tempered",
+      uncapturable: true,
     },
     {
       monster: "Nergigante",
-      strength: "AlphaTempered"
+      strength: "AlphaTempered",
+      uncapturable: true,
     },
     {
       monster: "XenoJiva",
-      strength: "Tempered"
+      strength: "Tempered",
+      uncapturable: true,
     },
     {
       monster: "XenoJiva",
-      strength: "AlphaTempered"
+      strength: "AlphaTempered",
+      uncapturable: true,
     },
     {
       monster: "Lunastra",
-      strength: "AlphaTempered"
+      strength: "AlphaTempered",
+      uncapturable: true,
     },
     {
       monster: "Behemoth",
-      strength: "Normal"
+      strength: "Normal",
+      uncapturable: true,
     },
     {
       monster: "Rajang",
@@ -244,7 +289,8 @@ export const monsterRank = {
     },
     {
       monster: "OldLeshen",
-      strength: "Normal"
+      strength: "Normal",
+      uncapturable: true,
     },
     {
       monster: "FrostfangBarioth",
@@ -264,7 +310,8 @@ export const monsterRank = {
     },
     {
       monster: "Velkhana",
-      strength: "Normal"
+      strength: "Normal",
+      uncapturable: true,
     }
   ]),
   B: newMonsterRecord([
@@ -386,8 +433,16 @@ export const monsterRank = {
       monster: "PinkRathian",
       strength: "Normal"
     },
+    {
+      monster: "Legiana",
+      strength: "Tempered"
+    },
   ]),
   D: newMonsterRecord([
+    {
+      monster: "Legiana",
+      strength: "Normal"
+    },
     {
       monster: "TobiKadashi",
       strength: "Tempered"
@@ -451,10 +506,6 @@ export const monsterRank = {
       strength: "Tempered"
     },
     {
-      monster: "Legiana",
-      strength: "Tempered"
-    },
-    {
       monster: "Paolumu",
       strength: "Tempered"
     },
@@ -487,10 +538,6 @@ export const monsterRank = {
       strength: "Normal"
     },
     {
-      monster: "Barroth",
-      strength: "Normal"
-    },
-    {
       monster: "Rathian",
       strength: "Normal"
     },
@@ -512,10 +559,6 @@ export const monsterRank = {
     },
   ]),
   F: newMonsterRecord([
-    {
-      monster: "Legiana",
-      strength: "Normal"
-    },
     {
       monster: "Paolumu",
       strength: "Normal"
@@ -546,6 +589,10 @@ export const monsterRank = {
     },
     {
       monster: "TobiKadashi",
+      strength: "Normal"
+    },
+    {
+      monster: "Barroth",
       strength: "Normal"
     },
   ])

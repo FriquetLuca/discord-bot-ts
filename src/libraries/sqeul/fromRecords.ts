@@ -110,6 +110,13 @@ export type RecordsObject<T extends RecordType> = {
    */
   map: (callbackfn: (value: T, index: number, array: T[]) => T, thisArg?: any) => RecordsObject<T>
   /**
+   * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+   * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
+   * @param thisArg An object to which the this keyword can refer in the callbackfn function. If thisArg is omitted, undefined is used as the this value.
+   * @returns A RecordsObject that contains the results
+   */
+  transform: <U extends RecordType>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: any) => RecordsObject<U>
+  /**
    * Create an union of both records
    * @param unionRecords The records to union with
    * @returns A RecordsObject containing the union of both records
@@ -318,7 +325,8 @@ export function fromRecords<T extends RecordType>(records: T[]): RecordsObject<T
     limit: (limit) => fromRecords(records.slice(0, limit)),
     slice: (offset, limit) => fromRecords(records.slice(offset, offset + limit)),
     map: (callbackfn: (value: T, index: number, array: T[]) => T, thisArg?: any) => fromRecords(records.map(callbackfn, thisArg)),
-    union: <U extends RecordType>(unionRecords: U[]) => fromRecords({ ...records, ...unionRecords }),
+    transform: <U extends RecordType>(callbackfn: (value: T, index: number, array: T[]) => U, thisArg?: any) => fromRecords(records.map(callbackfn, thisArg)),
+    union: <U extends RecordType>(unionRecords: U[]) => fromRecords([ ...records, ...unionRecords ]),
     pick: <U extends keyof T>(...selection: U[]) => fromRecords(records.map((record) => fromRecord(record).pick(...selection).get())),
     select: <U extends keyof T, V extends string, W extends {
       key: U;

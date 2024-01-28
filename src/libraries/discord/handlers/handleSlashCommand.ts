@@ -1,7 +1,7 @@
-import { type Client, type CommandInteraction, Collection } from "discord.js"
+import { type Client, Collection, type ChatInputCommandInteraction, type CacheType } from "discord.js"
 import { Commands, type DiscordClient } from "../"
 
-export const handleSlashCommand = async (client: Client, interaction: CommandInteraction): Promise<void> => {
+export const handleSlashCommand = async (client: Client, interaction: ChatInputCommandInteraction<CacheType>): Promise<void> => {
   const slashCommand = Commands.find(c => c.name === interaction.commandName)
   if (!slashCommand) {
     interaction.reply({ content: "La commande employée n'existe pas / plus." })
@@ -10,8 +10,7 @@ export const handleSlashCommand = async (client: Client, interaction: CommandInt
 
   if(slashCommand.hasCooldown) {
 
-    const { cooldowns } = interaction.client as DiscordClient;
-  
+    const { cooldowns } = interaction.client as DiscordClient
     if (!cooldowns.has(slashCommand.name)) {
       cooldowns.set(slashCommand.name, new Collection());
     }

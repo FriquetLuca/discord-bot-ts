@@ -1,4 +1,6 @@
 export * from "./getDirectoryPaths"
 export * from "./getFileOrDirectoryPaths"
 export * from "./getFilePaths"
+export * from "./loadModule"
 export * from "./loadModules"
+export * from "./readFile"

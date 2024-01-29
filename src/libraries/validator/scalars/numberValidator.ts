@@ -1,22 +1,26 @@
+import type { Collapse } from "@/libraries/types"
+import type { ParsedData, Schema } from "../schema"
 import { assert } from "@/libraries/typeof"
-import type { Collapse, OmitFirstArg, OverrideReturnType } from "@/libraries/types"
-import { type DataSchema } from "../schema"
+import { greaterLessError, minMaxError } from "../errors"
 
-export type NumberParserSchema = {
-  min?: number
-  max?: number
-  less?: number
-  greater?: number
-  integer?: boolean
-  undefinable: boolean
-  optional: boolean
-  nullable: boolean
+type NumberSchema<Data> = Schema<"number", Data>
+
+export type NumberValidator<Data> = {
+  parse: (value: unknown) => Collapse<ParsedData<Data, number>>
+  getSchema: () => NumberSchema<Data>
+  min: (min: number) => NumberValidator<Omit<Data, "min"> & { min: number }>
+  max: (max: number) => NumberValidator<Omit<Data, "max"> & { max: number }>
+  less: (less: number) => NumberValidator<Omit<Data, "less"> & { less: number }>
+  greater: (greater: number) => NumberValidator<Omit<Data, "greater"> & { greater: number }>
+  optional: () => NumberValidator<Omit<Data, "optional"> & { optional: true }>
+  required: () => NumberValidator<Omit<Data, "optional"> & { optional: false }>
+  undefinable: () => NumberValidator<Omit<Data, "undefinable"> & { undefinable: true }>
+  definable: () => NumberValidator<Omit<Data, "undefinable"> & { undefinable: false }>
+  nullable: () => NumberValidator<Omit<Data, "nullable"> & { nullable: true }>
+  notnull: () => NumberValidator<Omit<Data, "nullable"> & { nullable: false }>
 }
 
-const numberParser = <T extends NumberParserSchema>(val: unknown, datas: T): T["undefinable"] extends true
-? (T["nullable"] extends true ? number | null | undefined : number | undefined)
-: (T["nullable"] extends true ? number | null : number
-) => {
+const numberParser = <Data>(val: unknown, datas: Data): ParsedData<Data, number> => {
   const {
     integer,
     less,
@@ -25,7 +29,7 @@ const numberParser = <T extends NumberParserSchema>(val: unknown, datas: T): T["
     max,
     undefinable,
     nullable,
-  } = datas
+  } = datas as any
   if(undefinable === true && val === undefined) {
     return val as any
   }
@@ -33,106 +37,33 @@ const numberParser = <T extends NumberParserSchema>(val: unknown, datas: T): T["
     return val as any
   }
   assert(val, "number")
-  if(min !== undefined) { 
-    if(max !== undefined && (val < min || val > max)) {
-      throw new Error(`The number must be greater or equal to ${min} and less than ${max}`)
-    }
-    if(val < min) {
-      throw new Error(`The number must be greater or equal to ${min}`)
-    }
-  }
-  if(max !== undefined && val > max) {
-    throw new Error(`The number must be less or equal to ${max}`)
-  }
-  if(less !== undefined) { 
-    if(greater !== undefined && (val >= less || val <= greater)) {
-      throw new Error(`The number must be greater or equal to ${greater} and less than ${less}`)
-    }
-    if(val >= less) {
-      throw new Error(`The number must be less than ${less}`)
-    }
-  }
-  if(greater !== undefined && val <= greater) {
-    throw new Error(`The number must be greater or equal to ${greater}`)
-  }
-  if(integer === true && !Number.isInteger(val)) {
-    throw new Error(`The number must be an integer`)
-  }
+  minMaxError(val, min, max)
+  greaterLessError(val, less, greater)
   return val as any
 }
 
-export type NumberValidatorChain<Prs extends <U>(value: unknown, arg: U) => any, T extends Record<string, (arg: U, ...args: any) => any>, U extends NumberParserSchema> = {
-  [K in keyof T]: OverrideReturnType<OmitFirstArg<T[K]>, NumberValidatorChain<Prs, T, Collapse<U & ReturnType<OmitFirstArg<T[K]>>>>>
-} & {
-  schema: () => DataSchema<"number", (value: unknown) => ReturnType<typeof numberParser<U>>, U>
-  parse: (value: unknown) => ReturnType<typeof numberParser<U>>
-}
-
-function baseNumberValidator<Prs extends (value: unknown, arg: any) => any, T extends Record<string, (arg: U, ...args: any) => any>, U extends NumberParserSchema>(fns: T, arg: U, parse: Prs) {
-  const patchFns = {} as any
-  for(const fnKey in fns) {
-    const fn = fns[fnKey]
-    patchFns[fnKey] = (...args: any) => baseNumberValidator(fns, fn(arg, ...args), parse)
-  }
+export const numberValidatorConstructor = <Data>(data: Data): NumberValidator<Data> => {
   return {
-    ...patchFns,
-    schema: () => ({ "_type": "number", "_parser": (value: unknown) => parse(value, arg), "_datas": arg }),
-    parse: (value: unknown) => parse(value, arg),
-  } as NumberValidatorChain<Prs, T, U>
+    parse: (value) => numberParser(value, data) as any,
+    getSchema: () => ({
+      type: "number",
+      data,
+    }),
+    min: (min: number) => numberValidatorConstructor({ ...data, min }),
+    max: (max: number) => numberValidatorConstructor({ ...data, max }),
+    less: (less: number) => numberValidatorConstructor({ ...data, less }),
+    greater: (greater: number) => numberValidatorConstructor({ ...data, greater }),
+    optional: () => numberValidatorConstructor({ ...data, optional: true }),
+    required: () => numberValidatorConstructor({ ...data, optional: false }),
+    undefinable: () => numberValidatorConstructor({ ...data, undefinable: true }),
+    definable: () => numberValidatorConstructor({ ...data, undefinable: false }),
+    nullable: () => numberValidatorConstructor({ ...data, nullable: true }),
+    notnull: () => numberValidatorConstructor({ ...data, nullable: false }),
+  }
 }
 
-export const numberValidator = () => baseNumberValidator({
-    min: (arg: {}, minValue: number) => ({
-      ...arg,
-      min: minValue,
-    }),
-    max: (arg: {}, maxValue: number) => ({
-      ...arg,
-      max: maxValue,
-    }),
-    less: (arg: {}, less: number) => ({
-      ...arg,
-      less,
-    }),
-    greater: (arg: {}, greater: number) => ({
-      ...arg,
-      greater,
-    }),
-    optional: (arg: {}) => ({
-      ...arg,
-      optional: true as true,
-    }),
-    defined: (arg: {}) => ({
-      ...arg,
-      optional: false as false,
-    }),
-    definable: (arg: {}) => ({
-      ...arg,
-      undefinable: false as false,
-    }),
-    undefinable: (arg: {}) => ({
-      ...arg,
-      undefinable: true as true,
-    }),
-    required: (arg: {}) => ({
-      ...arg,
-      optional: false as false,
-      undefinable: false as false,
-    }),
-    isInteger: (arg: {}, integer: boolean) => ({
-      ...arg,
-      integer,
-    }),
-    nullable: (arg: {}) => ({
-      ...arg,
-      nullable: true as true,
-    }),
-    notnull: (arg: {}) => ({
-      ...arg,
-      nullable: false as false,
-    }),
-  }, {
-    optional: false as false,
-    undefinable: false as false,
-    nullable: false as false,
-  }, numberParser)
+export const numberValidator = () => numberValidatorConstructor({
+  optional: false as false,
+  nullable: false as false,
+  undefinable: false as false,
+})

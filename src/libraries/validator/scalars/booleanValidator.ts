@@ -1,26 +1,29 @@
+import type { Collapse } from "@/libraries/types"
+import type { ParsedData, Schema } from "../schema"
 import { assert } from "@/libraries/typeof"
-import type { Collapse, OmitFirstArg, OverrideReturnType } from "@/libraries/types"
-import { type DataSchema } from "../schema"
 
-export type BooleanParserSchema = {
-  checked?: boolean
-  unchecked?: boolean
-  undefinable: boolean
-  optional: boolean
-  nullable: boolean
+type BooleanSchema<Data> = Schema<"boolean", Data>
+
+export type BooleanValidator<Data> = {
+  parse: (value: unknown) => Collapse<ParsedData<Data, Error>>
+  getSchema: () => BooleanSchema<Data>
+  checked: () => BooleanValidator<Omit<Data, "checked"> & { checked: true }>
+  unchecked: () => BooleanValidator<Omit<Data, "checked"> & { checked: false }>
+  anyCheck: () => BooleanValidator<Omit<Data, "checked"> & { checked: undefined }>
+  optional: () => BooleanValidator<Omit<Data, "optional"> & { optional: true }>
+  required: () => BooleanValidator<Omit<Data, "optional"> & { optional: false }>
+  undefinable: () => BooleanValidator<Omit<Data, "undefinable"> & { undefinable: true }>
+  definable: () => BooleanValidator<Omit<Data, "undefinable"> & { undefinable: false }>
+  nullable: () => BooleanValidator<Omit<Data, "nullable"> & { nullable: true }>
+  notnull: () => BooleanValidator<Omit<Data, "nullable"> & { nullable: false }>
 }
 
-export type BooleanSchemaToType<T extends BooleanParserSchema> = T["undefinable"] extends true
-? (T["nullable"] extends true ? boolean | null | undefined : boolean | undefined)
-: (T["nullable"] extends true ? boolean | null : boolean)
-
-const booleanParser = <T extends BooleanParserSchema>(val: unknown, datas: T): BooleanSchemaToType<T> => {
+const booleanParser = <Data>(val: unknown, datas: Data): ParsedData<Data, Data extends { checked: true } ? true : Data extends { checked: false } ? false : boolean> => {
   const {
     checked,
-    unchecked,
     undefinable,
     nullable,
-  } = datas
+  } = datas as any
   if(undefinable === true && val === undefined) {
     return val as any
   }
@@ -28,75 +31,36 @@ const booleanParser = <T extends BooleanParserSchema>(val: unknown, datas: T): B
     return val as any
   }
   assert(val, "boolean")
-  if(checked === true && val === true) { 
+  if(checked === true && val !== true) { 
     throw new Error(`The boolean must be checked`)
   }
-  if(unchecked === true && val === false) { 
+  if(checked === false && val !== false) { 
     throw new Error(`The boolean must be unchecked`)
   }
   return val as any
 }
 
-export type BooleanValidatorChain<Prs extends <U>(value: unknown, arg: U) => any, T extends Record<string, (arg: U, ...args: any) => any>, U extends BooleanParserSchema> = {
-  [K in keyof T]: OverrideReturnType<OmitFirstArg<T[K]>, BooleanValidatorChain<Prs, T, Collapse<U & ReturnType<OmitFirstArg<T[K]>>>>>
-} & {
-  schema: () => DataSchema<"boolean", (value: unknown) => ReturnType<typeof booleanParser<U>>, U>
-  parse: (value: unknown) => ReturnType<typeof booleanParser<U>>
-}
-
-function baseBooleanValidator<Prs extends (value: unknown, arg: any) => any, T extends Record<string, (arg: U, ...args: any) => any>, U extends BooleanParserSchema>(fns: T, arg: U, parse: Prs) {
-  const patchFns = {} as any
-  for(const fnKey in fns) {
-    const fn = fns[fnKey]
-    patchFns[fnKey] = (...args: any) => baseBooleanValidator(fns, fn(arg, ...args), parse)
-  }
+export const booleanValidatorConstructor = <Data>(data: Data): BooleanValidator<Data> => {
   return {
-    ...patchFns,
-    schema: () => ({ "_type": "boolean", "_parser": (value: unknown) => parse(value, arg), "_datas": arg }),
-    parse: (value: unknown) => parse(value, arg),
-  } as BooleanValidatorChain<Prs, T, U>
+    parse: (value) => booleanParser(value, data) as any,
+    getSchema: () => ({
+      type: "boolean",
+      data,
+    }),
+    checked: () => booleanValidatorConstructor({ ...data, checked: true }),
+    unchecked: () => booleanValidatorConstructor({ ...data, checked: false }),
+    anyCheck: () => booleanValidatorConstructor({ ...data, checked: undefined }),
+    optional: () => booleanValidatorConstructor({ ...data, optional: true }),
+    required: () => booleanValidatorConstructor({ ...data, optional: false }),
+    undefinable: () => booleanValidatorConstructor({ ...data, undefinable: true }),
+    definable: () => booleanValidatorConstructor({ ...data, undefinable: false }),
+    nullable: () => booleanValidatorConstructor({ ...data, nullable: true }),
+    notnull: () => booleanValidatorConstructor({ ...data, nullable: false }),
+  }
 }
 
-export const booleanValidator = () => baseBooleanValidator({
-    checked: (arg: {}, checked: boolean) => ({
-      ...arg,
-      checked,
-    }),
-    unchecked: (arg: {}, unchecked: boolean) => ({
-      ...arg,
-      unchecked,
-    }),
-    optional: (arg: {}) => ({
-      ...arg,
-      optional: true as true,
-    }),
-    defined: (arg: {}) => ({
-      ...arg,
-      optional: false as false,
-    }),
-    definable: (arg: {}) => ({
-      ...arg,
-      undefinable: false as false,
-    }),
-    undefinable: (arg: {}) => ({
-      ...arg,
-      undefinable: true as true,
-    }),
-    required: (arg: {}) => ({
-      ...arg,
-      optional: false as false,
-      undefinable: false as false,
-    }),
-    nullable: (arg: {}) => ({
-      ...arg,
-      nullable: true as true,
-    }),
-    notnull: (arg: {}) => ({
-      ...arg,
-      nullable: false as false,
-    }),
-  }, {
-    optional: false as false,
-    undefinable: false as false,
-    nullable: false as false,
-  }, booleanParser)
+export const booleanValidator = () => booleanValidatorConstructor({
+  optional: false as false,
+  nullable: false as false,
+  undefinable: false as false,
+})

@@ -1,21 +1,25 @@
+import type { Collapse } from "@/libraries/types"
+import type { ParsedData, Schema } from "../schema"
 import { assert } from "@/libraries/typeof"
-import type { Collapse, OmitFirstArg, OverrideReturnType } from "@/libraries/types"
-import { type DataSchema } from "../schema"
 
-export type DateParserSchema = {
-  undefinable: boolean
-  nullable: boolean
-  optional: boolean
+type DateSchema<Data> = Schema<"date", Data>
+
+export type DateValidator<Data> = {
+  parse: (value: unknown) => Collapse<ParsedData<Data, Date>>
+  getSchema: () => DateSchema<Data>
+  optional: () => DateValidator<Omit<Data, "optional"> & { optional: true }>
+  required: () => DateValidator<Omit<Data, "optional"> & { optional: false }>
+  undefinable: () => DateValidator<Omit<Data, "undefinable"> & { undefinable: true }>
+  definable: () => DateValidator<Omit<Data, "undefinable"> & { undefinable: false }>
+  nullable: () => DateValidator<Omit<Data, "nullable"> & { nullable: true }>
+  notnull: () => DateValidator<Omit<Data, "nullable"> & { nullable: false }>
 }
 
-const dateParser = <T extends DateParserSchema>(val: unknown, datas: T): T["undefinable"] extends true
-  ? (T["nullable"] extends true ? Date | null | undefined : Date | undefined)
-  : (T["nullable"] extends true ? Date | null : Date
-  ) => {
+const dateParser = <Data>(val: unknown, datas: Data): ParsedData<Data, Date> => {
   const {
     undefinable,
     nullable,
-  } = datas
+  } = datas as any
   if(undefinable === true && val === undefined) {
     return val as any
   }
@@ -26,58 +30,24 @@ const dateParser = <T extends DateParserSchema>(val: unknown, datas: T): T["unde
   return val as any
 }
 
-export type DateValidatorChain<Prs extends <U>(value: unknown, arg: U) => any, T extends Record<string, (arg: U, ...args: any) => any>, U extends DateParserSchema> = {
-  [K in keyof T]: OverrideReturnType<OmitFirstArg<T[K]>, DateValidatorChain<Prs, T, Collapse<U & ReturnType<OmitFirstArg<T[K]>>>>>
-} & {
-  schema: () => DataSchema<"date", (value: unknown) => ReturnType<typeof dateParser<U>>, U>
-  parse: (value: unknown) => ReturnType<typeof dateParser<U>>
-}
-
-function baseDateValidator<Prs extends (value: unknown, arg: any) => any, T extends Record<string, (arg: U, ...args: any) => any>, U extends DateParserSchema>(fns: T, arg: U, parse: Prs) {
-  const patchFns = {} as any
-  for(const fnKey in fns) {
-    const fn = fns[fnKey]
-    patchFns[fnKey] = (...args: any) => baseDateValidator(fns, fn(arg, ...args), parse)
-  }
+export const dateValidatorConstructor = <Data>(data: Data): DateValidator<Data> => {
   return {
-    ...patchFns,
-    schema: () => ({ "_type": "date", "_parser": (value: unknown) => parse(value, arg), "_datas": arg }),
-    parse: (value: unknown) => parse(value, arg),
-  } as DateValidatorChain<Prs, T, U>
+    parse: (value) => dateParser(value, data) as any,
+    getSchema: () => ({
+      type: "date",
+      data,
+    }),
+    optional: () => dateValidatorConstructor({ ...data, optional: true }),
+    required: () => dateValidatorConstructor({ ...data, optional: false }),
+    undefinable: () => dateValidatorConstructor({ ...data, undefinable: true }),
+    definable: () => dateValidatorConstructor({ ...data, undefinable: false }),
+    nullable: () => dateValidatorConstructor({ ...data, nullable: true }),
+    notnull: () => dateValidatorConstructor({ ...data, nullable: false }),
+  }
 }
 
-export const dateValidator = () => baseDateValidator({
-    optional: (arg: {}) => ({
-      ...arg,
-      optional: true as true,
-    }),
-    defined: (arg: {}) => ({
-      ...arg,
-      optional: false as false,
-    }),
-    definable: (arg: {}) => ({
-      ...arg,
-      undefinable: false as false,
-    }),
-    undefinable: (arg: {}) => ({
-      ...arg,
-      undefinable: true as true,
-    }),
-    required: (arg: {}) => ({
-      ...arg,
-      optional: false as false,
-      undefinable: false as false,
-    }),
-    nullable: (arg: {}) => ({
-      ...arg,
-      nullable: true as true,
-    }),
-    notnull: (arg: {}) => ({
-      ...arg,
-      nullable: false as false,
-    }),
-  }, {
-    optional: false as false,
-    undefinable: false as false,
-    nullable: false as false
-  }, dateParser)
+export const dateValidator = () => dateValidatorConstructor({
+  optional: false as false,
+  nullable: false as false,
+  undefinable: false as false,
+})

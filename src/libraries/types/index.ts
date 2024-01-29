@@ -54,3 +54,13 @@ export type Collapse<T> = T extends (...args: any[]) => any
   : T extends object
     ? { [K in keyof T]: Collapse<T[K]> }
     : T
+/**
+ * Remove all keys that has a value of type never
+ */
+export type FilteredNeverKeys<T> = { [K in keyof T]: T[K] extends never ? never : K }[keyof T]
+/**
+ * Remove all key/value that has a value of type never
+ */
+export type RemoveNever<T> = {
+  [K in FilteredNeverKeys<T>]: T[K]
+}

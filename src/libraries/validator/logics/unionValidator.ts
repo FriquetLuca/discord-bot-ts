@@ -31,10 +31,10 @@ const parseOr = <T extends ElementShape, U extends ElementShape>(value: unknown,
   return value as any
 }
 
-export type UnionValidator<T extends ElementShape, U extends ElementShape, Rest = {}> = {
-  parse: (value: unknown) => Rest | ReturnType<T["parse"]> | ReturnType<U["parse"]>
+export type UnionValidator<T extends ElementShape, U extends ElementShape> = {
+  parse: (value: unknown) => ReturnType<T["parse"]> | ReturnType<U["parse"]>
   union: <W extends ElementShape>(or: W) => UnionValidator<{
-    parse: (value: unknown) => Rest | ReturnType<T["parse"]> | ReturnType<U["parse"]>
+    parse: (value: unknown) => ReturnType<T["parse"]> | ReturnType<U["parse"]>
     getSchema: () => ({})
   }, W>
 }

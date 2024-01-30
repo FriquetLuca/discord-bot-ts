@@ -1,16 +1,19 @@
-import { assert } from "@/libraries/typeof"
+
 import type { Collapse, RemoveNever } from "@/libraries/types"
-import type { ComplexSchema, ElementShape } from "../schema"
+import type { ExtractSchema, ComplexSchema, ElementShape, AnySchema } from "../schema"
+import { fromSchema } from "../schema"
+import { notSetError, unsafeError } from "../errors"
+import { assert } from "@/libraries/typeof"
 import { fromRecord } from "@/libraries/sqeul"
 
-export type ObjectSchema<T extends Record<string, ElementShape>, Data> = ComplexSchema<T, "object", Data>
+export type ObjectSchema<T, Data> = ComplexSchema<{ [K in keyof T]: T[K] extends { getSchema: () => infer S } ? S : T[K] }, "object", Data>
 type ObjectValidatorDatasValues<T extends Record<string, ElementShape>> = { [K in keyof T]: ReturnType<T[K]["parse"]> }
 type OptionalValidatorSchemas<T extends Record<string, ElementShape>> = RemoveNever<{ [K in keyof T]: ReturnType<T[K]["getSchema"]>["data"]["optional"] extends true ? true : never }>
 type ParseObjectValidatorDatas<T extends Record<string, ElementShape>> = Partial<Pick<ObjectValidatorDatasValues<T>, keyof OptionalValidatorSchemas<T>>> & Omit<ObjectValidatorDatasValues<T>, keyof OptionalValidatorSchemas<T>>
 
 export type ObjectValidator<T extends Record<string, ElementShape>, Data> = {
   parse: (value: unknown) => Collapse<ParseObjectValidatorDatas<T>>
-  getSchema: () => ObjectSchema<T, Data>
+  getSchema: () => Collapse<ObjectSchema<{ [K in keyof T]: T[K] extends { getSchema: () => infer S } ? S extends AnySchema ? ExtractSchema<S> : never : never }, Data>>
   merge: <U extends Record<string, ElementShape>>(mergeSchema: U) => ObjectValidator<Omit<T, keyof U> & U, Data>
   pick: <U extends keyof T>(...keys: U[]) => ObjectValidator<Pick<T, U>, Data>
   omit: <U extends keyof T>(...keys: U[]) => ObjectValidator<Omit<T, U>, Data>
@@ -39,34 +42,44 @@ const objectParser = <Data>(val: unknown, datas: Data) => {
   }
   assert(val, "object")
   let objectKeys = Object.keys(val)
+  const valResult = {} as any
   for(const keyName of Object.keys(schema)) {
     const currentItem = schema[keyName]
     const currentSchema = currentItem.getSchema()
     if(currentSchema.optional === true && !objectKeys.includes(keyName)) {
       continue
     }
-    const currentParser = currentItem.parse;
-    if(keyName in val) {
-      currentParser((val as any)[keyName])
-    } else {
-      throw new Error(`The key ${keyName} is not set`)
-    }
+    valResult[keyName] = notSetError(currentItem, val, keyName)
     objectKeys = objectKeys.filter((key) => key !== keyName)
   }
-  if(unsafe !== true && objectKeys.length > 0) {
-    throw new Error(`The following keys: ${objectKeys.map((value, i, arr) => i === arr.length - 1 ? `and \`${value}\`` : `\`${value}\`, `)} has been found but are not part of the schema`)
+  unsafeError(unsafe, objectKeys, val)
+  return valResult as any
+}
+export const fromObjectSchema = <T extends ObjectSchema<any, any>>(rawSchema: T) => {
+  const { schema, data } = rawSchema
+  const keys = Object.keys(schema)
+  const hydrateSchema = {} as any
+  for(const key of keys) {
+    hydrateSchema[key] = fromSchema(schema[key])
   }
-  return val as any
+  return objectValidatorConstructor(hydrateSchema, data) as any
 }
 // intersection type needed, everything else is a union anyway
-export const objectValidatorConstructor = <T extends Record<string, ElementShape>, Data>(schema: T, data: Data): ObjectValidator<T, Data> => {
+const objectValidatorConstructor = <T extends Record<string, ElementShape>, Data>(schema: T, data: Data): ObjectValidator<T, Data> => {
   return {
     parse: (value) => objectParser(value, { ...data, schema }),
-    getSchema: () => ({
-      type: "object",
-      data,
-      schema,
-    }),
+    getSchema: () => {
+      const keys = Object.keys(data as any)
+      const parsedSchema = {} as any
+      for(const key of keys) {
+        parsedSchema[key] = (data as any)[key]
+      }
+      return {
+        type: "object",
+        data,
+        schema: parsedSchema as any,
+      } as any
+    },
     merge: <U extends Record<string, ElementShape>>(mergeSchema: U) => objectValidatorConstructor({
       ...schema,
       ...mergeSchema,

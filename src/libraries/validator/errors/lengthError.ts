@@ -1,8 +1,10 @@
 import { getTypeof } from "@/libraries/typeof"
 
-export const lengthError = <T extends string|any[]>(val: T, length: number | undefined, errorContext: Partial<{
+export type LengthError<T extends string|any[]> = Partial<{
   lengthError: (value: T, length: number) => string
-}> = {}) => {
+}>
+
+export const lengthError = <T extends string|any[]>(val: T, length: number | undefined, errorContext: LengthError<T> = {}) => {
   const { lengthError } = errorContext
   if(length !== undefined) {
     if(val.length !== length) {

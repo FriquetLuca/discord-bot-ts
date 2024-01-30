@@ -1,7 +1,7 @@
 import type { Collapse } from "@/libraries/types"
 import type { ParsedData, Schema } from "../schema"
 import { assert } from "@/libraries/typeof"
-import { greaterLessLengthError, lengthError, minMaxLengthError, regexpTest } from "../errors"
+import { emptyError, greaterLessLengthError, lengthError, minMaxLengthError, regexpError } from "../errors"
 
 type StringSchema<Data> = Schema<"string", Data>
 
@@ -13,6 +13,8 @@ export type StringValidator<Data> = {
   less: (less: number) => StringValidator<Omit<Data, "less"> & { less: number }>
   greater: (greater: number) => StringValidator<Omit<Data, "greater"> & { greater: number }>
   length: (length: number) => StringValidator<Omit<Data, "length"> & { length: number }>,
+  empty: () => StringValidator<Omit<Data, "empty"> & { empty: true }>,
+  notEmpty: () => StringValidator<Omit<Data, "empty"> & { empty: false }>,
   regex: (regex: RegExp) => StringValidator<Omit<Data, "regex"> & { regex: RegExp }>,
   optional: () => StringValidator<Omit<Data, "optional"> & { optional: true }>
   required: () => StringValidator<Omit<Data, "optional"> & { optional: false }>
@@ -30,6 +32,7 @@ const stringParser = <Data>(val: unknown, datas: Data): ParsedData<Data, string>
     greater,
     length,
     regex,
+    empty,
     undefinable,
     nullable,
   } = datas as any
@@ -40,10 +43,11 @@ const stringParser = <Data>(val: unknown, datas: Data): ParsedData<Data, string>
     return val as any
   }
   assert(val, "string")
+  emptyError(val, empty)
   lengthError(val, length)
   minMaxLengthError(val, min, max)
   greaterLessLengthError(val, greater, less)
-  regexpTest(regex, val)
+  regexpError(regex, val)
   return val as any
 }
 
@@ -59,6 +63,8 @@ export const stringValidatorConstructor = <Data>(data: Data): StringValidator<Da
     less: (less: number) => stringValidatorConstructor({ ...data, less }),
     greater: (greater: number) => stringValidatorConstructor({ ...data, greater }),
     length: (length: number) => stringValidatorConstructor({ ...data, length }),
+    empty: () => stringValidatorConstructor({ ...data, empty: true }),
+    notEmpty: () => stringValidatorConstructor({ ...data, empty: false }),
     regex: (regex: RegExp) => stringValidatorConstructor({ ...data, regex }),
     optional: () => stringValidatorConstructor({ ...data, optional: true }),
     required: () => stringValidatorConstructor({ ...data, optional: false }),
@@ -70,6 +76,7 @@ export const stringValidatorConstructor = <Data>(data: Data): StringValidator<Da
 }
 
 export const stringValidator = () => stringValidatorConstructor({
+  empty: undefined as undefined,
   optional: false as false,
   nullable: false as false,
   undefinable: false as false,

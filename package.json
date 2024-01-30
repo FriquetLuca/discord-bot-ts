@@ -16,7 +16,8 @@
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "t": "ts-node -r tsconfig-paths/register src/db-tests/db.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.7.1",

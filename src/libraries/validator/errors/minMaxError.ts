@@ -1,10 +1,12 @@
 import { getTypeof } from "@/libraries/typeof"
 
-export const minMaxError = <V extends bigint|number>(val: V, min: V|undefined, max: V|undefined, errorContext: Partial<{
+export type MinMaxError<V extends bigint|number> = Partial<{
   minMaxError: (value: V, min: V, max: V) => string
   maxError: (value: V, max: V) => string
   minError: (value: V, min: V) => string
-}> = {}) => {
+}>
+
+export const minMaxError = <V extends bigint|number>(val: V, min: V|undefined, max: V|undefined, errorContext: MinMaxError<V> = {}) => {
   const { minMaxError, maxError, minError } = errorContext
   if(min !== undefined) { 
     if(max !== undefined && (val < min || val > max)) {

@@ -1,6 +1,7 @@
 import type { Collapse } from "@/libraries/types"
 import type { ParsedData, Schema } from "../schema"
 import { assert } from "@/libraries/typeof"
+import { checkedError } from "../errors"
 
 type BooleanSchema<Data> = Schema<"boolean", Data>
 
@@ -31,12 +32,7 @@ const booleanParser = <Data>(val: unknown, datas: Data): ParsedData<Data, Data e
     return val as any
   }
   assert(val, "boolean")
-  if(checked === true && val !== true) { 
-    throw new Error(`The boolean must be checked`)
-  }
-  if(checked === false && val !== false) { 
-    throw new Error(`The boolean must be unchecked`)
-  }
+  checkedError(val, checked)
   return val as any
 }
 
@@ -60,6 +56,7 @@ export const booleanValidatorConstructor = <Data>(data: Data): BooleanValidator<
 }
 
 export const booleanValidator = () => booleanValidatorConstructor({
+  checked: undefined as undefined,
   optional: false as false,
   nullable: false as false,
   undefinable: false as false,

@@ -1,7 +1,7 @@
 import { assert } from "@/libraries/typeof"
 import type { Collapse } from "@/libraries/types"
 import type { ElementShape, ComplexSchema } from "../schema"
-import { minMaxLengthError, greaterLessLengthError } from "../errors"
+import { minMaxLengthError, greaterLessLengthError, emptyError } from "../errors"
 
 export type ArraySchema<T extends ElementShape, Data> = ComplexSchema<T, "array", Data>
 
@@ -41,16 +41,12 @@ const arrayParser = <Data>(val: unknown, datas: Data) => {
     return val as any
   }
   assert(val, "array")
-  if(empty === true && val.length !== 0) {
-    throw new Error(`The array must be empty`)
-  }
-  if(empty === false && val.length === 0) {
-    throw new Error(`The array can't be empty`)
-  }
+  emptyError(val, empty)
   minMaxLengthError(val, min, max)
   greaterLessLengthError(val, greater, less)
+  const valResult = []
   for(let i = 0; i < val.length; i++) {
-    schema.parse(val[i])
+    valResult.push(schema.parse(val[i]))
   }
   return val as any
 }
@@ -80,6 +76,7 @@ export const arrayValidatorConstructor = <T extends ElementShape, Data>(schema: 
 }
 
 export const arrayValidator = <T extends ElementShape>(schema: T) => arrayValidatorConstructor(schema, {
+  empty: undefined as undefined,
   optional: false as false,
   nullable: false as false,
   undefinable: false as false,

@@ -37,7 +37,7 @@ const bigintParser = <Data>(val: unknown, datas: Data): ParsedData<Data, bigint>
   }
   assert(val, "bigint")
   minMaxError(val, min, max)
-  greaterLessError(val, less, greater)
+  greaterLessError(val, greater, less)
   return val as any
 }
 
@@ -62,6 +62,10 @@ export const bigintValidatorConstructor = <Data>(data: Data): BigintValidator<Da
 }
 
 export const bigintValidator = () => bigintValidatorConstructor({
+  min: undefined as undefined,
+  max: undefined as undefined,
+  less: undefined as undefined,
+  greater: undefined as undefined,
   optional: false as false,
   nullable: false as false,
   undefinable: false as false,

@@ -1,10 +1,12 @@
 import { getTypeof } from "@/libraries/typeof"
 
-export const minMaxLengthError = <V extends string|any[]>(val: V, min: number|undefined, max: number|undefined, errorContext: Partial<{
+export type MinMaxLengthError<V extends string|any[]> = Partial<{
   minMaxLengthError: (value: V, min: number, max: number) => string
   maxLengthError: (value: V, max: number) => string
   minLengthError: (value: V, min: number) => string
-}> = {}) => {
+}>
+
+export const minMaxLengthError = <V extends string|any[]>(val: V, min: number|undefined, max: number|undefined, errorContext: MinMaxLengthError<V> = {}) => {
   const { minMaxLengthError, maxLengthError, minLengthError } = errorContext
   if(min !== undefined) { 
     if(max !== undefined && (val.length < min || val.length > max)) {

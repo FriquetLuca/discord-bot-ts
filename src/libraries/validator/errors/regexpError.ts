@@ -1,6 +1,8 @@
-export const regexpTest = (regex: RegExp | undefined, value: string, errorContext: Partial<{
+export type RegexpError = Partial<{
   regexError: (value: string) => string
-}> = {}) => {
+}>
+
+export const regexpError = (regex: RegExp | undefined, value: string, errorContext: RegexpError = {}) => {
   const { regexError } = errorContext
   if(regex) {
     const result = regex.exec(value)

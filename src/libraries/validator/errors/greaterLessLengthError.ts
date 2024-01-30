@@ -1,10 +1,12 @@
 import { getTypeof } from "@/libraries/typeof"
 
-export const greaterLessLengthError = <V extends string|any[]>(val: V, greater: number|undefined, less: number|undefined, errorContext: Partial<{
+export type GreaterLessLengthError<V extends string|any[]> = Partial<{
   greaterLessLengthError: (value: V, greater: number, less: number) => string
   greaterLengthError: (value: V, greater: number) => string
   lessLengthError: (value: V, less: number) => string
-}> = {}) => {
+}>
+
+export const greaterLessLengthError = <V extends string|any[]>(val: V, greater: number|undefined, less: number|undefined, errorContext: GreaterLessLengthError<V> = {}) => {
   const { greaterLessLengthError, greaterLengthError, lessLengthError } = errorContext
   if(less !== undefined) { 
     if(greater !== undefined && (val.length >= less || val.length <= greater)) {

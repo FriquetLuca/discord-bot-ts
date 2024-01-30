@@ -1,8 +1,9 @@
 import { stringValidator, numberValidator, bigintValidator, booleanValidator, dateValidator, errorValidator, errorValidatorConstructor, dateValidatorConstructor, booleanValidatorConstructor, bigintValidatorConstructor, stringValidatorConstructor, numberValidatorConstructor } from "./scalars"
 import type { StringValidator, NumberValidator, BigintValidator, BooleanValidator, DateValidator, ErrorValidator } from "./scalars"
-import { arrayValidator, arrayValidatorConstructor, objectValidator, objectValidatorConstructor } from "./composites"
+import { arrayValidator, arrayValidatorConstructor, fromObjectSchema, objectValidator } from "./composites"
 import type { ArrayValidator, ObjectValidator } from "./composites"
 import { unionValidator } from "./logics"
+import { Collapse } from "../types"
 
 export type ScalarType = "string" | "number" | "undefined" | "null" | "date" | "error" | "boolean" | "bigint"
 
@@ -21,54 +22,49 @@ export type ComplexSchema<AnySchema, Type extends ComplexType, Data> = {
   schema: AnySchema
 }
 
-export type AnySchema = Schema<any, any> | ComplexSchema<any, any, any>
+export type AnySchema = Schema<ScalarType, any> | ComplexSchema<any, ComplexType, any>
 
-type Validators<T extends ExtractSchema<AnySchema>> = T extends { type: ComplexType }
-  ? (
-      T extends { type: "object", data: infer d, schema: Record<string, ElementShape> }
-        ? ObjectValidator<T["schema"], d>
-        : T extends { type: "array", data: infer d, schema: ElementShape }
-          ? ArrayValidator<T["schema"], d>
-          : never
-    )
-  : (
-    T extends { type: "bigint", data: infer d }
-      ? BigintValidator<d>
-      : T extends { type: "boolean", data: infer d }
-        ? BooleanValidator<d>
-        : T extends { type: "date", data: infer d }
-          ? DateValidator<d>
-          : T extends { type: "date", data: infer d }
-            ? DateValidator<d>
-              : T extends { type: "error", data: infer d }
-                ? ErrorValidator<d>
-                  : T extends { type: "number", data: infer d }
-                    ? NumberValidator<d>
-                    : T extends { type: "string", data: infer d }
-                      ? StringValidator<d>
-                      : never
-  );
-
-type ExtractSchema<AnySchemas extends AnySchema> = AnySchemas extends { type: ComplexType, schema: any } ? ComplexSchema<AnySchemas["schema"], AnySchemas["type"], AnySchemas["data"]> : AnySchemas extends { type: ScalarType, schema: any } ? Schema<AnySchemas["type"], AnySchemas["data"]> : never
+export type ExtractSchema<AnySchemas extends AnySchema> = AnySchemas extends { type: ComplexType, data: any, schema: any }
+  ? ComplexSchema<AnySchemas["schema"], AnySchemas["type"], AnySchemas["data"]>
+  : AnySchemas extends { type: ScalarType, data: any }
+    ? Collapse<Schema<AnySchemas["type"], AnySchemas["data"]>>
+    : never
 
 export type ElementShape = {
   parse: (value: unknown) => any
   getSchema: () => any
 }
 
-export type ParsedData<Data, Expected> = Data extends { undefined: true }
+export type ParsedData<Data, Expected> = Data extends { undefinable: true }
   ? (Data extends { nullable: true } ? Expected | null | undefined : Expected | undefined)
   : (Data extends { nullable: true } ? Expected | null : Expected)
 
-export type infer<T> = T extends ElementShape ? ReturnType<T["parse"]> : T extends AnySchema ? ReturnType<Validators<ExtractSchema<T>>["parse"]> : T extends ExtractSchema<AnySchema> ? ReturnType<Validators<T>["parse"]> : never
+export type infer<T> = T extends ElementShape ? ReturnType<T["parse"]> : T extends AnySchema ? ReturnType<FromSchema<T>["parse"]> : never
 
-export const fromSchema = <T extends AnySchema>(schema: T): Validators<ExtractSchema<T>> => {
+export type FromSchema<T> = T extends { type: "object", schema: infer A, data: infer B }
+  ? ObjectValidator<{ [K in keyof A]: FromSchema<A[K]> }, B>
+  : T extends { type: "bigint", data: infer d }
+    ? BigintValidator<d>
+    : T extends { type: "boolean", data: infer d }
+      ? BooleanValidator<d>
+      : T extends { type: "date", data: infer d }
+        ? DateValidator<d>
+        : T extends { type: "error", data: infer d }
+          ? ErrorValidator<d>
+            : T extends { type: "number", data: infer d }
+              ? NumberValidator<d>
+              : T extends { type: "string", data: infer d }
+                ? StringValidator<d>
+                : never
+
+export const fromSchema = <T extends AnySchema>(schema: T): FromSchema<T> => {
   switch(schema.type) {
     // Composites
     case "array":
-      return arrayValidatorConstructor((schema as any).schema, schema.data) as any
+      return arrayValidatorConstructor(fromSchema((schema as any).schema), schema.data) as any
     case "object":
-      return objectValidatorConstructor((schema as any).schema, schema.data) as any
+      return fromObjectSchema(schema as any) as any
+    // Logics
     // Scalars
     case "bigint":
       return bigintValidatorConstructor(schema.data) as any
